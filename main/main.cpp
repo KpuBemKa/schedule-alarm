@@ -29,13 +29,13 @@ extern "C" void
 app_main(void)
 {
   // ESP_ERROR_CHECK(nvs_flash_init());
-  // ESP_ERROR_CHECK(esp_netif_init());
-  // ESP_ERROR_CHECK(esp_event_loop_create_default());
+  ESP_ERROR_CHECK(esp_netif_init());
+  ESP_ERROR_CHECK(esp_event_loop_create_default());
   // initialise_mdns();
-  // netbiosns_init();
-  // netbiosns_set_name(CONFIG_EXAMPLE_MDNS_HOST_NAME);
+//   netbiosns_init();
+//   netbiosns_set_name(CONFIG_EXAMPLE_MDNS_HOST_NAME);
 
-  // ESP_ERROR_CHECK(example_connect());
+//   ESP_ERROR_CHECK(example_connect());
   // ESP_ERROR_CHECK(init_fs());
-  // ESP_ERROR_CHECK(http_server(CONFIG_EXAMPLE_WEB_MOUNT_POINT));
+  ESP_ERROR_CHECK(http_server.StartServer("../front/web-demo"));
 }

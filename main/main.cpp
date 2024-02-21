@@ -19,6 +19,9 @@
 
 #include "http_server.hpp"
 
+#include "models/schedule/ScheduleModel.hpp"
+#include "views/relay/RelayView.hpp"
+
 // #define MDNS_INSTANCE "esp home web server"
 
 static const char* TAG = "MAIN";

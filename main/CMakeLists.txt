@@ -1,10 +1,4 @@
-idf_component_register(SRCS "main.cpp"
-                       INCLUDE_DIRS "."
-                       PRIV_REQUIRES driver 
-                                     server
-                                     esp_netif
-                                     esp_event
-                                     mvc)
-
-set(WEB_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../front/web-demo")
-
+idf_component_register(SRCS "main.c" "file_server.c" "mount.c"
+                    INCLUDE_DIRS "."
+                    EMBED_FILES "favicon.ico" "upload_script.html"
+                    )

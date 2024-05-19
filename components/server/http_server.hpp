@@ -22,8 +22,14 @@ public:
   esp_err_t StartServer(std::string_view base_path);
 
 private:
-  /* An HTTP GET handler */
-  static esp_err_t EmptyHandler(httpd_req_t* req);
+  /* Handler to redirect incoming GET request for `/index.html` to `/`
+   * This can be overridden by uploading file with same name */
+  static esp_err_t GetIndexHtmlHandler(httpd_req_t* req);
+
+  static esp_err_t GetEmptyHandler(httpd_req_t* req);
+  static esp_err_t GetFaviconHandler(httpd_req_t* req);
+
+  static esp_err_t SendFile(httpd_req_t* req, const std::string_view file_name, const std::string_view response_type);
 
 private:
   RestServerContext mRestContext;

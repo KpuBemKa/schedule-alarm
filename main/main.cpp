@@ -1,3 +1,28 @@
+// #include "freertos/FreeRTOS.h"
+// #include "freertos/task.h"
+
+// #include "uri_encoder/uri_encoder.hpp"
+
+// #include "esp_log.h"
+
+// #define LOG_I(...) ESP_LOGI("MAIN", __VA_ARGS__)
+// #define LOG_W(...) ESP_LOGW("MAIN", __VA_ARGS__)
+// #define LOG_E(...) ESP_LOGE("MAIN", __VA_ARGS__)
+
+// extern "C" void
+// app_main()
+// {
+//   const std::string link = "spa ce";
+//   const std::string encoded = util::uri_encode(link);
+//   const std::string decoded = util::uri_decode(encoded);
+
+//   LOG_I("\nEncoded: %s\nDecoded: %s", encoded.c_str(), decoded.c_str());
+
+//   while (true) {
+//     vTaskDelay(pdMS_TO_TICKS(1'000));
+//   }
+// }
+
 /*
  * SPDX-FileCopyrightText: 2022 Espressif Systems (Shanghai) CO LTD
  *
@@ -21,7 +46,7 @@
 #include "esp_netif.h"
 #include "esp_netif_net_stack.h"
 #include "esp_wifi.h"
-#include "file_serving_example_common.h"
+// #include "file_serving_example_common.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "freertos/task.h"
@@ -29,6 +54,8 @@
 #include "lwip/netdb.h"
 #include "lwip/sockets.h"
 #include "nvs_flash.h"
+
+#include "http_server.hpp"
 
 // clang-format off
 
@@ -61,7 +88,6 @@
 #define EXAMPLE_ESP_WIFI_CHANNEL            CONFIG_ESP_WIFI_AP_CHANNEL
 #define EXAMPLE_MAX_STA_CONN                CONFIG_ESP_MAX_STA_CONN_AP
 
-
 /* The event group allows multiple bits for each event, but we only care about two events:
  * - we are connected to the AP with an IP
  * - we failed to connect after the maximum amount of retries */
@@ -80,11 +106,16 @@ static const char* TAG = "example";
 static const char* TAG_AP = "WiFi SoftAP";
 static const char* TAG_STA = "WiFi Sta";
 
-const char* s_base_path = "/data";
+const char s_base_path[] = "/spiffs";
 
 static int s_retry_num = 0;
 
 static EventGroupHandle_t s_wifi_event_group;
+
+esp_err_t
+example_mount_storage(const char* base_path);
+
+server::HttpServer http_server;
 
 static void
 wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
@@ -100,7 +131,7 @@ wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, voi
     ESP_LOGI(TAG_STA, "Station started");
 
     /* Start the file server */
-    ESP_ERROR_CHECK(example_start_file_server(s_base_path));
+    ESP_ERROR_CHECK(http_server.StartServer(s_base_path));
     ESP_LOGI(TAG, "File server started");
   } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
     ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
@@ -119,11 +150,11 @@ wifi_init_softap(void)
   wifi_config_t wifi_ap_config = {
         .ap = {
             .ssid = EXAMPLE_ESP_WIFI_AP_SSID,
+            .password = EXAMPLE_ESP_WIFI_AP_PASSWD,
             .ssid_len = strlen(EXAMPLE_ESP_WIFI_AP_SSID),
             .channel = EXAMPLE_ESP_WIFI_CHANNEL,
-            .password = EXAMPLE_ESP_WIFI_AP_PASSWD,
-            .max_connection = EXAMPLE_MAX_STA_CONN,
             .authmode = WIFI_AUTH_WPA2_PSK,
+            .max_connection = EXAMPLE_MAX_STA_CONN,
             .pmf_cfg = {
                 .required = false,
             },
@@ -156,14 +187,17 @@ wifi_init_sta(void)
             .ssid = EXAMPLE_ESP_WIFI_STA_SSID,
             .password = EXAMPLE_ESP_WIFI_STA_PASSWD,
             .scan_method = WIFI_ALL_CHANNEL_SCAN,
-            .failure_retry_cnt = EXAMPLE_ESP_MAXIMUM_RETRY,
             /* Authmode threshold resets to WPA2 as default if password matches WPA2 standards (pasword len => 8).
              * If you want to connect the device to deprecated WEP/WPA networks, Please set the threshold value
              * to WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK and set the password with length and format matching to
             * WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK standards.
              */
-            .threshold.authmode = ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD,
+            .threshold = {
+              .rssi = -127,
+              .authmode = ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD
+              },
             .sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
+            .failure_retry_cnt = EXAMPLE_ESP_MAXIMUM_RETRY,
         },
     };
 
@@ -174,7 +208,7 @@ wifi_init_sta(void)
   return esp_netif_sta;
 }
 
-void
+extern "C" void
 app_main(void)
 {
   ESP_LOGI(TAG, "Starting example");

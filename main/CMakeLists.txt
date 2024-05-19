@@ -1,4 +1,16 @@
-idf_component_register(SRCS "main.c" "file_server.c" "mount.c"
+idf_component_register(SRCS "main.cpp"
+                            "mount.cpp"
                     INCLUDE_DIRS "."
-                    EMBED_FILES "favicon.ico" "upload_script.html"
-                    )
+                #     EMBED_FILES "favicon.ico"
+                #                 "upload_script.html"
+                    PRIV_REQUIRES utility
+                                  log
+                                  freertos
+                                  esp_wifi
+                                  nvs_flash
+                                  server
+                                  spiffs
+                                  fatfs
+)
+
+spiffs_create_partition_image(storage ../data_image FLASH_IN_PROJECT)

@@ -1,221 +1,184 @@
 #include "http_server.hpp"
 
+#include "cJSON.h"
+#include "esp_check.h"
 #include "esp_chip_info.h"
 #include "esp_log.h"
 #include "esp_random.h"
-#include <fcntl.h>
-#include <string.h>
-// #include "esp_vfs.h"
-#include "cJSON.h"
 
-#define ESP_VFS_PATH_MAX 255
+#include "settings.hpp"
+#include "uri_encoder/uri_encoder.hpp"
 
-#define FILE_PATH_MAX (ESP_VFS_PATH_MAX + 128)
-#define SCRATCH_BUFSIZE (10240)
+const char TAG[] = "HTTP_SERVER";
 
-#define CHECK_FILE_EXTENSION(filename, ext)                                    \
-  (strcasecmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
+#if DEBUG_HTTP
+#define LOG_I(...) ESP_LOGI(TAG, __VA_ARGS__)
+#else
+#define LOG_I(...)
+#endif
+
+#define LOG_W(...) ESP_LOGW(TAG, __VA_ARGS__)
+#define LOG_E(...) ESP_LOGE(TAG, __VA_ARGS__)
+
+#define EXAMPLE_HTTP_QUERY_KEY_MAX_LEN (64)
 
 namespace server {
-
-constexpr const char* TAG = "HTTP SERVER";
-
-/* Set HTTP response content type according to file extension */
-esp_err_t
-HttpServer::set_content_type_from_file(httpd_req_t* req, const char* filepath)
-{
-  const char* type = "text/plain";
-  if (CHECK_FILE_EXTENSION(filepath, ".html")) {
-    type = "text/html";
-  } else if (CHECK_FILE_EXTENSION(filepath, ".js")) {
-    type = "application/javascript";
-  } else if (CHECK_FILE_EXTENSION(filepath, ".css")) {
-    type = "text/css";
-  } else if (CHECK_FILE_EXTENSION(filepath, ".png")) {
-    type = "image/png";
-  } else if (CHECK_FILE_EXTENSION(filepath, ".ico")) {
-    type = "image/x-icon";
-  } else if (CHECK_FILE_EXTENSION(filepath, ".svg")) {
-    type = "text/xml";
-  }
-  return httpd_resp_set_type(req, type);
-}
-
-// /* Send HTTP response with the contents of the requested file */
-// static esp_err_t
-// HttpServer::rest_common_get_handler(httpd_req_t* req)
-// {
-//   char filepath[FILE_PATH_MAX];
-
-//   RestServerContext* rest_context = (RestServerContext*)req->user_ctx;
-//   strlcpy(filepath, rest_context->base_path, sizeof(filepath));
-//   if (req->uri[strlen(req->uri) - 1] == '/') {
-//     strlcat(filepath, "/index.html", sizeof(filepath));
-//   } else {
-//     strlcat(filepath, req->uri, sizeof(filepath));
-//   }
-//   int fd = open(filepath, O_RDONLY, 0);
-//   if (fd == -1) {
-//     ESP_LOGE(REST_TAG, "Failed to open file : %s", filepath);
-//     /* Respond with 500 Internal Server Error */
-//     httpd_resp_send_err(
-//       req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read existing file");
-//     return ESP_FAIL;
-//   }
-
-//   set_content_type_from_file(req, filepath);
-
-//   char* chunk = rest_context->scratch;
-//   ssize_t read_bytes;
-//   do {
-//     /* Read file in chunks into the scratch buffer */
-//     read_bytes = read(fd, chunk, SCRATCH_BUFSIZE);
-//     if (read_bytes == -1) {
-//       ESP_LOGE(REST_TAG, "Failed to read file : %s", filepath);
-//     } else if (read_bytes > 0) {
-//       /* Send the buffer contents as HTTP response chunk */
-//       if (httpd_resp_send_chunk(req, chunk, read_bytes) != ESP_OK) {
-//         close(fd);
-//         ESP_LOGE(REST_TAG, "File sending failed!");
-//         /* Abort sending file */
-//         httpd_resp_sendstr_chunk(req, NULL);
-//         /* Respond with 500 Internal Server Error */
-//         httpd_resp_send_err(
-//           req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to send file");
-//         return ESP_FAIL;
-//       }
-//     }
-//   } while (read_bytes > 0);
-//   /* Close file after sending complete */
-//   close(fd);
-//   ESP_LOGI(REST_TAG, "File sending complete");
-//   /* Respond with an empty chunk to signal HTTP response completion */
-//   httpd_resp_send_chunk(req, NULL, 0);
-//   return ESP_OK;
-// }
-
-// /* Simple handler for light brightness control */
-// static esp_err_t
-// HttpServer::light_brightness_post_handler(httpd_req_t* req)
-// {
-//   int total_len = req->content_len;
-//   int cur_len = 0;
-//   char* buf = ((RestServerContext*)(req->user_ctx))->scratch;
-//   int received = 0;
-//   if (total_len >= SCRATCH_BUFSIZE) {
-//     /* Respond with 500 Internal Server Error */
-//     httpd_resp_send_err(
-//       req, HTTPD_500_INTERNAL_SERVER_ERROR, "content too long");
-//     return ESP_FAIL;
-//   }
-//   while (cur_len < total_len) {
-//     received = httpd_req_recv(req, buf + cur_len, total_len);
-//     if (received <= 0) {
-//       /* Respond with 500 Internal Server Error */
-//       httpd_resp_send_err(
-//         req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to post control
-//         value");
-//       return ESP_FAIL;
-//     }
-//     cur_len += received;
-//   }
-//   buf[total_len] = '\0';
-
-//   cJSON* root = cJSON_Parse(buf);
-//   int red = cJSON_GetObjectItem(root, "red")->valueint;
-//   int green = cJSON_GetObjectItem(root, "green")->valueint;
-//   int blue = cJSON_GetObjectItem(root, "blue")->valueint;
-//   ESP_LOGI(REST_TAG,
-//            "Light control: red = %d, green = %d, blue = %d",
-//            red,
-//            green,
-//            blue);
-//   cJSON_Delete(root);
-//   httpd_resp_sendstr(req, "Post control value successfully");
-//   return ESP_OK;
-// }
-
-// /* Simple handler for getting system handler */
-// static esp_err_t
-// HttpServer::system_info_get_handler(httpd_req_t* req)
-// {
-//   httpd_resp_set_type(req, "application/json");
-//   cJSON* root = cJSON_CreateObject();
-//   esp_chip_info_t chip_info;
-//   esp_chip_info(&chip_info);
-//   cJSON_AddStringToObject(root, "version", IDF_VER);
-//   cJSON_AddNumberToObject(root, "cores", chip_info.cores);
-//   const char* sys_info = cJSON_Print(root);
-//   httpd_resp_sendstr(req, sys_info);
-//   free((void*)sys_info);
-//   cJSON_Delete(root);
-//   return ESP_OK;
-// }
-
-// /* Simple handler for getting temperature data */
-// static esp_err_t
-// HttpServer::temperature_data_get_handler(httpd_req_t* req)
-// {
-//   httpd_resp_set_type(req, "application/json");
-//   cJSON* root = cJSON_CreateObject();
-//   cJSON_AddNumberToObject(root, "raw", esp_random() % 20);
-//   const char* sys_info = cJSON_Print(root);
-//   httpd_resp_sendstr(req, sys_info);
-//   free((void*)sys_info);
-//   cJSON_Delete(root);
-//   return ESP_OK;
-// }
 
 esp_err_t
 HttpServer::StartServer(std::string_view base_path)
 {
+  constexpr httpd_uri_t uri_handler_empty = {
+    .uri = "/", .method = HTTP_GET, .handler = HttpServer::EmptyHandler, .user_ctx = nullptr
+  };
+
+  constexpr httpd_config_t http_config = { .task_priority = tskIDLE_PRIORITY + 5,
+                                           .stack_size = 4096,
+                                           .core_id = tskNO_AFFINITY,
+                                           .server_port = 80,
+                                           .ctrl_port = ESP_HTTPD_DEF_CTRL_PORT,
+                                           .max_open_sockets = 7,
+                                           .max_uri_handlers = 8,
+                                           .max_resp_headers = 8,
+                                           .backlog_conn = 5,
+                                           .lru_purge_enable = true,
+                                           .recv_wait_timeout = 5,
+                                           .send_wait_timeout = 5,
+                                           .global_user_ctx = NULL,
+                                           .global_user_ctx_free_fn = NULL,
+                                           .global_transport_ctx = NULL,
+                                           .global_transport_ctx_free_fn = NULL,
+                                           .enable_so_linger = false,
+                                           .linger_timeout = 0,
+                                           .keep_alive_enable = false,
+                                           .keep_alive_idle = 0,
+                                           .keep_alive_interval = 0,
+                                           .keep_alive_count = 0,
+                                           .open_fn = NULL,
+                                           .close_fn = NULL,
+                                           .uri_match_fn = NULL };
+
   mRestContext.base_path = base_path;
-  // strlcpy(rest_context->base_path, base_path,
-  // sizeof(rest_context->base_path));
 
-  httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-  config.uri_match_fn = httpd_uri_match_wildcard;
-
-  ESP_LOGI(TAG, "Starting HTTP Server...");
-
-  esp_err_t result = httpd_start(&mServerHandle, &config);
-  if (result != ESP_OK) {
-    ESP_LOGE(TAG, "httpd_start() failed: %s", esp_err_to_name(result));
-    return result;
+  // Start the httpd server
+  LOG_I("Starting server on port: '%d'", http_config.server_port);
+  esp_err_t esp_result = httpd_start(&mServerHandle, &http_config);
+  if (esp_result != ESP_OK) {
+    LOG_E("%s:%d | Could not start the HTTP server: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+    return esp_result;
   }
 
-  // /* URI handler for fetching system info */
-  // httpd_uri_t system_info_get_uri = { .uri = "/api/v1/system/info",
-  //                                     .method = HTTP_GET,
-  //                                     .handler = system_info_get_handler,
-  //                                     .user_ctx = &mRestContext };
-  // httpd_register_uri_handler(mServerHandle, &system_info_get_uri);
+  // Set URI handlers
+  LOG_I("Registering URI handlers...");
+  bool full_success = true;
 
-  // /* URI handler for fetching temperature data */
-  // httpd_uri_t temperature_data_get_uri = { .uri = "/api/v1/temp/raw",
-  //                                          .method = HTTP_GET,
-  //                                          .handler =
-  //                                            temperature_data_get_handler,
-  //                                          .user_ctx = &mRestContext };
-  // httpd_register_uri_handler(mServerHandle, &temperature_data_get_uri);
+  esp_result = httpd_register_uri_handler(mServerHandle, &uri_handler_empty);
+  if (esp_result != ESP_OK) {
+    LOG_I("%s:%d | Handler for '%s' could not be registered: %s",
+          __FILE__,
+          __LINE__,
+          uri_handler_empty.uri,
+          esp_err_to_name(esp_result));
+    full_success = false;
+  }
 
-  // /* URI handler for light brightness control */
-  // httpd_uri_t light_brightness_post_uri = { .uri =
-  // "/api/v1/light/brightness",
-  //                                           .method = HTTP_POST,
-  //                                           .handler =
-  //                                             light_brightness_post_handler,
-  //                                           .user_ctx = &mRestContext };
-  // httpd_register_uri_handler(mServerHandle, &light_brightness_post_uri);
+  // httpd_register_uri_handler(mServerHandle, &echo);
+  // httpd_register_uri_handler(mServerHandle, &ctrl);
+  // httpd_register_uri_handler(mServerHandle, &any);
 
-  // /* URI handler for getting web server files */
-  // httpd_uri_t common_get_uri = { .uri = "/*",
-  //                                .method = HTTP_GET,
-  //                                .handler = rest_common_get_handler,
-  //                                .user_ctx = &mRestContext };
-  // httpd_register_uri_handler(mServerHandle, &common_get_uri);
+  return full_success ? ESP_OK : ESP_FAIL;
+}
+
+esp_err_t
+HttpServer::EmptyHandler(httpd_req_t* req)
+{
+  char* buf;
+  size_t buf_len;
+
+  /* Get header value string length and allocate memory for length + 1,
+   * extra byte for null termination */
+  buf_len = httpd_req_get_hdr_value_len(req, "Host") + 1;
+  if (buf_len > 1) {
+    buf = reinterpret_cast<char*>(malloc(buf_len));
+    ESP_RETURN_ON_FALSE(buf, ESP_ERR_NO_MEM, TAG, "buffer alloc failed");
+    /* Copy null terminated value string into buffer */
+    if (httpd_req_get_hdr_value_str(req, "Host", buf, buf_len) == ESP_OK) {
+      LOG_I("Found header => Host: %s", buf);
+    }
+    free(buf);
+  }
+
+  buf_len = httpd_req_get_hdr_value_len(req, "Test-Header-2") + 1;
+  if (buf_len > 1) {
+    buf = reinterpret_cast<char*>(malloc(buf_len));
+    ESP_RETURN_ON_FALSE(buf, ESP_ERR_NO_MEM, TAG, "buffer alloc failed");
+    if (httpd_req_get_hdr_value_str(req, "Test-Header-2", buf, buf_len) == ESP_OK) {
+      LOG_I("Found header => Test-Header-2: %s", buf);
+    }
+    free(buf);
+  }
+
+  buf_len = httpd_req_get_hdr_value_len(req, "Test-Header-1") + 1;
+  if (buf_len > 1) {
+    buf = reinterpret_cast<char*>(malloc(buf_len));
+    ESP_RETURN_ON_FALSE(buf, ESP_ERR_NO_MEM, TAG, "buffer alloc failed");
+    if (httpd_req_get_hdr_value_str(req, "Test-Header-1", buf, buf_len) == ESP_OK) {
+      LOG_I("Found header => Test-Header-1: %s", buf);
+    }
+    free(buf);
+  }
+
+  /* Read URL query string length and allocate memory for length + 1,
+   * extra byte for null termination */
+  buf_len = httpd_req_get_url_query_len(req) + 1;
+  if (buf_len > 1) {
+    buf = reinterpret_cast<char*>(malloc(buf_len));
+    ESP_RETURN_ON_FALSE(buf, ESP_ERR_NO_MEM, TAG, "buffer alloc failed");
+
+    if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK) {
+      LOG_I("Found URL query => %s", buf);
+
+      char param[EXAMPLE_HTTP_QUERY_KEY_MAX_LEN] /* , dec_param[EXAMPLE_HTTP_QUERY_KEY_MAX_LEN] = { 0 } */;
+      std::string decoded_param;
+
+      /* Get value of expected key from query string */
+      if (httpd_query_key_value(buf, "query1", param, sizeof(param)) == ESP_OK) {
+        LOG_I("Found URL query parameter => query1=%s", param);
+        decoded_param = util::uri_decode(std::string_view(param, strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN)));
+        LOG_I("Decoded query parameter => %s", decoded_param.c_str());
+      }
+
+      if (httpd_query_key_value(buf, "query3", param, sizeof(param)) == ESP_OK) {
+        LOG_I("Found URL query parameter => query3=%s", param);
+        decoded_param = util::uri_decode(std::string_view(param, strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN)));
+        LOG_I("Decoded query parameter => %s", decoded_param.c_str());
+      }
+
+      if (httpd_query_key_value(buf, "query2", param, sizeof(param)) == ESP_OK) {
+        LOG_I("Found URL query parameter => query2=%s", param);
+        decoded_param = util::uri_decode(std::string_view(param, strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN)));
+        LOG_I("Decoded query parameter => %s", decoded_param.c_str());
+      }
+    }
+    free(buf);
+  }
+
+  /* Set some custom headers */
+  httpd_resp_set_hdr(req, "Custom-Header-1", "Custom-Value-1");
+  httpd_resp_set_hdr(req, "Custom-Header-2", "Custom-Value-2");
+
+  /* Send response with custom headers and body set as the
+   * string passed in user context*/
+  // const char* resp_str = (const char*)req->user_ctx;
+  const char resp_str[] = "Hello, World!";
+  httpd_resp_send(req, resp_str, sizeof(resp_str));
+
+  /* After sending the HTTP response the old HTTP request
+   * headers are lost. Check if HTTP request headers can be read now. */
+  if (httpd_req_get_hdr_value_len(req, "Host") == 0) {
+    LOG_I("Request headers lost");
+  }
 
   return ESP_OK;
 }
 
-}
+} // namespace server

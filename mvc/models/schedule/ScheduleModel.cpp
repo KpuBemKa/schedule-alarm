@@ -16,7 +16,7 @@ ScheduleModel::SetWeekMinute(uint32_t new_week_minue)
 }
 
 void
-ScheduleModel::SetSchedule(const data::schedule& new_schedule)
+ScheduleModel::SetSchedule(const data::Schedule& new_schedule)
 {
   if (mSchedule == new_schedule) {
     return;
@@ -34,9 +34,9 @@ ScheduleModel::AddScheduleObserver(IScheduleObserver* observer)
 void
 ScheduleModel::TryFireAlarm()
 {
-  for (auto schedule_row : mSchedule.rows) {
-    if (schedule_row.week_minute == mWeekMinute) {
-      UpdateScheduleObservers(schedule_row.alarm_type);
+  for (auto ScheduleItem : mSchedule.rows) {
+    if (ScheduleItem.week_minute == mWeekMinute) {
+      UpdateScheduleObservers(ScheduleItem.alarm_type);
     }
   }
 }

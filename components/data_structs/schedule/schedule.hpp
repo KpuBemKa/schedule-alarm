@@ -12,25 +12,19 @@ enum class AlarmType : uint16_t
   Triple = 3
 };
 
-struct schedule_row
+struct ScheduleItem
 {
+  // Represents a minute of the week when the alarm should fire
+  // Monday, 00:00 is 0, Sunday 23:59 is 10'079
   uint16_t week_minute;
   AlarmType alarm_type;
-
-  friend bool operator==(const schedule_row& lhs, const schedule_row& rhs)
-  {
-    return lhs.week_minute == rhs.week_minute && lhs.alarm_type == rhs.alarm_type;
-  }
 };
 
-struct schedule
+/// This is stored in NVS as a regular array, but NVS also has a separate key for the ammount of rows
+/// Just to avoid a lot of potentially unused space
+struct Schedule
 {
-  std::vector<schedule_row> rows;
-
-  schedule();
-  schedule(const std::size_t no_of_rows, const void* data);
-
-  friend bool operator==(const schedule& lhs, const schedule& rhs) { return lhs.rows == rhs.rows; }
+  std::vector<ScheduleItem> rows;
 };
 
 } // namespace data

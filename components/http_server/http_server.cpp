@@ -26,8 +26,34 @@ const char TAG[] = "HTTP_SERVER";
 
 namespace server {
 
+constexpr httpd_config_t DEFAULT_HTTP_CONFIG = { .task_priority = tskIDLE_PRIORITY + 5,
+                                                 .stack_size = 4096,
+                                                 .core_id = tskNO_AFFINITY,
+                                                 .server_port = 80,
+                                                 .ctrl_port = ESP_HTTPD_DEF_CTRL_PORT,
+                                                 .max_open_sockets = 7,
+                                                 .max_uri_handlers = 8,
+                                                 .max_resp_headers = 8,
+                                                 .backlog_conn = 5,
+                                                 .lru_purge_enable = true,
+                                                 .recv_wait_timeout = 5,
+                                                 .send_wait_timeout = 5,
+                                                 .global_user_ctx = NULL,
+                                                 .global_user_ctx_free_fn = NULL,
+                                                 .global_transport_ctx = NULL,
+                                                 .global_transport_ctx_free_fn = NULL,
+                                                 .enable_so_linger = false,
+                                                 .linger_timeout = 0,
+                                                 .keep_alive_enable = false,
+                                                 .keep_alive_idle = 0,
+                                                 .keep_alive_interval = 0,
+                                                 .keep_alive_count = 0,
+                                                 .open_fn = NULL,
+                                                 .close_fn = NULL,
+                                                 .uri_match_fn = NULL };
+
 esp_err_t
-HttpServer::StartServer(std::string_view base_path)
+HttpServer::StartServer()
 {
   constexpr httpd_uri_t uri_handler_redirect = {
     .uri = "/index.html", .method = HTTP_GET, .handler = HttpServer::GetIndexHtmlHandler, .user_ctx = nullptr
@@ -39,43 +65,15 @@ HttpServer::StartServer(std::string_view base_path)
     .uri = "/favicon.ico", .method = HTTP_GET, .handler = HttpServer::GetFaviconHandler, .user_ctx = nullptr
   };
 
-  constexpr httpd_config_t http_config = { .task_priority = tskIDLE_PRIORITY + 5,
-                                           .stack_size = 4096,
-                                           .core_id = tskNO_AFFINITY,
-                                           .server_port = 80,
-                                           .ctrl_port = ESP_HTTPD_DEF_CTRL_PORT,
-                                           .max_open_sockets = 7,
-                                           .max_uri_handlers = 8,
-                                           .max_resp_headers = 8,
-                                           .backlog_conn = 5,
-                                           .lru_purge_enable = true,
-                                           .recv_wait_timeout = 5,
-                                           .send_wait_timeout = 5,
-                                           .global_user_ctx = NULL,
-                                           .global_user_ctx_free_fn = NULL,
-                                           .global_transport_ctx = NULL,
-                                           .global_transport_ctx_free_fn = NULL,
-                                           .enable_so_linger = false,
-                                           .linger_timeout = 0,
-                                           .keep_alive_enable = false,
-                                           .keep_alive_idle = 0,
-                                           .keep_alive_interval = 0,
-                                           .keep_alive_count = 0,
-                                           .open_fn = NULL,
-                                           .close_fn = NULL,
-                                           .uri_match_fn = NULL };
-
-  mRestContext.base_path = base_path;
-
   // Start the httpd server
-  LOG_I("Starting server on port: '%d'", http_config.server_port);
-  esp_err_t esp_result = httpd_start(&mServerHandle, &http_config);
+  LOG_I("Starting server on port: '%d'", DEFAULT_HTTP_CONFIG.server_port);
+  esp_err_t esp_result = httpd_start(&mServerHandle, &DEFAULT_HTTP_CONFIG);
   if (esp_result != ESP_OK) {
     LOG_E("%s:%d | Could not start the HTTP server: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
     return esp_result;
   }
 
-  // Set URI handlers
+  // Set the URI handlers
   LOG_I("Registering URI handlers...");
   bool full_success = true;
 
@@ -109,11 +107,19 @@ HttpServer::StartServer(std::string_view base_path)
     full_success = false;
   }
 
-  // httpd_register_uri_handler(mServerHandle, &echo);
-  // httpd_register_uri_handler(mServerHandle, &ctrl);
-  // httpd_register_uri_handler(mServerHandle, &any);
-
   return full_success ? ESP_OK : ESP_FAIL;
+}
+
+esp_err_t
+HttpServer::StopServer()
+{
+  const esp_err_t esp_error = httpd_stop(mServerHandle);
+
+  if (esp_error != ESP_OK) {
+    LOG_E("%s:%d | Error stopping the HTTP server: %s", __FILE__, __LINE__, esp_err_to_name(esp_error));
+  }
+
+  return esp_error;
 }
 
 esp_err_t

@@ -13,7 +13,7 @@ public:
   ScheduleModel();
 
   void SetWeekMinute(uint32_t new_week_minue);
-  void SetSchedule(const data::schedule &new_schedule);
+  void SetSchedule(const data::Schedule &new_schedule);
 
   void AddScheduleObserver(IScheduleObserver* observer) override;
 
@@ -26,7 +26,7 @@ private:
   std::vector<IScheduleObserver*> mScheduleObservers;
 
   uint32_t mWeekMinute;
-  data::schedule mSchedule;
+  data::Schedule mSchedule;
 };
 
 } // namespace models::time

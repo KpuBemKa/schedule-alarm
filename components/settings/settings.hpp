@@ -2,13 +2,32 @@
 
 #include <cstdint>
 
-#define DEBUG_HTTP 1
-#define DEBUG_WIFI 1
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+
+#include "settings_struct.hpp"
 
 namespace settings {
 
-constexpr uint32_t WiFiEventId = 42;
-constexpr uint8_t WiFiApChannel = 1;
-constexpr uint8_t MaxWifiConnections = 2;
+class Settings {
+   public:
+    Settings(Settings& other) = delete;
+    void operator=(const Settings&) = delete;
 
-} // namespace settings
+    static Settings& GetInstance();
+
+    void LoadFromMemory();
+    void SaveToMemory() const;
+
+    settings::Changable GetSettings() const;
+    void UpdateSettings(const settings::Changable& new_settings);
+
+   private:
+    Settings() {}
+
+   private:
+    mutable portMUX_TYPE xSettingsSpinlock;
+    settings::Changable mSettings;
+};
+
+}  // namespace settings

@@ -1,2 +1,4 @@
-idf_component_register(INCLUDE_DIRS ".")
+idf_component_register(SRCS "settings.cpp"
+                       INCLUDE_DIRS "."
+                       REQUIRES hal)
 

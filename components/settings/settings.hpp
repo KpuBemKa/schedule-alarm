@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <list>
+#include <memory>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
@@ -9,6 +11,11 @@
 
 namespace settings {
 
+class ISettingsObserver {
+   public:
+    virtual void SettingsChangedUpdate() = 0;
+};
+
 class Settings {
    public:
     Settings(Settings& other) = delete;
@@ -16,18 +23,27 @@ class Settings {
 
     static Settings& GetInstance();
 
-    void LoadFromMemory();
-    void SaveToMemory() const;
-
     settings::Changable GetSettings() const;
     void UpdateSettings(const settings::Changable& new_settings);
 
+    void AddSettingsObserver(ISettingsObserver* observer) {
+        mSettingsObservers.push_back(observer);
+    }
+
    private:
-    Settings() {}
+    Settings() { xSettingsSpinlock = portMUX_INITIALIZER_UNLOCKED; }
+
+    void NotifySettingsChanged() {
+        for (auto observer : mSettingsObservers) {
+            observer->SettingsChangedUpdate();
+        }
+    }
 
    private:
     mutable portMUX_TYPE xSettingsSpinlock;
     settings::Changable mSettings;
+
+    std::list<ISettingsObserver*> mSettingsObservers;
 };
 
 }  // namespace settings

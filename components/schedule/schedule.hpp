@@ -2,9 +2,13 @@
 
 #include <cstdint>
 #include <span>
+#include <string_view>
 #include <vector>
 
-enum class AlarmType : uint16_t { Single = 1, Double = 2, Triple = 3 };
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+
+enum class AlarmType : uint16_t { None = 0, Single = 1, Double = 2, Triple = 3 };
 
 struct SchedulePoint {
     // Represents a minute of the day when the alarm should fire
@@ -14,23 +18,32 @@ struct SchedulePoint {
 
 class Schedule {
    public:
-    void SetIndex(const std::size_t new_index) { m_schedule_index = new_index; }
-    void SetSchedule(const std::span<const SchedulePoint> schedule) {
-        m_schedule.insert(m_schedule.begin(), schedule.begin(), schedule.end());
+    Schedule() {
+        xScheduleMutex = xSemaphoreCreateBinary();
+        xSemaphoreGive(xScheduleMutex);
     }
 
-    SchedulePoint GetSchedulePoint() { return m_schedule.at(m_schedule_index); }
+    esp_err_t Load();
+    esp_err_t Save();
+
+    void SetIndex(const std::size_t new_index) { mScheduleIndex = new_index; }
+
+    esp_err_t SetSchedule(const std::span<const SchedulePoint> schedule);
+    std::vector<SchedulePoint> GetScheduleArray();
+
+    SchedulePoint GetSchedulePoint();
     uint16_t GetSystemMinute();
 
-    void AdvanceSchedule() {
-        if (m_schedule_index == m_schedule.size() - 1) {
-            m_schedule_index = 0;
-        } else {
-            ++m_schedule_index;
-        }
-    }
+    void AdvanceSchedule();
+    void ReindexSchedule();
+
+    std::string ToJson();
+    esp_err_t FromJson(const std::string_view raw_json);
 
    private:
-    std::size_t m_schedule_index = 0;
-    std::vector<SchedulePoint> m_schedule = {};
+    static constexpr const std::string_view SCHEDULE_FILE = "alarm_schedule.json";
+
+    mutable QueueHandle_t xScheduleMutex;
+    std::size_t mScheduleIndex = 0;
+    std::vector<SchedulePoint> mSchedule = {};
 };

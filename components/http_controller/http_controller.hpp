@@ -1,18 +1,25 @@
 #pragma once
 
-#include <stdint.h>
-#include <functional>
-#include <string>
+#include <cstdint>
+#include <expected>
+#include <memory>
 #include <string_view>
+#include <vector>
 
+#include "cJSON.h"
 #include "esp_err.h"
-
 #include "esp_http_server.h"
+
+#include "schedule.hpp"
+#include "settings.hpp"
 
 namespace srvr {
 
 class HttpController {
    public:
+    HttpController(Schedule& schedule, settings::Settings& settings)
+        : mSchedule(schedule), mSettings(settings) {}
+
     esp_err_t StartServer();
     esp_err_t StopServer();
 
@@ -29,19 +36,31 @@ class HttpController {
     /// @brief Handle to fetch the site favicon
     static esp_err_t FaviconHandlerGET(httpd_req_t* req);
 
-    static esp_err_t ScheduleUploadHandler(httpd_req_t* req);
-    static esp_err_t ScheduleRetreiveHandler(httpd_req_t* req);
+    /// @brief /post_schedule
+    static esp_err_t SchedulePOST(httpd_req_t* req);
+    /// @brief /get_schedule
+    static esp_err_t ScheduleGET(httpd_req_t* req);
 
-    static esp_err_t SettingsUploadHandler(httpd_req_t* req);
-    static esp_err_t SettingsRetreiveHandler(httpd_req_t* req);
+    /// @brief /post_settings
+    static esp_err_t SettingsPOST(httpd_req_t* req);
+    /// @brief /get_settings
+    static esp_err_t SettingsGET(httpd_req_t* req);
 
-   private:
     static esp_err_t SendFile(httpd_req_t* req,
                               const std::string_view file_name,
-                              const std::string_view response_type);
+                              const std::string_view content_type);
+
+    static esp_err_t SendString(httpd_req_t* req,
+                                const std::string_view string,
+                                const std::string_view content_type);
 
    private:
+    Schedule& mSchedule;
+    settings::Settings& mSettings;
+
     httpd_handle_t mServerHandle;
+
+    std::array<char, 2048> mReceiveBuffer;
 
     bool mIsStarted = false;
 };

@@ -19,10 +19,8 @@ void Settings::UpdateSettings(const settings::Changable& new_settings) {
     taskENTER_CRITICAL(&xSettingsSpinlock);
     mSettings = new_settings;
     taskEXIT_CRITICAL(&xSettingsSpinlock);
+
+    NotifySettingsChanged();
 }
-
-void Settings::LoadFromMemory() {}
-
-void Settings::SaveToMemory() const {}
 
 }  // namespace settings

@@ -13,7 +13,7 @@ class SleepController {
                     Schedule& schedule)
         : m_wifi_controller(wifi_controller),
           m_http_controller(http_controller),
-          m_schedule(schedule) {}
+          mSchedule(schedule) {}
 
     void SetSleepTimeout(const TickType_t timeout_ticks) {
         m_timeout_ticks = timeout_ticks;
@@ -45,5 +45,5 @@ class SleepController {
 
     wifi::WifiController& m_wifi_controller;
     srvr::HttpController& m_http_controller;
-    Schedule& m_schedule;
+    Schedule& mSchedule;
 };

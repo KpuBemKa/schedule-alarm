@@ -50,7 +50,7 @@ esp_err_t SleepController::ConfigureWakeup() {
 
 uint64_t SleepController::GetSleepTimeUs() {
     const auto minute_difference =
-        m_schedule.GetSchedulePoint().day_minute - m_schedule.GetSystemMinute();
+        mSchedule.GetSchedulePoint().day_minute - mSchedule.GetSystemMinute();
 
     return minute_difference * 60 * 1'000 * 1'000;  // microseconds
 }

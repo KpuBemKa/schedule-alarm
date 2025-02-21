@@ -1,10 +1,14 @@
 #pragma once
 
+#include <string_view>
+
 #include "hal/gpio_hal.h"
 
 #define DEBUG_WIFI 1
 #define DEBUG_HTTP 1
 #define DEBUG_SLEEP 1
+
+constexpr std::string_view SPIFFS_BASE_PATH = "/spiffs";
 
 namespace pins {
 

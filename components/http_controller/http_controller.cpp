@@ -1,8 +1,9 @@
 #include "http_controller.hpp"
 
 #include <cstdio>
+#include <cstring>
+#include <string>
 
-#include "cJSON.h"
 #include "esp_check.h"
 #include "esp_chip_info.h"
 #include "esp_log.h"
@@ -27,49 +28,53 @@ const char TAG[] = "HTTP_SERVER";
 
 namespace srvr {
 
-constexpr httpd_config_t DEFAULT_HTTP_CONFIG = {
-    .task_priority = tskIDLE_PRIORITY + 5,
-    .stack_size = 4096,
-    .core_id = tskNO_AFFINITY,
-    .server_port = 80,
-    .ctrl_port = ESP_HTTPD_DEF_CTRL_PORT,
-    .max_open_sockets = 7,
-    .max_uri_handlers = 8,
-    .max_resp_headers = 8,
-    .backlog_conn = 5,
-    .lru_purge_enable = true,
-    .recv_wait_timeout = 5,
-    .send_wait_timeout = 5,
-    .global_user_ctx = NULL,
-    .global_user_ctx_free_fn = NULL,
-    .global_transport_ctx = NULL,
-    .global_transport_ctx_free_fn = NULL,
-    .enable_so_linger = false,
-    .linger_timeout = 0,
-    .keep_alive_enable = false,
-    .keep_alive_idle = 0,
-    .keep_alive_interval = 0,
-    .keep_alive_count = 0,
-    .open_fn = NULL,
-    .close_fn = NULL,
-    .uri_match_fn = NULL};
+constexpr httpd_config_t DEFAULT_HTTP_CONFIG = {.task_priority = tskIDLE_PRIORITY + 5,
+                                                .stack_size = 4096,
+                                                .core_id = tskNO_AFFINITY,
+                                                .server_port = 80,
+                                                .ctrl_port = ESP_HTTPD_DEF_CTRL_PORT,
+                                                .max_open_sockets = 7,
+                                                .max_uri_handlers = 8,
+                                                .max_resp_headers = 8,
+                                                .backlog_conn = 5,
+                                                .lru_purge_enable = true,
+                                                .recv_wait_timeout = 5,
+                                                .send_wait_timeout = 5,
+                                                .global_user_ctx = NULL,
+                                                .global_user_ctx_free_fn = NULL,
+                                                .global_transport_ctx = NULL,
+                                                .global_transport_ctx_free_fn = NULL,
+                                                .enable_so_linger = false,
+                                                .linger_timeout = 0,
+                                                .keep_alive_enable = false,
+                                                .keep_alive_idle = 0,
+                                                .keep_alive_interval = 0,
+                                                .keep_alive_count = 0,
+                                                .open_fn = NULL,
+                                                .close_fn = NULL,
+                                                .uri_match_fn = NULL};
 
 esp_err_t HttpController::StartServer() {
-    constexpr httpd_uri_t uri_handler_redirect = {
-        .uri = "/index.html",
-        .method = HTTP_GET,
-        .handler = HttpController::IndexHtmlHandlerGET,
-        .user_ctx = nullptr};
-    constexpr httpd_uri_t uri_handler_empty = {
-        .uri = "/",
-        .method = HTTP_GET,
-        .handler = HttpController::EmptyHandlerGET,
-        .user_ctx = nullptr};
-    constexpr httpd_uri_t uri_handler_favicon = {
-        .uri = "/favicon.ico",
-        .method = HTTP_GET,
-        .handler = HttpController::FaviconHandlerGET,
-        .user_ctx = nullptr};
+    constexpr httpd_uri_t uri_handler_redirect = {.uri = "/index.html",
+                                                  .method = HTTP_GET,
+                                                  .handler = HttpController::IndexHtmlHandlerGET,
+                                                  .user_ctx = nullptr};
+    constexpr httpd_uri_t uri_handler_get_empty = {.uri = "/",
+                                                   .method = HTTP_GET,
+                                                   .handler = HttpController::EmptyHandlerGET,
+                                                   .user_ctx = nullptr};
+    constexpr httpd_uri_t uri_handler_get_favicon = {.uri = "/favicon.ico",
+                                                     .method = HTTP_GET,
+                                                     .handler = HttpController::FaviconHandlerGET,
+                                                     .user_ctx = nullptr};
+    httpd_uri_t uri_handler_get_schedule = {.uri = "/get_schedule",
+                                            .method = HTTP_GET,
+                                            .handler = HttpController::ScheduleGET,
+                                            .user_ctx = this};
+    httpd_uri_t uri_handler_post_schedule = {.uri = "/update_schedule",
+                                             .method = HTTP_POST,
+                                             .handler = HttpController::SchedulePOST,
+                                             .user_ctx = this};
 
     // Start the httpd server
     LOG_I("Starting server on port %d...", DEFAULT_HTTP_CONFIG.server_port);
@@ -88,26 +93,38 @@ esp_err_t HttpController::StartServer() {
     LOG_I("Server has been started. Registering URI handlers...");
     bool full_success = true;
 
-    esp_result =
-        httpd_register_uri_handler(mServerHandle, &uri_handler_redirect);
+    esp_result = httpd_register_uri_handler(mServerHandle, &uri_handler_redirect);
     if (esp_result != ESP_OK) {
-        LOG_E("%s:%d | Handler for '%s' could not be registered: %s", __FILE__,
-              __LINE__, uri_handler_redirect.uri, esp_err_to_name(esp_result));
+        LOG_E("%s:%d | Handler for '%s' could not be registered: %s", __FILE__, __LINE__,
+              uri_handler_redirect.uri, esp_err_to_name(esp_result));
         full_success = false;
     }
 
-    esp_result = httpd_register_uri_handler(mServerHandle, &uri_handler_empty);
+    esp_result = httpd_register_uri_handler(mServerHandle, &uri_handler_get_empty);
     if (esp_result != ESP_OK) {
-        LOG_E("%s:%d | Handler for '%s' could not be registered: %s", __FILE__,
-              __LINE__, uri_handler_empty.uri, esp_err_to_name(esp_result));
+        LOG_E("%s:%d | Handler for '%s' could not be registered: %s", __FILE__, __LINE__,
+              uri_handler_get_empty.uri, esp_err_to_name(esp_result));
         full_success = false;
     }
 
-    esp_result =
-        httpd_register_uri_handler(mServerHandle, &uri_handler_favicon);
+    esp_result = httpd_register_uri_handler(mServerHandle, &uri_handler_get_favicon);
     if (esp_result != ESP_OK) {
-        LOG_E("%s:%d | Handler for '%s' could not be registered: %s", __FILE__,
-              __LINE__, uri_handler_favicon.uri, esp_err_to_name(esp_result));
+        LOG_E("%s:%d | Handler for '%s' could not be registered: %s", __FILE__, __LINE__,
+              uri_handler_get_favicon.uri, esp_err_to_name(esp_result));
+        full_success = false;
+    }
+
+    esp_result = httpd_register_uri_handler(mServerHandle, &uri_handler_get_schedule);
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Handler for '%s' could not be registered: %s", __FILE__, __LINE__,
+              uri_handler_get_schedule.uri, esp_err_to_name(esp_result));
+        full_success = false;
+    }
+
+    esp_result = httpd_register_uri_handler(mServerHandle, &uri_handler_post_schedule);
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Handler for '%s' could not be registered: %s", __FILE__, __LINE__,
+              uri_handler_post_schedule.uri, esp_err_to_name(esp_result));
         full_success = false;
     }
 
@@ -140,136 +157,105 @@ esp_err_t HttpController::IndexHtmlHandlerGET(httpd_req_t* req) {
 }
 
 esp_err_t HttpController::EmptyHandlerGET(httpd_req_t* req) {
-    // char* buf;
-    // size_t buf_len;
-
-    /* Get header value string length and allocate memory for length + 1,
-     * extra byte for null termination */
-    // buf_len = httpd_req_get_hdr_value_len(req, "Host") + 1;
-    // if (buf_len > 1) {
-    //   buf = reinterpret_cast<char*>(malloc(buf_len));
-    //   ESP_RETURN_ON_FALSE(buf, ESP_ERR_NO_MEM, TAG, "buffer alloc failed");
-    //   /* Copy null terminated value string into buffer */
-    //   if (httpd_req_get_hdr_value_str(req, "Host", buf, buf_len) == ESP_OK) {
-    //     LOG_I("Found header => Host: %s", buf);
-    //   }
-    //   free(buf);
-    // }
-
-    // buf_len = httpd_req_get_hdr_value_len(req, "Test-Header-2") + 1;
-    // if (buf_len > 1) {
-    //   buf = reinterpret_cast<char*>(malloc(buf_len));
-    //   ESP_RETURN_ON_FALSE(buf, ESP_ERR_NO_MEM, TAG, "buffer alloc failed");
-    //   if (httpd_req_get_hdr_value_str(req, "Test-Header-2", buf, buf_len) ==
-    //   ESP_OK) {
-    //     LOG_I("Found header => Test-Header-2: %s", buf);
-    //   }
-    //   free(buf);
-    // }
-
-    // buf_len = httpd_req_get_hdr_value_len(req, "Test-Header-1") + 1;
-    // if (buf_len > 1) {
-    //   buf = reinterpret_cast<char*>(malloc(buf_len));
-    //   ESP_RETURN_ON_FALSE(buf, ESP_ERR_NO_MEM, TAG, "buffer alloc failed");
-    //   if (httpd_req_get_hdr_value_str(req, "Test-Header-1", buf, buf_len) ==
-    //   ESP_OK) {
-    //     LOG_I("Found header => Test-Header-1: %s", buf);
-    //   }
-    //   free(buf);
-    // }
-
-    /* Read URL query string length and allocate memory for length + 1,
-     * extra byte for null termination */
-    // buf_len = httpd_req_get_url_query_len(req) + 1;
-    // if (buf_len > 1) {
-    //   buf = reinterpret_cast<char*>(malloc(buf_len));
-    //   ESP_RETURN_ON_FALSE(buf, ESP_ERR_NO_MEM, TAG, "buffer alloc failed");
-
-    //   if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK) {
-    //     LOG_I("Found URL query => %s", buf);
-
-    //     char param[EXAMPLE_HTTP_QUERY_KEY_MAX_LEN] /* ,
-    //     dec_param[EXAMPLE_HTTP_QUERY_KEY_MAX_LEN] = { 0 } */; std::string
-    //     decoded_param;
-
-    //     /* Get value of expected key from query string */
-    //     if (httpd_query_key_value(buf, "query1", param, sizeof(param)) ==
-    //     ESP_OK) {
-    //       LOG_I("Found URL query parameter => query1=%s", param);
-    //       decoded_param = util::uri_decode(std::string_view(param,
-    //       strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN))); LOG_I("Decoded
-    //       query parameter => %s", decoded_param.c_str());
-    //     }
-
-    //     if (httpd_query_key_value(buf, "query3", param, sizeof(param)) ==
-    //     ESP_OK) {
-    //       LOG_I("Found URL query parameter => query3=%s", param);
-    //       decoded_param = util::uri_decode(std::string_view(param,
-    //       strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN))); LOG_I("Decoded
-    //       query parameter => %s", decoded_param.c_str());
-    //     }
-
-    //     if (httpd_query_key_value(buf, "query2", param, sizeof(param)) ==
-    //     ESP_OK) {
-    //       LOG_I("Found URL query parameter => query2=%s", param);
-    //       decoded_param = util::uri_decode(std::string_view(param,
-    //       strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN))); LOG_I("Decoded
-    //       query parameter => %s", decoded_param.c_str());
-    //     }
-    //   }
-    //   free(buf);
-    // }
-
-    /* Set some custom headers */
-    // httpd_resp_set_hdr(req, "Custom-Header-1", "Custom-Value-1");
-    // httpd_resp_set_hdr(req, "Custom-Header-2", "Custom-Value-2");
-
-    /* Send response with custom headers and body set as the
-     * string passed in user context*/
-    // const char* resp_str = (const char*)req->user_ctx;
-
     return SendFile(req, "/spiffs/index.html", "text/html");
-
-    // const char resp_str[] = "Hello, World!";
-    // httpd_resp_send(req, resp_str, sizeof(resp_str));
-
-    // /* After sending the HTTP response the old HTTP request
-    //  * headers are lost. Check if HTTP request headers can be read now. */
-    // if (httpd_req_get_hdr_value_len(req, "Host") == 0) {
-    //   LOG_I("Request headers lost");
-    // }
-
-    // return ESP_OK;
 }
 
 esp_err_t HttpController::FaviconHandlerGET(httpd_req_t* req) {
     return SendFile(req, "/spiffs/favicon.ico", "image/x-icon");
 }
 
-esp_err_t HttpController::ScheduleUploadHandler(httpd_req_t* req) {
+esp_err_t HttpController::SchedulePOST(httpd_req_t* req) {
+    std::string schedule_raw_json;
+    int remaining = req->content_len;
+    std::size_t retries_count = 0;
+    auto self = reinterpret_cast<HttpController*>(req->user_ctx);
+
+    while (remaining > 0) {
+        LOG_I("Remaining to receive: %d", remaining);
+
+        int received =
+            httpd_req_recv(req, self->mReceiveBuffer.data(), self->mReceiveBuffer.size());
+
+        if (retries_count > 5) {
+            LOG_E("%s:%d | Schedule reception failed: TIMEOUT", __FILE__, __LINE__);
+            return ESP_ERR_TIMEOUT;
+        }
+
+        if (received <= 0) {
+            if (received == HTTPD_SOCK_ERR_TIMEOUT) {
+                ++retries_count;
+                continue;
+            }
+
+            LOG_E("%s:%d | Schedule reception failed. Code: %d", __FILE__, __LINE__, received);
+
+            /* Respond with 500 Internal Server Error */
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                                "Failed to receive the schedule");
+            return ESP_FAIL;
+        }
+
+        retries_count = 0;
+
+        schedule_raw_json.append(self->mReceiveBuffer.data(), received);
+        remaining -= received;
+    }
+
+    LOG_I("Received data: %.*s", schedule_raw_json.length(), schedule_raw_json.c_str());
+
+    const esp_err_t esp_result = self->mSchedule.FromJson(schedule_raw_json);
+
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Schedule parsing failed: %s", __FILE__, __LINE__,
+              esp_err_to_name(esp_result));
+
+        if (esp_result == ESP_ERR_INVALID_ARG) {
+            /* Respond with 500 Internal Server Error */
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid JSON");
+        } else {
+            /* Respond with 500 Internal Server Error */
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Internal server error.");
+        }
+
+        return esp_result;
+    }
+
+    httpd_resp_sendstr(req, "Schedule has been updated.");
+
+    LOG_I("Schedule has been updated.");
+
+    return ESP_OK;
+}
+
+esp_err_t HttpController::ScheduleGET(httpd_req_t* req) {
+    auto self = reinterpret_cast<HttpController*>(req->user_ctx);
+
+    std::string schedule_json = self->mSchedule.ToJson();
+
+    const esp_err_t esp_result = SendString(req, schedule_json, "application/json");
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Error sending schedule: %s", __FILE__, __LINE__,
+              esp_err_to_name(esp_result));
+    }
+
+    return esp_result;
+}
+
+esp_err_t HttpController::SettingsPOST(httpd_req_t* req) {
     return ESP_ERR_NOT_SUPPORTED;
 }
 
-esp_err_t HttpController::ScheduleRetreiveHandler(httpd_req_t* req) {
-    return ESP_ERR_NOT_SUPPORTED;
-}
-
-esp_err_t HttpController::SettingsUploadHandler(httpd_req_t* req) {
-    return ESP_ERR_NOT_SUPPORTED;
-}
-
-esp_err_t HttpController::SettingsRetreiveHandler(httpd_req_t* req) {
+esp_err_t HttpController::SettingsGET(httpd_req_t* req) {
     return ESP_ERR_NOT_SUPPORTED;
 }
 
 esp_err_t HttpController::SendFile(httpd_req_t* req,
                                    const std::string_view file_name,
-                                   const std::string_view response_type) {
+                                   const std::string_view content_type) {
     // Open the file
     FILE* file_ptr = fopen(file_name.data(), "r");
     if (file_ptr == nullptr) {
-        LOG_E("%s:%d | Error opening requested file '%s'.", __FILE__, __LINE__,
-              file_name.data());
+        LOG_E("%s:%d | Error opening requested file '%s'.", __FILE__, __LINE__, file_name.data());
         return ESP_ERR_NOT_FOUND;
     }
 
@@ -279,16 +265,10 @@ esp_err_t HttpController::SendFile(httpd_req_t* req,
     fseek(file_ptr, 0L, SEEK_SET);
 
     // Reserve memory for the file
-    char* file_buf = new (std::nothrow) char[file_size];
-    if (file_buf == nullptr) {
-        LOG_E("%s:%d | Error reserving memory for file '%s'.", __FILE__,
-              __LINE__, file_name.data());
-        return ESP_ERR_NO_MEM;
-    }
+    std::vector<char> file_buf(file_size, '\0');
 
     // Copy file data into the reserved memory
-    const std::size_t read_count =
-        fread(file_buf, sizeof(char), file_size, file_ptr);
+    const std::size_t read_count = fread(file_buf.data(), sizeof(char), file_size, file_ptr);
     if (read_count != file_size) {
         LOG_E(
             "%s:%d | Error reading the entire file '%s'. Ammount of bytes "
@@ -298,23 +278,36 @@ esp_err_t HttpController::SendFile(httpd_req_t* req,
     }
 
     // Send the copied file
-    esp_err_t result = httpd_resp_set_type(req, response_type.data());
-    result |= httpd_resp_send(req, file_buf, file_size);
-    if (read_count != file_size) {
-        LOG_E("%s:%d | Error sending file '%s': %s", __FILE__, __LINE__,
-              file_name.data(), esp_err_to_name(result));
+    esp_err_t result = httpd_resp_set_type(req, content_type.data());
+    result |= httpd_resp_send(req, file_buf.data(), file_size);
+    if (result != ESP_OK) {
+        LOG_E("%s:%d | Error sending file '%s': %s", __FILE__, __LINE__, file_name.data(),
+              esp_err_to_name(result));
         return result;
     }
 
     // Close the file
     if (fclose(file_ptr) != 0) {
-        LOG_E("%s:%d | Error closing file '%s'.", __FILE__, __LINE__,
-              file_name.data());
+        LOG_E("%s:%d | Error closing file '%s'.", __FILE__, __LINE__, file_name.data());
         return result;
     }
 
-    delete[] file_buf;
     return ESP_OK;
+}
+
+esp_err_t HttpController::SendString(httpd_req_t* req,
+                                     const std::string_view string,
+                                     const std::string_view content_type) {
+    // char* json_str = cJSON_Print(data);
+    // const std::size_t json_str_size = std::strlen(json_str);
+
+    esp_err_t result = httpd_resp_set_type(req, content_type.data());
+    result |= httpd_resp_send(req, string.data(), string.size());
+    if (result != ESP_OK) {
+        LOG_E("%s:%d | Error sending JSON: %s", __FILE__, __LINE__, esp_err_to_name(result));
+    }
+
+    return result;
 }
 
 }  // namespace srvr

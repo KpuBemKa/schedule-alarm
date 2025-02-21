@@ -1,6 +1,7 @@
 #include "wifi_controller.hpp"
 
 #include <algorithm>
+#include <cstring>
 
 #include "esp_log.h"
 #include "esp_mac.h"
@@ -35,7 +36,7 @@ esp_err_t WifiController::Start() {
 
     // Create the event loop
     result = esp_event_loop_create_default();
-    if (result != ESP_ERR_INVALID_STATE && result != ESP_OK) {
+    if (result != ESP_OK) {
         LOG_E("%s:%d | Error creating event loop : %s", __FILE__, __LINE__,
               esp_err_to_name(result));
         return result;
@@ -187,30 +188,23 @@ esp_err_t WifiController::ConfigAP() {
 
     // Initialize the config structure
     wifi_config_t wifi_ap_config = {
-        .ap = {.ssid = {},
-               .password = {},
-               .ssid_len = static_cast<uint8_t>(settings.wifi_ssid.size()),
-               .channel = settings::Constant::WiFiApChannel,
-               // if wifi password at index 0 is null, it means it is empty,
-               // which means authentification type should be open
-               .authmode = settings.wifi_password.at(0) != '\0'
-                               ? wifi_auth_mode_t::WIFI_AUTH_WPA2_PSK
-                               : wifi_auth_mode_t::WIFI_AUTH_OPEN,
-               .ssid_hidden = 0,
-               .max_connection = settings::Constant::MaxWifiConnections,
-               .beacon_interval = 100,
-               .pairwise_cipher = wifi_cipher_type_t::WIFI_CIPHER_TYPE_TKIP_CCMP,
-               .ftm_responder = true,
-               .pmf_cfg =
-                   {
-                       .capable = true,  // is deprecated but compiler throws a warning
-                       .required = false,
-                   },
-               .sae_pwe_h2e = wifi_sae_pwe_method_t::WPA3_SAE_PWE_UNSPECIFIED},
+        .ap =
+            {
+                .ssid = {},
+                .password = {},
+                .ssid_len = static_cast<uint8_t>(std::strlen(settings.wifi_ssid.data())),
+                .channel = 1,
+                .authmode = wifi_auth_mode_t::WIFI_AUTH_WPA2_PSK,
+                .max_connection = settings::Constant::MaxWifiConnections,
+                .pmf_cfg =
+                    {
+                        .required = false,
+                    },
+            },
     };
 
-    std::copy_n(settings.wifi_ssid.data(), settings.wifi_ssid.size(), wifi_ap_config.ap.ssid);
-    std::copy_n(settings.wifi_password.data(), settings.wifi_password.size(),
+    std::copy_n(settings.wifi_ssid.data(), wifi_ap_config.ap.ssid_len, wifi_ap_config.ap.ssid);
+    std::copy_n(settings.wifi_password.data(), std::strlen(settings.wifi_password.data()),
                 wifi_ap_config.ap.password);
 
     if (settings.wifi_password.at(0) == '\0') {
@@ -218,7 +212,7 @@ esp_err_t WifiController::ConfigAP() {
     }
 
     // Apply the settings
-    const esp_err_t result = esp_wifi_set_config(WIFI_IF_AP, &wifi_ap_config);
+    esp_err_t result = esp_wifi_set_config(WIFI_IF_AP, &wifi_ap_config);
     if (result != ESP_OK) {
         LOG_E("%s:%d | Error configuring Wi-Fi AP settings: %s", __FILE__, __LINE__,
               esp_err_to_name(result));
@@ -242,7 +236,7 @@ esp_err_t WifiController::ConfigSTA() {
                 .scan_method = WIFI_ALL_CHANNEL_SCAN,
                 .threshold = {.authmode = WIFI_AUTH_WPA2_WPA3_PSK},
                 .sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
-                .failure_retry_cnt = CONFIG_ESP_MAXIMUM_STA_RETRY,
+                .failure_retry_cnt = 5,
             },
     };
 
@@ -296,5 +290,7 @@ esp_err_t WifiController::ConfigDnsAP() {
 
     return result;
 }
+
+void WifiController::SettingsChangedUpdate() {}
 
 }  // namespace wifi

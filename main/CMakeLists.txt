@@ -1,8 +1,5 @@
-idf_component_register(SRCS "mount.cpp" "main.cpp"
-                           
+idf_component_register(SRCS "main.cpp"                           
                     INCLUDE_DIRS "."
-                #     EMBED_FILES "favicon.ico"
-                #                 "upload_script.html"
                     PRIV_REQUIRES log
                                   freertos
                                   esp_wifi

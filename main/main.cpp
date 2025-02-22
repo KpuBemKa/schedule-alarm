@@ -34,7 +34,7 @@ static const char TAG[] = "MAIN";
 
 bool s_button_pressed_flag = false;
 
-settings::Settings& s_settings = settings::Settings::GetInstance();
+settings::Settings s_settings;
 Schedule s_schedule;
 wifi::WifiController s_wifi_controller(s_settings);
 srvr::HttpController s_http_controller(s_schedule, s_settings);
@@ -51,24 +51,20 @@ void HttpServerTask(void* args);
 void RingAlarm(const AlarmType alarm_type);
 
 extern "C" void app_main(void) {
+    vTaskDelay(pdMS_TO_TICKS(1'000));
     ESP_ERROR_CHECK(nvs_flash_init());
 
     /* Initialize file storage */
     ESP_ERROR_CHECK(MountSpiffsStorage(SPIFFS_BASE_PATH.data()));
 
     s_schedule.Load();
-
-    s_settings.UpdateSettings(settings::Changable{.wifi_ssid = "School Alarm",
-                                                  .wifi_password = "elimul nou",
-                                                  //   .wifi_password = "",
-                                                  .remote_wifi_ssid = "Penzari-2",
-                                                  .remote_wifi_password = "?068882210!_"});
-
-    // std::array schedule = {SchedulePoint{.day_minute = 0, .alarm_type = AlarmType::Single},
-    //                        SchedulePoint{.day_minute = 65, .alarm_type = AlarmType::Double},
-    //                        SchedulePoint{.day_minute = 120, .alarm_type = AlarmType::Triple}};
-    // s_schedule.SetSchedule(schedule);
+    s_settings.Load();
     s_sleep_controller.SetSleepTimeout(pdMS_TO_TICKS(60'000));
+
+    for (const char c : s_settings.GetSettings().wifi_password) {
+        printf("%02X ", c);
+    }
+    printf("\n");
 
     // xTaskCreate(ScheduleTask, "SCHEDULE", 8192, nullptr, 8,
     //             &s_schedule_task_handle);

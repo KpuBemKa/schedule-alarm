@@ -1,6 +1,6 @@
 #pragma once
 
-#include <array>
+#include <string>
 #include <cstdint>
 
 namespace settings {
@@ -11,11 +11,11 @@ struct Constant {
 };
 
 struct Changable {
-    std::array<char, 32> wifi_ssid;
-    std::array<char, 32> wifi_password;
+    std::string wifi_ssid;
+    std::string wifi_password;
 
-    std::array<char, 32> remote_wifi_ssid;
-    std::array<char, 32> remote_wifi_password;
+    std::string remote_wifi_ssid;
+    std::string remote_wifi_password;
 };
 
 }  // namespace settings

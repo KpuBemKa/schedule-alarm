@@ -1,16 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alarm Schedule</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; max-width: 400px; border-collapse: collapse; }
-        td { padding: 5px; }
-        button { margin-top: 10px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 400px;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 5px;
+        }
+
+        button {
+            margin-top: 10px;
+        }
     </style>
 </head>
+
 <body>
     <h2>Alarm Schedule</h2>
     <form id="alarmForm">
@@ -22,6 +38,7 @@
         <button type="button" onclick="submitForm()">Submit</button>
         <button type="button" onclick="fetchSchedule()">Load Schedule</button>
     </form>
+    <button onclick="location.href='settings.html'">Go to Settings</button>
 
     <script>
         function addRow(time = "", type = "single") {
@@ -49,7 +66,7 @@
             const form = document.getElementById("alarmForm");
             const times = Array.from(form.querySelectorAll("input[name='time[]']")).map(input => input.value);
             const types = Array.from(form.querySelectorAll("select[name='type[]']")).map(select => select.value);
-            
+
             const schedule_items = times.map((time, index) => {
                 const [hour, minute] = time.split(":").map(Number);
                 return {
@@ -57,13 +74,13 @@
                     type: types[index] === "single" ? 1 : types[index] === "double" ? 2 : 3
                 };
             });
-            
+
             const jsonData = {
                 schedule_items: schedule_items
             };
-            
+
             console.log(JSON.stringify(jsonData, null, 2));
-            
+
             fetch('/update_schedule', {
                 method: 'POST',
                 headers: {
@@ -71,9 +88,9 @@
                 },
                 body: JSON.stringify(jsonData)
             })
-            .then(response => response.text())
-            .then(data => console.log('Server Response:', data))
-            .catch(error => console.error('Error:', error));
+                .then(response => response.text())
+                .then(data => console.log('Server Response:', data))
+                .catch(error => console.error('Error:', error));
         }
 
         function fetchSchedule() {
@@ -94,4 +111,5 @@
         document.addEventListener("DOMContentLoaded", fetchSchedule);
     </script>
 </body>
+
 </html>

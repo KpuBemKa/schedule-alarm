@@ -63,7 +63,7 @@ esp_err_t Schedule::Save() {
     }
 
     fclose(file_ptr);
-    return written != json_data.length() ? ESP_OK : ESP_FAIL;
+    return written == json_data.length() ? ESP_OK : ESP_FAIL;
 }
 
 esp_err_t Schedule::SetSchedule(const std::span<const SchedulePoint> schedule) {

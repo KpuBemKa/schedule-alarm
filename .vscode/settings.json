@@ -83,12 +83,13 @@
     "C_Cpp.errorSquiggles": "enabled",
     "idf.flashType": "UART",
     // "C_Cpp.clang_format_style": "{ BasedOnStyle: Mozilla, IndentWidth: 4, TabWidth: 4 }"
-    "C_Cpp.clang_format_style": "{ BasedOnStyle: Chromium, IndentWidth: 4, TabWidth: 4, ColumnLimit: 100 }",
+    "C_Cpp.clang_format_style": "{ BasedOnStyle: Mozilla, IndentWidth: 4, TabWidth: 4, ColumnLimit: 120 }",
     "editor.detectIndentation": false,
     "idf.customExtraVars": {
         "OPENOCD_SCRIPTS": "d:\\dev\\tools\\esp-idf-5.2.1\\tools\\tools\\openocd-esp32\\v0.12.0-esp32-20230921/openocd-esp32/share/openocd/scripts",
         "IDF_CCACHE_ENABLE": "1",
         "ESP_ROM_ELF_DIR": "d:\\dev\\tools\\esp-idf-5.2.1\\tools\\tools\\esp-rom-elfs\\20230320/",
         "IDF_TARGET": "esp32c6"
-    }
+    },
+    "idf.monitorNoReset": true
 }

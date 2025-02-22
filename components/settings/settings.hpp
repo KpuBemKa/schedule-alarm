@@ -2,7 +2,8 @@
 
 #include <cstdint>
 #include <list>
-#include <memory>
+#include <string>
+#include <string_view>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
@@ -18,20 +19,24 @@ class ISettingsObserver {
 
 class Settings {
    public:
-    Settings(Settings& other) = delete;
-    void operator=(const Settings&) = delete;
+    Settings() { xSettingsSpinlock = portMUX_INITIALIZER_UNLOCKED; }
 
-    static Settings& GetInstance();
+    esp_err_t Load();
+    esp_err_t Save();
 
     settings::Changable GetSettings() const;
-    void UpdateSettings(const settings::Changable& new_settings);
+    esp_err_t UpdateSettings(const settings::Changable& new_settings);
 
     void AddSettingsObserver(ISettingsObserver* observer) {
         mSettingsObservers.push_back(observer);
     }
 
+    std::string ToJson();
+    esp_err_t FromJson(const std::string_view raw_json);
+
    private:
-    Settings() { xSettingsSpinlock = portMUX_INITIALIZER_UNLOCKED; }
+    esp_err_t Save(const Changable& new_settings);
+    void SetSettings(const Changable& new_settings);
 
     void NotifySettingsChanged() {
         for (auto observer : mSettingsObservers) {
@@ -39,7 +44,11 @@ class Settings {
         }
     }
 
+    // esp_err_t ExtractStringFromJson(cJSON*)
+
    private:
+    static constexpr const std::string_view SCHEDULE_FILE = "settings.json";
+
     mutable portMUX_TYPE xSettingsSpinlock;
     settings::Changable mSettings;
 

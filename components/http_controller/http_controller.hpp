@@ -15,17 +15,21 @@
 
 namespace srvr {
 
-class HttpController {
-   public:
+class HttpController
+{
+  public:
     HttpController(Schedule& schedule, settings::Settings& settings)
-        : mSchedule(schedule), mSettings(settings) {}
+      : mSchedule(schedule)
+      , mSettings(settings)
+    {
+    }
 
     esp_err_t StartServer();
     esp_err_t StopServer();
 
     bool IsStarted() { return mIsStarted; }
 
-   private:
+  private:
     /* -=< Esp-Idf HTTP handlers */
 
     /// @brief Handler to redirect incoming GET request from `/index.html` to
@@ -35,6 +39,8 @@ class HttpController {
     static esp_err_t EmptyHandlerGET(httpd_req_t* req);
     /// @brief Handle to fetch the site favicon
     static esp_err_t FaviconHandlerGET(httpd_req_t* req);
+    /// @brief Handle to fetch the settings page
+    static esp_err_t SettingsPageHandlerGET(httpd_req_t* req);
 
     /// @brief /post_schedule
     static esp_err_t SchedulePOST(httpd_req_t* req);
@@ -46,15 +52,11 @@ class HttpController {
     /// @brief /get_settings
     static esp_err_t SettingsGET(httpd_req_t* req);
 
-    static esp_err_t SendFile(httpd_req_t* req,
-                              const std::string_view file_name,
-                              const std::string_view content_type);
+    static esp_err_t SendFile(httpd_req_t* req, const std::string_view file_name, const std::string_view content_type);
 
-    static esp_err_t SendString(httpd_req_t* req,
-                                const std::string_view string,
-                                const std::string_view content_type);
+    static esp_err_t SendString(httpd_req_t* req, const std::string_view string, const std::string_view content_type);
 
-   private:
+  private:
     Schedule& mSchedule;
     settings::Settings& mSettings;
 
@@ -65,4 +67,4 @@ class HttpController {
     bool mIsStarted = false;
 };
 
-}  // namespace srvr
+} // namespace srvr

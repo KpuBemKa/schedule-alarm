@@ -25,14 +25,14 @@ class Settings {
     esp_err_t Save();
 
     settings::Changable GetSettings() const;
-    esp_err_t UpdateSettings(const settings::Changable& new_settings);
+    esp_err_t UpdateSettings(const settings::Changable& new_settings, bool surpress_updates = false);
 
     void AddSettingsObserver(ISettingsObserver* observer) {
         mSettingsObservers.push_back(observer);
     }
 
     std::string ToJson();
-    esp_err_t FromJson(const std::string_view raw_json);
+    esp_err_t FromJson(const std::string_view raw_json, bool surpress_updates = false);
 
    private:
     esp_err_t Save(const Changable& new_settings);

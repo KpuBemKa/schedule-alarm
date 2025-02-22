@@ -25,10 +25,8 @@ namespace wifi {
 constexpr uint8_t DHCPS_OFFER_DNS = 0x02;
 
 esp_err_t
-WifiController::Start()
+WifiController::Init()
 {
-    LOG_I("Starting Wi-Fi in AP&STA mode...");
-
     // Start the netif
     esp_err_t result = esp_netif_init();
     if (result != ESP_OK) {
@@ -38,7 +36,7 @@ WifiController::Start()
 
     // Create the event loop
     result = esp_event_loop_create_default();
-    if (result != ESP_OK) {
+    if (result != ESP_OK && result != ESP_ERR_INVALID_STATE) {
         LOG_E("%s:%d | Error creating event loop : %s", __FILE__, __LINE__, esp_err_to_name(result));
         return result;
     }
@@ -54,9 +52,17 @@ WifiController::Start()
         return result;
     }
 
+    return result;
+}
+
+esp_err_t
+WifiController::Start()
+{
+    LOG_I("Starting Wi-Fi...");
+
     // Initialize the Wi-Fi
     const wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    result = esp_wifi_init(&cfg);
+    esp_err_t result = esp_wifi_init(&cfg);
     if (result != ESP_OK) {
         LOG_E("%s:%d | Error initializing Wi-Fi : %s", __FILE__, __LINE__, esp_err_to_name(result));
         return result;
@@ -66,7 +72,6 @@ WifiController::Start()
     result = esp_wifi_set_mode(WIFI_MODE_APSTA);
     if (result != ESP_OK) {
         LOG_E("%s:%d | Error setting Wi-Fi in AP mode: %s", __FILE__, __LINE__, esp_err_to_name(result));
-        return result;
     }
 
     result = ConfigAP();
@@ -90,7 +95,8 @@ WifiController::Start()
     }
 
     if (should_sta_be_configured) {
-        while (!mIsConnected && xTaskGetTickCount() <= pdMS_TO_TICKS(30'000)) {
+        const TickType_t wait_end = xTaskGetTickCount() + pdMS_TO_TICKS(30'000);
+        while (!mIsConnected && xTaskGetTickCount() <= wait_end) {
             vTaskDelay(pdMS_TO_TICKS(1'000));
         }
 
@@ -135,31 +141,20 @@ WifiController::Stop()
         return result;
     }
 
-    result = esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, mEventHandlerWifi);
-    result |= esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, mEventHandlerIP);
+    result = esp_wifi_deinit();
     if (result != ESP_OK) {
-        LOG_E(
-          "%s:%d | Error unregistering one the Wi-Fi event handlers: %s", __FILE__, __LINE__, esp_err_to_name(result));
-        return result;
+        LOG_E("%s:%d | Error deiniting Wi-Fi: %s", __FILE__, __LINE__, esp_err_to_name(result));
     }
-
-    esp_netif_destroy(mApNetif);
-    esp_netif_destroy(mStaNetif);
-
-    result = esp_netif_deinit();
-    if (result != ESP_OK) {
-        LOG_E("%s:%d | Error de-initializing netif: %s", __FILE__, __LINE__, esp_err_to_name(result));
-        return result;
-    }
-
-    mIsStarted = false;
-
-    return ESP_OK;
+    return result;
 }
 
 int
 WifiController::GetConnectionsCount()
 {
+    if (!mIsStarted || !mIsConnected) {
+        return 0;
+    }
+
     wifi_sta_list_t sta_list;
     const esp_err_t esp_result = esp_wifi_ap_get_sta_list(&sta_list);
 
@@ -200,7 +195,8 @@ esp_err_t
 WifiController::ConfigAP()
 {
     // Create the netif
-    mApNetif = esp_netif_create_default_wifi_ap();
+    if (mApNetif == nullptr)
+        mApNetif = esp_netif_create_default_wifi_ap();
 
     const auto settings = mSettings.GetSettings();
 
@@ -244,7 +240,8 @@ WifiController::ConfigSTA()
 {
     const auto settings = mSettings.GetSettings();
 
-    mStaNetif = esp_netif_create_default_wifi_sta();
+    if (mStaNetif == nullptr)
+        mStaNetif = esp_netif_create_default_wifi_sta();
 
     wifi_config_t wifi_sta_config = {
         .sta =
@@ -308,6 +305,16 @@ WifiController::ConfigDnsAP()
 void
 WifiController::SettingsChangedUpdate()
 {
+    esp_err_t result = Stop();
+    if (result != ESP_OK) {
+        LOG_E("%s:%d | Error stopping Wi-Fi: %s", __FILE__, __LINE__, esp_err_to_name(result));
+        return;
+    }
+
+    result = Start();
+    if (result != ESP_OK) {
+        LOG_E("%s:%d | Error restarting Wi-Fi: %s", __FILE__, __LINE__, esp_err_to_name(result));
+    }
 }
 
 } // namespace wifi

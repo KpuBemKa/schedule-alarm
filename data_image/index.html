@@ -21,39 +21,77 @@
             padding: 5px;
         }
 
-        button {
-            margin-top: 10px;
+        #scheduleTable {
+            margin: 2rem 0 1rem 0;
+        }
+
+        .form-select {
+            padding: 0.25rem 1rem 0.25rem 1rem;
+            font-size: 1rem;
+        }
+
+        .form-time {
+            padding: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .base-button {
+            padding: 0.5rem 1rem 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .schedule-button {
+            padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+            font-size: 1rem;
+            margin-right: 1rem;
+        }
+
+        .delete-button {
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 1rem;
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
     <h2>Alarm Schedule</h2>
+    <div class="button-container">
+        <button onclick="location.href='settings.html'" class="base-button">Go to Settings</button>
+    </div>
     <form id="alarmForm">
         <table id="scheduleTable">
             <tbody>
             </tbody>
         </table>
-        <button type="button" onclick="addRow()">Add Row</button>
-        <button type="button" onclick="submitForm()">Submit</button>
-        <button type="button" onclick="fetchSchedule()">Load Schedule</button>
+        <button type="button" onclick="addRow()" class="schedule-button">Add Row</button>
+        <button type="button" onclick="submitForm()" class="schedule-button">Submit</button>
+        <button type="button" onclick="fetchSchedule()" class="schedule-button">Load Schedule</button>
     </form>
-    <button onclick="location.href='settings.html'">Go to Settings</button>
 
     <script>
         function addRow(time = "", type = "single") {
             const table = document.getElementById("scheduleTable").getElementsByTagName("tbody")[0];
             const newRow = table.insertRow();
             newRow.innerHTML = `
-                <td><input type="time" name="time[]" value="${time}" required></td>
+                <td><input type="time" name="time[]" value="${time}" required class="form-time"></td>
                 <td>
-                    <select name="type[]" required>
+                    <select name="type[]" required class="form-select">
                         <option value="single" ${type == 1 ? "selected" : ""}>Single</option>
                         <option value="double" ${type == 2 ? "selected" : ""}>Double</option>
                         <option value="triple" ${type == 3 ? "selected" : ""}>Triple</option>
                     </select>
                 </td>
-                <td><button type="button" onclick="deleteRow(this)">Delete</button></td>
+                <td><button type="button" onclick="deleteRow(this)" class="delete-button">x</button></td>
             `;
         }
 

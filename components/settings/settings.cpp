@@ -50,7 +50,7 @@ Settings::Load()
         return UpdateSettings(kDefaultSettings);
     }
 
-    return FromJson(std::string_view(file_buf.data(), read_count));
+    return FromJson(std::string_view(file_buf.data(), read_count), /* surpress_updates = */ true);
 }
 
 esp_err_t
@@ -70,9 +70,12 @@ Settings::GetSettings() const
 }
 
 esp_err_t
-Settings::UpdateSettings(const settings::Changable& new_settings)
+Settings::UpdateSettings(const settings::Changable& new_settings, bool surpress_updates)
 {
     SetSettings(new_settings);
+
+    if (surpress_updates)
+        return ESP_OK;
 
     esp_err_t esp_result = Save(new_settings);
     if (esp_result != ESP_OK) {
@@ -131,7 +134,7 @@ Settings::ToJson()
 }
 
 esp_err_t
-Settings::FromJson(const std::string_view raw_json)
+Settings::FromJson(const std::string_view raw_json, bool surpress_updates)
 {
     const char* parse_error_ptr = nullptr;
     cJSON* root_json = cJSON_ParseWithLengthOpts(raw_json.data(), raw_json.length(), &parse_error_ptr, false);
@@ -181,7 +184,7 @@ Settings::FromJson(const std::string_view raw_json)
 
     cJSON_Delete(root_json);
 
-    return UpdateSettings(new_settings);
+    return UpdateSettings(new_settings, surpress_updates);
 }
 
 esp_err_t

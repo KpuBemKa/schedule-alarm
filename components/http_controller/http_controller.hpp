@@ -42,12 +42,12 @@ class HttpController
     /// @brief Handle to fetch the settings page
     static esp_err_t SettingsPageHandlerGET(httpd_req_t* req);
 
-    /// @brief /post_schedule
+    /// @brief /update_schedule
     static esp_err_t SchedulePOST(httpd_req_t* req);
     /// @brief /get_schedule
     static esp_err_t ScheduleGET(httpd_req_t* req);
 
-    /// @brief /post_settings
+    /// @brief /update_settings
     static esp_err_t SettingsPOST(httpd_req_t* req);
     /// @brief /get_settings
     static esp_err_t SettingsGET(httpd_req_t* req);

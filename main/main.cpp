@@ -43,33 +43,38 @@ SleepController s_sleep_controller(s_wifi_controller, s_http_controller, s_sched
 TaskHandle_t s_schedule_task_handle;
 TaskHandle_t s_server_task_handle;
 
-esp_err_t MountSpiffsStorage(const char* base_path);
+esp_err_t
+MountSpiffsStorage(const char* base_path);
 
-void ScheduleTask(void* args);
-void HttpServerTask(void* args);
+void
+ScheduleTask(void* args);
+void
+HttpServerTask(void* args);
 
-void RingAlarm(const AlarmType alarm_type);
+void
+RingAlarm(const AlarmType alarm_type);
 
-extern "C" void app_main(void) {
-    vTaskDelay(pdMS_TO_TICKS(1'000));
+extern "C" void
+app_main(void)
+{
+    // vTaskDelay(pdMS_TO_TICKS(1'000));
     ESP_ERROR_CHECK(nvs_flash_init());
 
     /* Initialize file storage */
     ESP_ERROR_CHECK(MountSpiffsStorage(SPIFFS_BASE_PATH.data()));
 
+    s_wifi_controller.Init();
+
     s_schedule.Load();
     s_settings.Load();
     s_sleep_controller.SetSleepTimeout(pdMS_TO_TICKS(60'000));
 
-    for (const char c : s_settings.GetSettings().wifi_password) {
-        printf("%02X ", c);
-    }
-    printf("\n");
+    ESP_ERROR_CHECK(s_wifi_controller.Start());
+    ESP_ERROR_CHECK(s_http_controller.StartServer());
 
     // xTaskCreate(ScheduleTask, "SCHEDULE", 8192, nullptr, 8,
     //             &s_schedule_task_handle);
-    xTaskCreatePinnedToCore(HttpServerTask, "SERVER", 16384, nullptr, 8, &s_schedule_task_handle,
-                            0);
+    xTaskCreatePinnedToCore(HttpServerTask, "SERVER", 16384, nullptr, 8, &s_schedule_task_handle, 0);
     // xTaskCreate(HttpServerTask, "SERVER", 16384, nullptr, 8, &s_schedule_task_handle);
 
     // while (true) {
@@ -77,7 +82,9 @@ extern "C" void app_main(void) {
     // }
 }
 
-void ScheduleTask(void* args) {
+void
+ScheduleTask(void* args)
+{
     while (true) {
         const auto schedule_point = s_schedule.GetSchedulePoint();
         if (s_schedule.GetSystemMinute() != schedule_point.day_minute)
@@ -91,17 +98,19 @@ void ScheduleTask(void* args) {
     }
 }
 
-void HttpServerTask(void* args) {
+void
+HttpServerTask(void* args)
+{
     while (true) {
         // if (!s_button_pressed_flag)
         //     continue;
 
         s_button_pressed_flag = false;
 
-        if (!s_wifi_controller.IsStarted()) {
-            ESP_ERROR_CHECK(s_wifi_controller.Start());
-            ESP_ERROR_CHECK(s_http_controller.StartServer());
-        }
+        // if (!s_wifi_controller.IsStarted()) {
+        //     ESP_ERROR_CHECK(s_wifi_controller.Start());
+        //     ESP_ERROR_CHECK(s_http_controller.StartServer());
+        // }
 
         while (s_wifi_controller.GetConnectionsCount() > 0) {
             s_sleep_controller.ResetSleepTimeout();
@@ -112,14 +121,16 @@ void HttpServerTask(void* args) {
     }
 }
 
-esp_err_t MountSpiffsStorage(const char* base_path) {
+esp_err_t
+MountSpiffsStorage(const char* base_path)
+{
     ESP_LOGI(TAG, "Initializing SPIFFS");
 
-    esp_vfs_spiffs_conf_t conf = {.base_path = base_path,
-                                  .partition_label = NULL,
-                                  .max_files = 5,  // This sets the maximum number of files
+    esp_vfs_spiffs_conf_t conf = { .base_path = base_path,
+                                   .partition_label = NULL,
+                                   .max_files = 5, // This sets the maximum number of files
                                                    // that can be open at the same time
-                                  .format_if_mount_failed = true};
+                                   .format_if_mount_failed = true };
 
     esp_err_t ret = esp_vfs_spiffs_register(&conf);
     if (ret != ESP_OK) {
@@ -144,7 +155,9 @@ esp_err_t MountSpiffsStorage(const char* base_path) {
     return ESP_OK;
 }
 
-void RingAlarm(const AlarmType alarm_type) {
+void
+RingAlarm(const AlarmType alarm_type)
+{
     LOG_I("Ringing the alarm...");
     std::size_t cycles = static_cast<uint16_t>(alarm_type);
 

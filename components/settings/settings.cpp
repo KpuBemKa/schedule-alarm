@@ -20,7 +20,8 @@ namespace settings {
 const Changable kDefaultSettings{ .wifi_ssid = "School Alarm",
                                   .wifi_password = "",
                                   .remote_wifi_ssid = "",
-                                  .remote_wifi_password = "" };
+                                  .remote_wifi_password = "",
+                                  .timezone = "UTC0" };
 
 esp_err_t
 Settings::Load()
@@ -130,6 +131,13 @@ Settings::ToJson()
         return "";
     }
 
+    cJSON* timezone = cJSON_AddStringToObject(root, "timezone", settings_copy.timezone.c_str());
+    if (timezone == nullptr) {
+        LOG_E("%s:%d | Error creating a JSON.", __FILE__, __LINE__);
+        cJSON_Delete(root);
+        return "";
+    }
+
     return std::string(cJSON_Print(root));
 }
 
@@ -181,6 +189,14 @@ Settings::FromJson(const std::string_view raw_json, bool surpress_updates)
         return exp_result.error();
     }
     new_settings.remote_wifi_password = exp_result.value();
+
+    exp_result = util::ExtractStringFromJSON(root_json, "timezone");
+    if (!exp_result.has_value()) {
+        LOG_E("%s:%d | Error parsing JSON: %s", __FILE__, __LINE__, esp_err_to_name(exp_result.error()));
+        cJSON_Delete(root_json);
+        return exp_result.error();
+    }
+    new_settings.timezone = exp_result.value();
 
     cJSON_Delete(root_json);
 

@@ -1,4 +1,5 @@
-#include <string.h>
+#include <cstring>
+#include <ctime>
 
 #include "esp_err.h"
 #include "esp_event.h"
@@ -24,6 +25,7 @@
 #include "schedule.hpp"
 #include "settings.hpp"
 #include "sleep.hpp"
+#include "sntp.hpp"
 #include "wifi_controller.hpp"
 
 static const char TAG[] = "MAIN";
@@ -39,9 +41,12 @@ Schedule s_schedule;
 wifi::WifiController s_wifi_controller(s_settings);
 srvr::HttpController s_http_controller(s_schedule, s_settings);
 SleepController s_sleep_controller(s_wifi_controller, s_http_controller, s_schedule);
+wifi::SNTP s_sntp(s_settings);
 
 TaskHandle_t s_schedule_task_handle;
 TaskHandle_t s_server_task_handle;
+TaskHandle_t s_sleep_task_handle;
+TaskHandle_t s_sntp_task_handle;
 
 esp_err_t
 MountSpiffsStorage(const char* base_path);
@@ -50,51 +55,80 @@ void
 ScheduleTask(void* args);
 void
 HttpServerTask(void* args);
+void
+SntpTask(void* args);
 
 void
 RingAlarm(const AlarmType alarm_type);
 
+extern long timezone;
+
 extern "C" void
 app_main(void)
 {
+    // Configure GPIO pins
+    esp_err_t esp_result = gpio_set_direction(pins::BUTTON, gpio_mode_t::GPIO_MODE_INPUT);
+    esp_result |= gpio_set_pull_mode(pins::BUTTON, gpio_pull_mode_t::GPIO_PULLUP_ONLY);
+    if (esp_result != ESP_OK) {
+        LOG_E("Failed to configure the button pin: %s", esp_err_to_name(esp_result));
+    }
+
     // vTaskDelay(pdMS_TO_TICKS(1'000));
     ESP_ERROR_CHECK(nvs_flash_init());
 
     /* Initialize file storage */
     ESP_ERROR_CHECK(MountSpiffsStorage(SPIFFS_BASE_PATH.data()));
 
-    s_wifi_controller.Init();
+    ESP_ERROR_CHECK(s_wifi_controller.Init());
 
     s_schedule.Load();
     s_settings.Load();
     s_sleep_controller.SetSleepTimeout(pdMS_TO_TICKS(60'000));
+    s_sntp.SetTimezone(s_settings.GetSettings().timezone);
 
     ESP_ERROR_CHECK(s_wifi_controller.Start());
     ESP_ERROR_CHECK(s_http_controller.StartServer());
+    if (s_wifi_controller.IsConnected()) {
+        s_sntp.Init(20'000);
+    }
 
-    // xTaskCreate(ScheduleTask, "SCHEDULE", 8192, nullptr, 8,
-    //             &s_schedule_task_handle);
-    xTaskCreatePinnedToCore(HttpServerTask, "SERVER", 16384, nullptr, 8, &s_schedule_task_handle, 0);
-    // xTaskCreate(HttpServerTask, "SERVER", 16384, nullptr, 8, &s_schedule_task_handle);
+    xTaskCreate(ScheduleTask, "SCHEDULE", 8192, nullptr, 8, &s_schedule_task_handle);
+    xTaskCreate(HttpServerTask, "SERVER", 16384, nullptr, 8, &s_schedule_task_handle);
+    xTaskCreate(s_sleep_controller.TaskRunner, "SLEEP", 8192, &s_sleep_controller, 8, &s_sleep_task_handle);
+    xTaskCreate(SntpTask, "SNTP", 8192, nullptr, 8, &s_sntp_task_handle);
 
-    // while (true) {
-    //     vTaskDelay(pdMS_TO_TICKS(10'000));
-    // }
+    while (true) {
+        if (gpio_get_level(pins::BUTTON) == 0) {
+            s_button_pressed_flag = true;
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
 }
 
 void
 ScheduleTask(void* args)
 {
     while (true) {
+        vTaskDelay(pdMS_TO_TICKS(500));
+
+        if (s_schedule.IsEmpty())
+            continue;
+
         const auto schedule_point = s_schedule.GetSchedulePoint();
         if (s_schedule.GetSystemMinute() != schedule_point.day_minute)
             continue;
 
         s_sleep_controller.ResetSleepTimeout();
         RingAlarm(schedule_point.alarm_type);
-        s_schedule.AdvanceSchedule();
 
-        vTaskDelay(pdMS_TO_TICKS(500));
+        if (s_schedule.GetPointsCount() == 1) {
+            // LOG_I("Sleeping for a minute...");
+            vTaskDelay(pdMS_TO_TICKS(60 * 1'000));
+            // LOG_I("Woken");
+        }
+
+        s_schedule.AdvanceSchedule();
     }
 }
 
@@ -102,22 +136,67 @@ void
 HttpServerTask(void* args)
 {
     while (true) {
-        // if (!s_button_pressed_flag)
-        //     continue;
+        vTaskDelay(pdMS_TO_TICKS(1'000));
 
-        s_button_pressed_flag = false;
-
-        // if (!s_wifi_controller.IsStarted()) {
-        //     ESP_ERROR_CHECK(s_wifi_controller.Start());
-        //     ESP_ERROR_CHECK(s_http_controller.StartServer());
-        // }
-
-        while (s_wifi_controller.GetConnectionsCount() > 0) {
+        if (s_wifi_controller.GetConnectionsCount() > 0) {
+            // LOG_I("Resetting...");
             s_sleep_controller.ResetSleepTimeout();
-            vTaskDelay(pdMS_TO_TICKS(1'000));
         }
 
-        vTaskDelay(pdMS_TO_TICKS(1'000));
+        if (!s_button_pressed_flag)
+            continue;
+
+        LOG_I("Button was pressed. Starting the server...");
+        s_button_pressed_flag = false;
+
+        if (!s_wifi_controller.IsStarted()) {
+            ESP_ERROR_CHECK(s_wifi_controller.Start());
+            ESP_ERROR_CHECK(s_http_controller.StartServer());
+        }
+    }
+}
+
+void
+SntpTask(void* args)
+{
+    constexpr TickType_t kSyncInterval = pdMS_TO_TICKS(24 * 60 * 60 * 1'000);
+    static TickType_t next_time_sync = xTaskGetTickCount() + kSyncInterval;
+
+    while (true) {
+        vTaskDelay(pdMS_TO_TICKS(10'000));
+
+        if (xTaskGetTickCount() < next_time_sync)
+            continue;
+
+        // check if wi-fi is connected
+        if (!s_wifi_controller.IsConnected()) {
+            // try to start it
+            const esp_err_t result = s_wifi_controller.Start();
+
+            // if it has been started, but still not connected, it does not have anything to connect to
+            if (result == ESP_OK && !s_wifi_controller.IsConnected()) {
+                LOG_W("%s:%d | Wi-Fi is not supposed to be connected. Skipping SNTP sync...", __FILE__, __LINE__);
+                next_time_sync = xTaskGetTickCount() + pdMS_TO_TICKS(60 * 60 * 1'000);
+                continue;
+            }
+
+            // if it has failed, however, schedule the next sync in an hour
+            if (result != ESP_OK) {
+                LOG_W("%s:%d | Failed to start Wi-Fi to start the system time synchronization: %s",
+                      __FILE__,
+                      __LINE__,
+                      esp_err_to_name(result));
+                next_time_sync = xTaskGetTickCount() + pdMS_TO_TICKS(60 * 60 * 1'000);
+                continue;
+            }
+        }
+
+        const esp_err_t result = s_sntp.Resync();
+        next_time_sync = xTaskGetTickCount() + kSyncInterval;
+
+        if (result != ESP_OK) {
+            LOG_E("System time syncronization failed.");
+        }
     }
 }
 

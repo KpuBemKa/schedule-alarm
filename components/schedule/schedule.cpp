@@ -99,6 +99,8 @@ SchedulePoint Schedule::GetSchedulePoint() {
         return SchedulePoint{.day_minute = 0, .alarm_type = AlarmType::None};
     }
 
+    // LOG_I("Index: %d", mScheduleIndex);
+
     auto schedule_point = mSchedule.at(mScheduleIndex);
 
     xSemaphoreGive(xScheduleMutex);

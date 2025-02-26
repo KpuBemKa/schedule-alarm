@@ -52,6 +52,11 @@ class HttpController
     /// @brief /get_settings
     static esp_err_t SettingsGET(httpd_req_t* req);
 
+    /// @brief /get_time
+    static esp_err_t SystemTimeGET(httpd_req_t* req);
+    /// @brief /sync_time
+    static esp_err_t SyncTimePOST(httpd_req_t* req);
+
     static esp_err_t SendFile(httpd_req_t* req, const std::string_view file_name, const std::string_view content_type);
 
     static esp_err_t SendString(httpd_req_t* req, const std::string_view string, const std::string_view content_type);

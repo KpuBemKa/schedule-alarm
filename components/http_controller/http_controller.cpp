@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 #include <string>
 
 #include "esp_check.h"
@@ -28,32 +29,6 @@ const char TAG[] = "HTTP_SERVER";
 
 namespace srvr {
 
-constexpr httpd_config_t DEFAULT_HTTP_CONFIG = { .task_priority = tskIDLE_PRIORITY + 5,
-                                                 .stack_size = 4096,
-                                                 .core_id = tskNO_AFFINITY,
-                                                 .server_port = 80,
-                                                 .ctrl_port = ESP_HTTPD_DEF_CTRL_PORT,
-                                                 .max_open_sockets = 7,
-                                                 .max_uri_handlers = 8,
-                                                 .max_resp_headers = 8,
-                                                 .backlog_conn = 5,
-                                                 .lru_purge_enable = true,
-                                                 .recv_wait_timeout = 5,
-                                                 .send_wait_timeout = 5,
-                                                 .global_user_ctx = NULL,
-                                                 .global_user_ctx_free_fn = NULL,
-                                                 .global_transport_ctx = NULL,
-                                                 .global_transport_ctx_free_fn = NULL,
-                                                 .enable_so_linger = false,
-                                                 .linger_timeout = 0,
-                                                 .keep_alive_enable = false,
-                                                 .keep_alive_idle = 0,
-                                                 .keep_alive_interval = 0,
-                                                 .keep_alive_count = 0,
-                                                 .open_fn = NULL,
-                                                 .close_fn = NULL,
-                                                 .uri_match_fn = NULL };
-
 esp_err_t
 HttpController::StartServer()
 {
@@ -70,6 +45,9 @@ HttpController::StartServer()
                                                         .method = HTTP_GET,
                                                         .handler = HttpController::SettingsPageHandlerGET,
                                                         .user_ctx = nullptr };
+    constexpr httpd_uri_t uri_handler_get_time = {
+        .uri = "/get_time", .method = HTTP_GET, .handler = HttpController::SystemTimeGET, .user_ctx = nullptr
+    };
     httpd_uri_t uri_handler_get_schedule = {
         .uri = "/get_schedule", .method = HTTP_GET, .handler = HttpController::ScheduleGET, .user_ctx = this
     };
@@ -84,9 +62,11 @@ HttpController::StartServer()
     };
 
     // Start the httpd server
-    LOG_I("Starting server on port %d...", DEFAULT_HTTP_CONFIG.server_port);
-    // esp_err_t esp_result = httpd_start(&mServerHandle, &DEFAULT_HTTP_CONFIG);
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    config.max_uri_handlers = 12;
+    config.stack_size = 8192;
+
+    LOG_I("Starting server on port %d...", config.server_port);
     esp_err_t esp_result = httpd_start(&mServerHandle, &config);
     if (esp_result != ESP_OK) {
         LOG_E("%s:%d | Could not start the HTTP server: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
@@ -178,6 +158,15 @@ HttpController::StartServer()
               esp_err_to_name(esp_result));
         full_success = false;
     }
+    esp_result = httpd_register_uri_handler(mServerHandle, &uri_handler_get_time);
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Handler for '%s' could not be registered: %s",
+              __FILE__,
+              __LINE__,
+              uri_handler_get_time.uri,
+              esp_err_to_name(esp_result));
+        full_success = false;
+    }
 
     LOG_I("URI handlers have been registered.");
 
@@ -187,6 +176,10 @@ HttpController::StartServer()
 esp_err_t
 HttpController::StopServer()
 {
+    if (!mIsStarted) {
+        return ESP_ERR_INVALID_STATE;
+    }
+
     const esp_err_t esp_error = httpd_stop(mServerHandle);
 
     if (esp_error != ESP_OK) {
@@ -380,6 +373,27 @@ HttpController::SettingsGET(httpd_req_t* req)
     }
 
     return esp_result;
+}
+
+esp_err_t
+HttpController::SystemTimeGET(httpd_req_t* req)
+{
+    const std::time_t now = std::time(nullptr);
+    struct tm local_time;
+    localtime_r(&now, &local_time);
+
+    char string_buffer[32];
+    strftime(string_buffer, sizeof(string_buffer), "%Y-%m-%dT%H:%M:%S", &local_time);
+
+    return SendString(req, string_buffer, "text/plain");
+
+    // return ESP_OK;
+}
+
+esp_err_t
+HttpController::SyncTimePOST(httpd_req_t* req)
+{
+    return ESP_OK;
 }
 
 esp_err_t

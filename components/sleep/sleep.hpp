@@ -16,16 +16,24 @@ class SleepController
     {
     }
 
-    void SetSleepTimeout(const TickType_t timeout_ticks) { m_timeout_ticks = timeout_ticks; }
+    void SetSleepTimeout(const TickType_t timeout_ticks)
+    {
+        m_timeout_ticks = timeout_ticks;
+        ResetSleepTimeout();
+    }
+
     void ResetSleepTimeout() { m_sleep_stamp = xTaskGetTickCount() + m_timeout_ticks; }
 
-    void TaskRunner(void* args)
+    static void TaskRunner(void* args)
     {
+        auto self = reinterpret_cast<SleepController*>(args);
         while (true) {
-            if (xTaskGetTickCount() == m_sleep_stamp) {
-                EnterSleep();
+            vTaskDelay(pdMS_TO_TICKS(500));
+            
+            if (xTaskGetTickCount() >= self->m_sleep_stamp) {
+                self->EnterSleep();
 
-                ResetSleepTimeout();
+                self->ResetSleepTimeout();
             }
         }
     }

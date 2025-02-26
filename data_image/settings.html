@@ -67,6 +67,9 @@
         <!-- <input type="password" id="remote_wifi_password" name="remote_wifi_password"> -->
         <input type="text" id="remote_wifi_password" name="remote_wifi_password">
 
+        <label for="timezone">Timezone format:</label>
+        <input type="text" id="timezone" name="timezone">
+
         <div class="button-container">
             <button type="button" onclick="submitSettings()">Save Settings</button>
         </div>
@@ -83,7 +86,8 @@
                 wifi_ssid: form.wifi_ssid.value,
                 wifi_password: form.wifi_password.value,
                 remote_wifi_ssid: form.remote_wifi_ssid.value,
-                remote_wifi_password: form.remote_wifi_password.value
+                remote_wifi_password: form.remote_wifi_password.value,
+                timezone: form.timezone.value
             };
 
             console.log(JSON.stringify(jsonData, null, 2));
@@ -116,6 +120,7 @@
                     document.getElementById("wifi_password").value = data.wifi_password || "";
                     document.getElementById("remote_wifi_ssid").value = data.remote_wifi_ssid || "";
                     document.getElementById("remote_wifi_password").value = data.remote_wifi_password || "";
+                    document.getElementById("timezone").value = data.timezone || "";
                 })
                 .catch(error => {
                     console.error('Error fetching settings:', error);

@@ -5,6 +5,7 @@
 
 #include "esp_log.h"
 #include "esp_mac.h"
+#include "esp_netif_sntp.h"
 
 #include "config.hpp"
 #include "settings.hpp"
@@ -136,22 +137,27 @@ esp_err_t
 WifiController::Stop()
 {
     esp_err_t result = esp_wifi_stop();
-    if (result != ESP_OK) {
+    if (result != ESP_OK && result != ESP_ERR_WIFI_NOT_INIT) {
         LOG_E("%s:%d | Error stopping Wi-Fi: %s", __FILE__, __LINE__, esp_err_to_name(result));
         return result;
     }
 
     result = esp_wifi_deinit();
-    if (result != ESP_OK) {
+    if (result != ESP_OK && result != ESP_ERR_WIFI_NOT_INIT) {
         LOG_E("%s:%d | Error deiniting Wi-Fi: %s", __FILE__, __LINE__, esp_err_to_name(result));
+        return result;
     }
-    return result;
+
+    mIsStarted = false;
+    mIsConnected = false;
+
+    return ESP_OK;
 }
 
 int
 WifiController::GetConnectionsCount()
 {
-    if (!mIsStarted || !mIsConnected) {
+    if (!mIsStarted) {
         return 0;
     }
 

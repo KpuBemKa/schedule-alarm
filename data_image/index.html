@@ -35,13 +35,6 @@
             font-size: 1rem;
         }
 
-        .button-container {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
         .base-button {
             padding: 0.5rem 1rem 0.5rem 1rem;
             font-size: 1rem;
@@ -60,14 +53,31 @@
             font-size: 1rem;
             font-weight: bold;
         }
+
+        .top {
+            display: flex;
+        }
+
+        .left {
+            display: flex;
+            flex-wrap: wrap;
+            align-content: center;
+            margin-right: auto;
+        }
     </style>
 </head>
 
 <body>
     <h2>Alarm Schedule</h2>
-    <div class="button-container">
-        <button onclick="location.href='settings.html'" class="base-button">Go to Settings</button>
+    <div class="top">
+        <div class="left">
+            <span id="timeDisplay" style="font-weight: bold;">Loading...</span>
+        </div>
+        <div>
+            <button onclick="location.href='settings.html'" class="base-button">Go to Settings</button>
+        </div>
     </div>
+
     <form id="alarmForm">
         <table id="scheduleTable">
             <tbody>
@@ -146,6 +156,21 @@
                 .catch(error => console.error('Error fetching schedule:', error));
         }
 
+        function updateTime() {
+            fetch('/get_time')
+                .then(response => response.text())
+                .then(timeString => {
+                    const date = new Date(timeString);
+                    const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    document.getElementById("timeDisplay").textContent = "System Time: " + formattedTime;
+                })
+                .catch(error => {
+                    console.error("Error fetching time:", error);
+                    document.getElementById("timeDisplay").textContent = "Error loading time";
+                });
+        }
+
+        document.addEventListener("DOMContentLoaded", updateTime);
         document.addEventListener("DOMContentLoaded", fetchSchedule);
     </script>
 </body>

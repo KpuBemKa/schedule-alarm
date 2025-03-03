@@ -12,33 +12,35 @@
 
 namespace settings {
 
-class ISettingsObserver {
-   public:
+class ISettingsObserver
+{
+  public:
     virtual void SettingsChangedUpdate() = 0;
 };
 
-class Settings {
-   public:
+class Settings
+{
+  public:
     Settings() { xSettingsSpinlock = portMUX_INITIALIZER_UNLOCKED; }
 
     esp_err_t Load();
     esp_err_t Save();
+    esp_err_t Reset();
 
     settings::Changable GetSettings() const;
     esp_err_t UpdateSettings(const settings::Changable& new_settings, bool surpress_updates = false);
 
-    void AddSettingsObserver(ISettingsObserver* observer) {
-        mSettingsObservers.push_back(observer);
-    }
+    void AddSettingsObserver(ISettingsObserver* observer) { mSettingsObservers.push_back(observer); }
 
     std::string ToJson();
     esp_err_t FromJson(const std::string_view raw_json, bool surpress_updates = false);
 
-   private:
+  private:
     esp_err_t Save(const Changable& new_settings);
     void SetSettings(const Changable& new_settings);
 
-    void NotifySettingsChanged() {
+    void NotifySettingsChanged()
+    {
         for (auto observer : mSettingsObservers) {
             observer->SettingsChangedUpdate();
         }
@@ -46,7 +48,7 @@ class Settings {
 
     // esp_err_t ExtractStringFromJson(cJSON*)
 
-   private:
+  private:
     static constexpr const std::string_view SCHEDULE_FILE = "settings.json";
 
     mutable portMUX_TYPE xSettingsSpinlock;
@@ -55,4 +57,4 @@ class Settings {
     std::list<ISettingsObserver*> mSettingsObservers;
 };
 
-}  // namespace settings
+} // namespace settings

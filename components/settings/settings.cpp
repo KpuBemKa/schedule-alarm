@@ -26,7 +26,7 @@ const Changable kDefaultSettings{ .wifi_ssid = "School Alarm",
 esp_err_t
 Settings::Load()
 {
-    std::string file_path(SPIFFS_BASE_PATH);
+    std::string file_path(config::SPIFFS_BASE_PATH);
     file_path.append("/").append(SCHEDULE_FILE);
 
     FILE* file_ptr = fopen(file_path.c_str(), "r");
@@ -58,6 +58,12 @@ esp_err_t
 Settings::Save()
 {
     return Save(GetSettings());
+}
+
+esp_err_t
+Settings::Reset()
+{
+    return UpdateSettings(kDefaultSettings);
 }
 
 settings::Changable
@@ -206,7 +212,7 @@ Settings::FromJson(const std::string_view raw_json, bool surpress_updates)
 esp_err_t
 Settings::Save(const Changable& new_settings)
 {
-    std::string file_path(SPIFFS_BASE_PATH);
+    std::string file_path(config::SPIFFS_BASE_PATH);
     file_path.append("/").append(SCHEDULE_FILE);
 
     FILE* file_ptr = fopen(file_path.c_str(), "w");

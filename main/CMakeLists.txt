@@ -7,6 +7,7 @@ idf_component_register(SRCS "main.cpp"
                                   spiffs
                                   fatfs
                                   esp_driver_gpio
+                                  esp_driver_gptimer
                                   
                                   http_controller
                                   wifi_controller

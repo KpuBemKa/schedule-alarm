@@ -16,7 +16,7 @@ const char TAG[] = "SCHEDULE";
 #define LOG_E(...) ESP_LOGE(TAG, __VA_ARGS__)
 
 esp_err_t Schedule::Load() {
-    std::string file_path(SPIFFS_BASE_PATH);
+    std::string file_path(config::SPIFFS_BASE_PATH);
     file_path.append("/").append(SCHEDULE_FILE);
 
     FILE* file_ptr = fopen(file_path.c_str(), "r");
@@ -45,7 +45,7 @@ esp_err_t Schedule::Load() {
 }
 
 esp_err_t Schedule::Save() {
-    std::string file_path(SPIFFS_BASE_PATH);
+    std::string file_path(config::SPIFFS_BASE_PATH);
     file_path.append("/").append(SCHEDULE_FILE);
 
     FILE* file_ptr = fopen(file_path.c_str(), "w");

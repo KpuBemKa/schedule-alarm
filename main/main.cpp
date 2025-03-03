@@ -10,6 +10,7 @@
 #include "esp_wifi.h"
 // #include "file_serving_example_common.h"
 #include "driver/gpio.h"
+#include "driver/gptimer.h"
 #include "esp_spiffs.h"
 #include "esp_vfs_fat.h"
 #include "freertos/FreeRTOS.h"
@@ -35,6 +36,7 @@ static const char TAG[] = "MAIN";
 #define LOG_E(...) ESP_LOGE(TAG, __VA_ARGS__)
 
 bool s_button_pressed_flag = false;
+bool s_settings_reset_flag = false;
 
 settings::Settings s_settings;
 Schedule s_schedule;
@@ -48,6 +50,9 @@ TaskHandle_t s_server_task_handle;
 TaskHandle_t s_sleep_task_handle;
 TaskHandle_t s_sntp_task_handle;
 
+gptimer_handle_t s_settings_reset_timer = nullptr;
+bool s_timer_started = false;
+
 esp_err_t
 MountSpiffsStorage(const char* base_path);
 
@@ -58,10 +63,17 @@ HttpServerTask(void* args);
 void
 SntpTask(void* args);
 
+esp_err_t
+ConfigureTimer();
+esp_err_t
+StartTimer();
+esp_err_t
+StopTimer();
+bool
+TimerFiredCallback(gptimer_handle_t timer, const gptimer_alarm_event_data_t* edata, void* user_ctx);
+
 void
 RingAlarm(const AlarmType alarm_type);
-
-extern long timezone;
 
 extern "C" void
 app_main(void)
@@ -77,7 +89,9 @@ app_main(void)
     ESP_ERROR_CHECK(nvs_flash_init());
 
     /* Initialize file storage */
-    ESP_ERROR_CHECK(MountSpiffsStorage(SPIFFS_BASE_PATH.data()));
+    ESP_ERROR_CHECK(MountSpiffsStorage(config::SPIFFS_BASE_PATH.data()));
+
+    ESP_ERROR_CHECK(ConfigureTimer());
 
     ESP_ERROR_CHECK(s_wifi_controller.Init());
 
@@ -100,6 +114,13 @@ app_main(void)
     while (true) {
         if (gpio_get_level(pins::BUTTON) == 0) {
             s_button_pressed_flag = true;
+            StartTimer();
+        } else {
+            StopTimer();
+        }
+
+        if (s_timer_started) {
+            s_sleep_controller.ResetSleepTimeout();
         }
 
         vTaskDelay(pdMS_TO_TICKS(50));
@@ -139,17 +160,22 @@ HttpServerTask(void* args)
         vTaskDelay(pdMS_TO_TICKS(1'000));
 
         if (s_wifi_controller.GetConnectionsCount() > 0) {
-            // LOG_I("Resetting...");
             s_sleep_controller.ResetSleepTimeout();
+        }
+
+        if (s_settings_reset_flag) {
+            LOG_I("Timer fired.");
+            s_settings_reset_flag = false;
+            ESP_ERROR_CHECK(s_settings.Reset());
         }
 
         if (!s_button_pressed_flag)
             continue;
 
-        LOG_I("Button was pressed. Starting the server...");
         s_button_pressed_flag = false;
 
         if (!s_wifi_controller.IsStarted()) {
+            LOG_I("Button was pressed. Starting the server...");
             ESP_ERROR_CHECK(s_wifi_controller.Start());
             ESP_ERROR_CHECK(s_http_controller.StartServer());
         }
@@ -232,6 +258,104 @@ MountSpiffsStorage(const char* base_path)
 
     ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
     return ESP_OK;
+}
+
+esp_err_t
+ConfigureTimer()
+{
+    // initialize a timer used to disable the interrupts-signaling LED
+    const gptimer_config_t timer_config = { .clk_src = GPTIMER_CLK_SRC_DEFAULT,
+                                            .direction = GPTIMER_COUNT_DOWN, // alarm will fire at 0
+                                            .resolution_hz = 1'000'000,
+                                            .intr_priority = 0,
+                                            .flags{ .intr_shared = false } };
+    esp_err_t esp_result = gptimer_new_timer(&timer_config, &s_settings_reset_timer);
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Error creating timer: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+        return esp_result;
+    }
+
+    // create a callback for this timer
+    const gptimer_event_callbacks_t cbs = {
+        .on_alarm = TimerFiredCallback,
+    };
+    esp_result = gptimer_register_event_callbacks(s_settings_reset_timer, &cbs, nullptr);
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Error registering timer callbacks: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+        return esp_result;
+    }
+
+    // configure alarm counter settings
+    const gptimer_alarm_config_t alarm_config = { .alarm_count = 0, // alarm will fire at 0
+                                                  .reload_count =
+                                                    0, // this doesn't matter if auto_reload_on_alarm is false
+                                                  .flags{ .auto_reload_on_alarm = false } };
+    esp_result = gptimer_set_alarm_action(s_settings_reset_timer, &alarm_config);
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Error registering timer callbacks: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+        return esp_result;
+    }
+
+    esp_result = gptimer_enable(s_settings_reset_timer);
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Error enabling timer: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+        return esp_result;
+    }
+
+    return ESP_OK;
+}
+
+esp_err_t
+StartTimer()
+{
+    if (s_timer_started) {
+        // LOG_W("Timer already started...");
+        return ESP_OK;
+    }
+
+    esp_err_t esp_result = gptimer_set_raw_count(s_settings_reset_timer, config::MS_COUNT_BEFORE_RESET * 1'000);
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Error setting timer count: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+        return esp_result;
+    }
+
+    esp_result = gptimer_start(s_settings_reset_timer);
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Error starting timer: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+        return esp_result;
+    }
+
+    LOG_I("Timer has been started.");
+
+    s_timer_started = true;
+    return ESP_OK;
+}
+
+esp_err_t
+StopTimer()
+{
+    if (!s_timer_started) {
+        // LOG_W("Timer already stopped...");
+        return ESP_OK;
+    }
+
+    esp_err_t esp_result = gptimer_stop(s_settings_reset_timer);
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Error stopping timer: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+        return esp_result;
+    }
+
+    LOG_I("Timer has been stopped.");
+
+    s_timer_started = false;
+    return ESP_OK;
+}
+
+bool
+TimerFiredCallback(gptimer_handle_t timer, const gptimer_alarm_event_data_t* edata, void* user_ctx)
+{
+    s_settings_reset_flag = true;
+    return pdFALSE;
 }
 
 void

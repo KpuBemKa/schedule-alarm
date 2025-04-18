@@ -18,7 +18,7 @@ constexpr std::string_view SPIFFS_BASE_PATH = "/spiffs";
 
 namespace pins {
 
-constexpr gpio_num_t BUTTON = gpio_num_t::GPIO_NUM_10;
-constexpr gpio_num_t RELAY = gpio_num_t::GPIO_NUM_12;
+constexpr gpio_num_t BUTTON = gpio_num_t::GPIO_NUM_3;
+constexpr gpio_num_t RELAY = gpio_num_t::GPIO_NUM_0;
 
 } // namespace pins

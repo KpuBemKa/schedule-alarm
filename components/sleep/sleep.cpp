@@ -87,7 +87,7 @@ SleepController::ConfigureWakeup()
 uint64_t
 SleepController::GetSleepTimeUs()
 {
-    return 30 * 1'000 * 1'000;
+    // return 30 * 1'000 * 1'000;
     // minutes to microseconds conversion factor
     constexpr uint64_t MINUTES_TO_US = 60 * 1'000 * 1'000;
 

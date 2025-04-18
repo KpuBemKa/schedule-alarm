@@ -85,6 +85,12 @@ app_main(void)
         LOG_E("Failed to configure the button pin: %s", esp_err_to_name(esp_result));
     }
 
+    esp_result = gpio_set_direction(pins::RELAY, gpio_mode_t::GPIO_MODE_OUTPUT);
+    if (esp_result != ESP_OK) {
+        LOG_E("Failed to configure the relay pin: %s", esp_err_to_name(esp_result));
+    }
+    gpio_set_level(pins::RELAY, 1);
+
     // vTaskDelay(pdMS_TO_TICKS(1'000));
     ESP_ERROR_CHECK(nvs_flash_init());
 
@@ -365,9 +371,9 @@ RingAlarm(const AlarmType alarm_type)
     std::size_t cycles = static_cast<uint16_t>(alarm_type);
 
     for (std::size_t i = 0; i < cycles; ++i) {
-        gpio_set_level(pins::RELAY, 1);
-        vTaskDelay(pdMS_TO_TICKS(1'000));
         gpio_set_level(pins::RELAY, 0);
+        vTaskDelay(pdMS_TO_TICKS(1'000));
+        gpio_set_level(pins::RELAY, 1);
         vTaskDelay(pdMS_TO_TICKS(1'000));
     }
 }

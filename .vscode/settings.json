@@ -2,9 +2,9 @@
     "C_Cpp.intelliSenseEngine": "default",
     "idf.adapterTargetName": "esp32s3",
     "idf.openOcdConfigs": [
-        "board/esp32c6-ftdi.cfg"
+        "board/esp32c3-ftdi.cfg"
     ],
-    "idf.portWin": "COM3",
+    "idf.portWin": "COM6",
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",
@@ -89,7 +89,7 @@
         "OPENOCD_SCRIPTS": "d:\\dev\\tools\\esp-idf-5.2.1\\tools\\tools\\openocd-esp32\\v0.12.0-esp32-20230921/openocd-esp32/share/openocd/scripts",
         "IDF_CCACHE_ENABLE": "1",
         "ESP_ROM_ELF_DIR": "d:\\dev\\tools\\esp-idf-5.2.1\\tools\\tools\\esp-rom-elfs\\20230320/",
-        "IDF_TARGET": "esp32c6"
+        "IDF_TARGET": "esp32c3"
     },
     "idf.monitorNoReset": true
 }

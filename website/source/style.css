@@ -1,0 +1,138 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 1rem;
+}
+
+@media (min-width: 920px) {
+    body {
+        max-width: 900px;
+        margin: 1rem auto 1rem auto;
+    }
+}
+
+table {
+    width: 100%;
+    max-width: 400px;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 5px;
+}
+
+/* label {
+    display: block;
+    margin-top: 10px;
+} */
+
+input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+}
+
+button {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+hr {
+    margin: 1.5rem 0 1.5rem 0;
+}
+
+#scheduleTable {
+    margin: 2rem 0 1rem 0;
+}
+
+.d-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.d-settings-row {
+    margin-top: 1rem;
+}
+
+.d-schedule-label {
+    font-size: 1.15rem;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.form-select {
+    padding: 0.25rem 1rem 0.25rem 1rem;
+    font-size: 1rem;
+}
+
+.form-time {
+    padding: 0.25rem;
+    font-size: 1rem;
+}
+
+.base-button {
+    padding: 0.5rem 1rem 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.schedule-button {
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+    font-size: 1rem;
+    margin-right: 1rem;
+}
+
+.delete-button {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.top {
+    display: flex;
+    margin: 2rem 0 2rem 0;
+}
+
+.left {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    margin-right: auto;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 2px solid #ccc;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    font-size: 16px;
+    width: 50%;
+}
+
+.tab.active {
+    border-bottom: 2px solid #007bff;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.tab-content {
+    display: none;
+    margin-top: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}

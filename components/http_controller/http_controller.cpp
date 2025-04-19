@@ -194,6 +194,27 @@ HttpController::StopServer()
     return ESP_OK;
 }
 
+int
+HttpController::GetConnectionsCount()
+{
+    if (!mIsStarted) {
+        return 0;
+    }
+
+    std::size_t clients = 32;
+    int client_fds[clients];
+    const esp_err_t esp_result = httpd_get_client_list(mServerHandle, &clients, client_fds);
+
+    if (esp_result != ESP_OK) {
+        LOG_E("%s:%d | Failed to retreive STA connections: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+        return -1;
+    }
+
+    LOG_I("HTTP connections: %u", clients);
+
+    return clients;
+}
+
 esp_err_t
 HttpController::IndexHtmlHandlerGET(httpd_req_t* req)
 {

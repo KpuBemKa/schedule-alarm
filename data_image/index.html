@@ -1,178 +1,542 @@
 <!DOCTYPE html>
 <html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Alarm Schedule
+  </title>
+  <style>
+   body {
+    font-family: Arial, sans-serif;
+    margin: 1rem;
+}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alarm Schedule</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
+@media (min-width: 920px) {
+    body {
+        max-width: 900px;
+        margin: 1rem auto 1rem auto;
+    }
+}
 
-        table {
-            width: 100%;
-            max-width: 400px;
-            border-collapse: collapse;
-        }
+table {
+    width: 100%;
+    max-width: 400px;
+    border-collapse: collapse;
+}
 
-        td {
-            padding: 5px;
-        }
+td {
+    padding: 5px;
+}
 
-        #scheduleTable {
-            margin: 2rem 0 1rem 0;
-        }
+/* label {
+    display: block;
+    margin-top: 10px;
+} */
 
-        .form-select {
-            padding: 0.25rem 1rem 0.25rem 1rem;
-            font-size: 1rem;
-        }
+input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+}
 
-        .form-time {
-            padding: 0.25rem;
-            font-size: 1rem;
-        }
+button {
+    font-size: 1rem;
+    font-weight: bold;
+}
 
-        .base-button {
-            padding: 0.5rem 1rem 0.5rem 1rem;
-            font-size: 1rem;
-            font-weight: bold;
-        }
+hr {
+    margin: 1.5rem 0 1.5rem 0;
+}
 
-        .schedule-button {
-            padding: 0.25rem 0.5rem 0.25rem 0.5rem;
-            font-size: 1rem;
-            margin-right: 1rem;
-        }
+#scheduleTable {
+    margin: 2rem 0 1rem 0;
+}
 
-        .delete-button {
-            width: 2.25rem;
-            height: 2.25rem;
-            font-size: 1rem;
-            font-weight: bold;
-        }
+.d-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-        .top {
-            display: flex;
-        }
+.d-settings-row {
+    margin-top: 1rem;
+}
 
-        .left {
-            display: flex;
-            flex-wrap: wrap;
-            align-content: center;
-            margin-right: auto;
-        }
-    </style>
-</head>
+.d-schedule-label {
+    font-size: 1.15rem;
+}
 
-<body>
-    <h2>Alarm Schedule</h2>
-    <div class="top">
-        <div class="left">
-            <span id="timeDisplay" style="font-weight: bold;">Loading...</span>
-        </div>
-        <div>
-            <button onclick="location.href='settings.html'" class="base-button">Go to Settings</button>
-        </div>
-    </div>
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
 
+.form-select {
+    padding: 0.25rem 1rem 0.25rem 1rem;
+    font-size: 1rem;
+}
+
+.form-time {
+    padding: 0.25rem;
+    font-size: 1rem;
+}
+
+.base-button {
+    padding: 0.5rem 1rem 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.schedule-button {
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+    font-size: 1rem;
+    margin-right: 1rem;
+}
+
+.delete-button {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.top {
+    display: flex;
+    margin: 2rem 0 2rem 0;
+}
+
+.left {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    margin-right: auto;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 2px solid #ccc;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    font-size: 16px;
+    width: 50%;
+}
+
+.tab.active {
+    border-bottom: 2px solid #007bff;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.tab-content {
+    display: none;
+    margin-top: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+  </style>
+  <style>
+   .c-calendar-container {
+    margin: 1rem 0 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-evenly;
+}
+
+.c-month {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 250px;
+}
+
+.c-month h3 {
+    text-align: center;
+    margin: 5px 0 10px;
+}
+
+.c-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.c-day,
+.c-weekday {
+    text-align: center;
+    padding: 5px;
+}
+
+.c-weekday {
+    font-weight: bold;
+    background: #f0f0f0;
+}
+
+.c-day {
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.c-day:hover {
+    background: #007bff;
+    color: white;
+}
+
+#popup {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 2px solid #007bff;
+    padding: 20px;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+#popup button {
+    margin-top: 10px;
+}
+  </style>
+ </head>
+ <body>
+  <div class="top">
+   <div class="left">
+    <span id="timeDisplay" style="font-weight: bold;">
+     Loading...
+    </span>
+   </div>
+  </div>
+  <div>
+   <div class="tabs">
+    <button class="tab active" onclick="showTab('schedule')">
+     Schedule
+    </button>
+    <button class="tab" onclick="showTab('settings')">
+     Settings
+    </button>
+   </div>
+   <div class="tab-content active" id="schedule">
     <form id="alarmForm">
-        <table id="scheduleTable">
-            <tbody>
-            </tbody>
-        </table>
-        <button type="button" onclick="addRow()" class="schedule-button">Add Row</button>
-        <button type="button" onclick="submitForm()" class="schedule-button">Submit</button>
-        <button type="button" onclick="fetchSchedule()" class="schedule-button">Load Schedule</button>
+     <div class="d-row">
+      <label class="d-schedule-label" for="schedule_loop_type">
+       Schedule loops:
+      </label>
+      <select class="form-select" name="schedule_loop_type" required="">
+       <option value="daily">
+        Dailyy
+       </option>
+       <option value="weekly">
+        Weekly
+       </option>
+       <option value="monthly">
+        Monthly
+       </option>
+       <option value="yearly">
+        Yearly
+       </option>
+       <option value="custom">
+        Custom range
+       </option>
+      </select>
+     </div>
+     <table id="scheduleTable">
+      <tbody>
+       <div class="d-year-view">
+        <div class="c-calendar-container">
+        </div>
+       </div>
+       <div class="d-month-view">
+       </div>
+       <div class="d-week-view">
+       </div>
+       <div class="d-day-view">
+       </div>
+       <div class="d-custom-range-view">
+       </div>
+      </tbody>
+     </table>
+     <button class="schedule-button" onclick="addScheduleRow()" type="button">
+      Add Row
+     </button>
+     <button class="schedule-button" onclick="submitSchedule()" type="button">
+      Submit
+     </button>
+     <button class="schedule-button" onclick="fetchSchedule()" type="button">
+      Load Schedule
+     </button>
     </form>
+   </div>
+   <div class="tab-content" id="settings">
+    <form id="settingsForm">
+     <div class="d-settings-row">
+      <label for="wifi_ssid">
+       Wi-Fi SSID:
+      </label>
+      <input id="wifi_ssid" name="wifi_ssid" required="" type="text"/>
+     </div>
+     <div class="d-settings-row">
+      <label for="wifi_password">
+       Wi-Fi Password:
+      </label>
+      <input id="wifi_password" name="wifi_password" type="text"/>
+     </div>
+     <div class="d-settings-row">
+      <label for="remote_wifi_ssid">
+       Remote Wi-Fi SSID:
+      </label>
+      <input id="remote_wifi_ssid" name="remote_wifi_ssid" type="text"/>
+     </div>
+     <div class="d-settings-row">
+      <label for="remote_wifi_password">
+       Remote Wi-Fi Password:
+      </label>
+      <input id="remote_wifi_password" name="remote_wifi_password" type="text"/>
+     </div>
+     <div class="d-settings-row">
+      <label for="timezone">
+       Timezone format:
+      </label>
+      <input id="timezone" name="timezone" type="text"/>
+     </div>
+     <div class="button-container">
+      <button class="schedule-button" onclick="submitSettings()" type="button">
+       Save Settings
+      </button>
+     </div>
+    </form>
+   </div>
+  </div>
+  <script>
+   function addScheduleRow(time = "", type = "single") {
+    const table = document.getElementById("scheduleTable").getElementsByTagName("tbody")[0];
+    const newRow = table.insertRow();
+    newRow.innerHTML = `
+        <td><input type="time" name="time[]" value="${time}" required class="form-time"></td>
+        <td>
+            <select name="type[]" required class="form-select">
+                <option value="single" ${type == 1 ? "selected" : ""}>Single</option>
+                <option value="double" ${type == 2 ? "selected" : ""}>Double</option>
+                <option value="triple" ${type == 3 ? "selected" : ""}>Triple</option>
+            </select>
+        </td>
+        <td><button type="button" onclick="deleteScheduleRow(this)" class="delete-button">x</button></td>
+    `;
+}
 
-    <script>
-        function addRow(time = "", type = "single") {
-            const table = document.getElementById("scheduleTable").getElementsByTagName("tbody")[0];
-            const newRow = table.insertRow();
-            newRow.innerHTML = `
-                <td><input type="time" name="time[]" value="${time}" required class="form-time"></td>
-                <td>
-                    <select name="type[]" required class="form-select">
-                        <option value="single" ${type == 1 ? "selected" : ""}>Single</option>
-                        <option value="double" ${type == 2 ? "selected" : ""}>Double</option>
-                        <option value="triple" ${type == 3 ? "selected" : ""}>Triple</option>
-                    </select>
-                </td>
-                <td><button type="button" onclick="deleteRow(this)" class="delete-button">x</button></td>
-            `;
-        }
+function deleteScheduleRow(button) {
+    const row = button.parentNode.parentNode;
+    row.parentNode.removeChild(row);
 
-        function deleteRow(button) {
-            const row = button.parentNode.parentNode;
-            row.parentNode.removeChild(row);
-        }
+}
 
-        function submitForm() {
-            const form = document.getElementById("alarmForm");
-            const times = Array.from(form.querySelectorAll("input[name='time[]']")).map(input => input.value);
-            const types = Array.from(form.querySelectorAll("select[name='type[]']")).map(select => select.value);
+function submitSchedule() {
+    const form = document.getElementById("alarmForm");
+    const times = Array.from(form.querySelectorAll("input[name='time[]']")).map(input => input.value);
+    const types = Array.from(form.querySelectorAll("select[name='type[]']")).map(select => select.value);
 
-            const schedule_items = times.map((time, index) => {
-                const [hour, minute] = time.split(":").map(Number);
-                return {
-                    time: hour * 60 + minute,
-                    type: types[index] === "single" ? 1 : types[index] === "double" ? 2 : 3
-                };
+    const schedule_items = times.map((time, index) => {
+        const [hour, minute] = time.split(":").map(Number);
+        return {
+            time: hour * 60 + minute,
+            type: types[index] === "single" ? 1 : types[index] === "double" ? 2 : 3
+        };
+    });
+
+    const jsonData = {
+        schedule_items: schedule_items
+    };
+
+    console.log(JSON.stringify(jsonData, null, 2));
+
+    fetch('/update_schedule', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonData)
+    })
+        .then(response => response.text())
+        .then(data => console.log('Server Response:', data))
+        .catch(error => console.error('Error:', error));
+}
+
+function fetchSchedule() {
+    fetch('/get_schedule')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById("scheduleTable").getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = ""; // Clear existing rows
+            data.schedule_items.forEach(item => {
+                const hour = Math.floor(item.time / 60).toString().padStart(2, '0');
+                const minute = (item.time % 60).toString().padStart(2, '0');
+                addScheduleRow(`${hour}:${minute}`, item.type);
+            });
+        })
+        .catch(error => console.error('Error fetching schedule:', error));
+}
+
+function submitSettings() {
+    if (!confirm("Wi-Fi will restart after settings are applied. Do you want to proceed?")) {
+        return;
+    }
+
+    const form = document.getElementById("settingsForm");
+    const jsonData = {
+        wifi_ssid: form.wifi_ssid.value,
+        wifi_password: form.wifi_password.value,
+        remote_wifi_ssid: form.remote_wifi_ssid.value,
+        remote_wifi_password: form.remote_wifi_password.value,
+        timezone: form.timezone.value
+    };
+
+    console.log(JSON.stringify(jsonData, null, 2));
+
+    fetch('/update_settings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update settings');
+            }
+            return response.text();
+        })
+        .then(data => console.log('Server Response:', data))
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating settings: ' + error.message);
+        });
+}
+
+function fetchSettings() {
+    fetch('/get_settings')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("wifi_ssid").value = data.wifi_ssid || "";
+            document.getElementById("wifi_password").value = data.wifi_password || "";
+            document.getElementById("remote_wifi_ssid").value = data.remote_wifi_ssid || "";
+            document.getElementById("remote_wifi_password").value = data.remote_wifi_password || "";
+            document.getElementById("timezone").value = data.timezone || "";
+        })
+        .catch(error => {
+            console.error('Error fetching settings:', error);
+            // alert('Error fetching settings: ' + error.message);
+        });
+}
+
+function updateTime() {
+    fetch('/get_time')
+        .then(response => response.text())
+        .then(timeString => {
+            const date = new Date(timeString);
+            const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById("timeDisplay").textContent = "System Time: " + formattedTime;
+        })
+        .catch(error => {
+            console.error("Error fetching time:", error);
+            document.getElementById("timeDisplay").textContent = "System Time: Error loading time";
+        });
+}
+
+function showTab(tabId) {
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    document.querySelector(`.tab[onclick*="${tabId}"]`).classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+
+document.addEventListener("DOMContentLoaded", fetchSettings);
+document.addEventListener("DOMContentLoaded", updateTime);
+document.addEventListener("DOMContentLoaded", fetchSchedule);
+  </script>
+  <script>
+   const calendarEl = document.getElementById('calendar');
+const popupEl = document.getElementById('popup');
+const popupContentEl = document.getElementById('popup-content');
+
+const year = new Date().getFullYear();
+const monthNames = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+function createCalendar(targetClass, year) {
+    const calendarContainers = document.querySelectorAll(`.${targetClass}`);
+
+    calendarContainers.forEach(calendarEl => {
+        calendarEl.innerHTML = ''; // Clear previous content if any
+
+        for (let month = 0; month < 12; month++) {
+            const monthDiv = document.createElement('div');
+            monthDiv.className = 'c-month';
+            monthDiv.innerHTML = `<h3>${monthNames[month]}</h3>`;
+
+            const daysGrid = document.createElement('div');
+            daysGrid.className = 'c-days';
+
+            weekdays.forEach(d => {
+                const wd = document.createElement('div');
+                wd.className = 'c-weekday';
+                wd.textContent = d;
+                daysGrid.appendChild(wd);
             });
 
-            const jsonData = {
-                schedule_items: schedule_items
-            };
+            const firstDay = new Date(year, month, 0).getDay();
+            const numDays = new Date(year, month + 1, 0).getDate();
 
-            console.log(JSON.stringify(jsonData, null, 2));
+            // empty slots before first day
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                daysGrid.appendChild(empty);
+            }
 
-            fetch('/update_schedule', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(jsonData)
-            })
-                .then(response => response.text())
-                .then(data => console.log('Server Response:', data))
-                .catch(error => console.error('Error:', error));
+            for (let day = 1; day <= numDays; day++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'c-day';
+                dayEl.textContent = day;
+                dayEl.addEventListener('click', () => showPopup(`${year}-${month + 1}-${day}`));
+                daysGrid.appendChild(dayEl);
+            }
+
+            monthDiv.appendChild(daysGrid);
+            calendarEl.appendChild(monthDiv);
         }
+    });
+}
 
-        function fetchSchedule() {
-            fetch('/get_schedule')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.getElementById("scheduleTable").getElementsByTagName("tbody")[0];
-                    tableBody.innerHTML = ""; // Clear existing rows
-                    data.schedule_items.forEach(item => {
-                        const hour = Math.floor(item.time / 60).toString().padStart(2, '0');
-                        const minute = (item.time % 60).toString().padStart(2, '0');
-                        addRow(`${hour}:${minute}`, item.type);
-                    });
-                })
-                .catch(error => console.error('Error fetching schedule:', error));
-        }
+function showPopup(dateString) {
+    popupContentEl.innerHTML = `<h2>Selected Date: ${dateString}</h2>
+        <p>You can add any custom UI or actions here, like forms, buttons, etc.</p>`;
+    popupEl.style.display = 'block';
+}
 
-        function updateTime() {
-            fetch('/get_time')
-                .then(response => response.text())
-                .then(timeString => {
-                    const date = new Date(timeString);
-                    const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    document.getElementById("timeDisplay").textContent = "System Time: " + formattedTime;
-                })
-                .catch(error => {
-                    console.error("Error fetching time:", error);
-                    document.getElementById("timeDisplay").textContent = "Error loading time";
-                });
-        }
-
-        document.addEventListener("DOMContentLoaded", updateTime);
-        document.addEventListener("DOMContentLoaded", fetchSchedule);
-    </script>
-</body>
-
+function closePopup() {
+    popupEl.style.display = 'none';
+}
+  </script>
+  <script>
+   createCalendar("c-calendar-container", year);
+  </script>
+ </body>
 </html>

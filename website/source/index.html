@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarm Schedule</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="calendar.css" />
+</head>
+
+<body>
+    <div class="top">
+        <div class="left">
+            <span id="timeDisplay" style="font-weight: bold;">Loading...</span>
+        </div>
+    </div>
+
+    <div>
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('schedule')">Schedule</button>
+            <button class="tab" onclick="showTab('settings')">Settings</button>
+        </div>
+
+        <div id="schedule" class="tab-content active">
+            <form id="alarmForm">
+                <div class="d-row">
+                    <label for="schedule_loop_type" class="d-schedule-label">Schedule loops: </label>
+                    <select name="schedule_loop_type" class="form-select" required>
+                        <option value="daily">Dailyy</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="custom">Custom range</option>
+                    </select>
+                </div>
+
+                <table id="scheduleTable">
+                    <tbody>
+                        <div class="d-year-view">
+                            <div class="c-calendar-container"></div>
+                        </div>
+
+                        <div class="d-month-view">
+                        </div>
+
+                        <div class="d-week-view">
+                        </div>
+
+                        <div class="d-day-view">
+                        </div>
+
+                        <div class="d-custom-range-view">
+                        </div>
+                    </tbody>
+                </table>
+                <button type="button" onclick="addScheduleRow()" class="schedule-button">Add Row</button>
+                <button type="button" onclick="submitSchedule()" class="schedule-button">Submit</button>
+                <button type="button" onclick="fetchSchedule()" class="schedule-button">Load Schedule</button>
+            </form>
+        </div>
+
+        <div id="settings" class="tab-content">
+            <form id="settingsForm">
+                <div class="d-settings-row">
+                    <label for="wifi_ssid">Wi-Fi SSID:</label>
+                    <input type="text" id="wifi_ssid" name="wifi_ssid" required>
+                </div>
+
+                <div class="d-settings-row">
+                    <label for="wifi_password">Wi-Fi Password:</label>
+                    <input type="text" id="wifi_password" name="wifi_password">
+                </div>
+
+                <div class="d-settings-row">
+                    <label for="remote_wifi_ssid">Remote Wi-Fi SSID:</label>
+                    <input type="text" id="remote_wifi_ssid" name="remote_wifi_ssid">
+                </div>
+
+                <div class="d-settings-row">
+                    <label for="remote_wifi_password">Remote Wi-Fi Password:</label>
+                    <input type="text" id="remote_wifi_password" name="remote_wifi_password">
+                </div>
+
+                <div class="d-settings-row">
+                    <label for="timezone">Timezone format:</label>
+                    <input type="text" id="timezone" name="timezone">
+                </div>
+
+                <div class="button-container">
+                    <button class="schedule-button" type="button" onclick="submitSettings()">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="index.js"></script>
+    <script type="text/javascript" src="calendar.js"></script>
+    <script>
+        createCalendar("c-calendar-container", year);
+    </script>
+</body>
+
+</html>

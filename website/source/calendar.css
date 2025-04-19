@@ -1,0 +1,62 @@
+.c-calendar-container {
+    margin: 1rem 0 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-evenly;
+}
+
+.c-month {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 250px;
+}
+
+.c-month h3 {
+    text-align: center;
+    margin: 5px 0 10px;
+}
+
+.c-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.c-day,
+.c-weekday {
+    text-align: center;
+    padding: 5px;
+}
+
+.c-weekday {
+    font-weight: bold;
+    background: #f0f0f0;
+}
+
+.c-day {
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.c-day:hover {
+    background: #007bff;
+    color: white;
+}
+
+#popup {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 2px solid #007bff;
+    padding: 20px;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+#popup button {
+    margin-top: 10px;
+}

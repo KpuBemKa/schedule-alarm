@@ -165,7 +165,7 @@ HttpServerTask(void* args)
     while (true) {
         vTaskDelay(pdMS_TO_TICKS(1'000));
 
-        if (s_wifi_controller.GetConnectionsCount() > 0) {
+        if (s_wifi_controller.GetConnectionsCount() > 0 || s_http_controller.GetConnectionsCount() > 0) {
             s_sleep_controller.ResetSleepTimeout();
         }
 

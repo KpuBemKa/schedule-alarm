@@ -29,6 +29,8 @@ class HttpController
 
     bool IsStarted() { return mIsStarted; }
 
+    int GetConnectionsCount();
+
   private:
     /* -=< Esp-Idf HTTP handlers */
 

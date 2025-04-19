@@ -17,4 +17,6 @@ idf_component_register(SRCS "main.cpp"
                                   util
 )
 
-spiffs_create_partition_image(storage ../data_image FLASH_IN_PROJECT)
+spiffs_create_partition_image(storage ../data_image FLASH_IN_PROJECT DEPENDS embed_website)
+
+# add_dependencies(storage embed_website)

@@ -27,7 +27,7 @@
                 <div class="d-row">
                     <label for="schedule_loop_type" class="d-schedule-label">Schedule loops: </label>
                     <select name="schedule_loop_type" class="form-select" required>
-                        <option value="daily">Dailyy</option>
+                        <option value="daily">Daily</option>
                         <option value="weekly">Weekly</option>
                         <option value="monthly">Monthly</option>
                         <option value="yearly">Yearly</option>
@@ -94,8 +94,13 @@
         </div>
     </div>
 
+    <div id="schedule-day-popup" class="d-popup">
+
+    </div>
+
     <script type="text/javascript" src="index.js"></script>
     <script type="text/javascript" src="calendar.js"></script>
+    <script type="text/javascript" src="schedule.js"></script>
     <script>
         createCalendar("c-calendar-container", year);
     </script>

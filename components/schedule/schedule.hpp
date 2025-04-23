@@ -1,27 +1,14 @@
 #pragma once
 
-#include <cstdint>
-#include <span>
+#include <memory>
 #include <string_view>
-#include <vector>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 
-enum class AlarmType : uint16_t
-{
-    None = 0,
-    Single = 1,
-    Double = 2,
-    Triple = 3
-};
+#include "schedules/i_schedule.hpp"
 
-struct SchedulePoint
-{
-    // Represents a minute of the day when the alarm should fire
-    uint16_t day_minute;
-    AlarmType alarm_type;
-};
+namespace schd {
 
 class Schedule
 {
@@ -32,30 +19,26 @@ class Schedule
         xSemaphoreGive(xScheduleMutex);
     }
 
-    esp_err_t Load();
-    esp_err_t Save();
+    bool IsEmpty() const;
 
-    bool IsEmpty() { return mSchedule.empty(); }
-    std::size_t GetPointsCount() { return mSchedule.size(); }
-
-    void SetIndex(const std::size_t new_index) { mScheduleIndex = new_index; }
-
-    esp_err_t SetSchedule(const std::span<const SchedulePoint> schedule);
-    std::vector<SchedulePoint> GetScheduleArray();
-
-    SchedulePoint GetSchedulePoint();
-    uint16_t GetSystemMinute();
+    bool IsFired(const bool auto_advance_schedule = true);
+    Action GetAction() const;
 
     void AdvanceSchedule();
     void ReindexSchedule();
 
-    std::string ToJson();
-    esp_err_t FromJson(const std::string_view raw_json);
+    esp_err_t Load() { return ESP_ERR_NOT_SUPPORTED; }
+    esp_err_t Save() { return ESP_ERR_NOT_SUPPORTED; }
+
+    std::expected<std::vector<uint8_t>, esp_err_t> Serialize() const;
+    esp_err_t Serialize(std::span<uint8_t> output) const;
+    esp_err_t Deserialize(const std::span<const uint8_t> source) const;
 
   private:
-    static constexpr const std::string_view SCHEDULE_FILE = "alarm_schedule.json";
+    static constexpr const std::string_view SCHEDULE_FILE = "system_schedule.json";
 
     mutable QueueHandle_t xScheduleMutex;
-    std::size_t mScheduleIndex = 0;
-    std::vector<SchedulePoint> mSchedule = {};
+    std::unique_ptr<ISchedule> mSchedule;
 };
+
+} // namespace schd

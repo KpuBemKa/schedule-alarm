@@ -281,21 +281,21 @@ HttpController::SchedulePOST(httpd_req_t* req)
 
     LOG_I("Received data: %.*s", schedule_raw_json.length(), schedule_raw_json.c_str());
 
-    const esp_err_t esp_result = self->mSchedule.FromJson(schedule_raw_json);
+    // const esp_err_t esp_result = self->mSchedule.FromJson(schedule_raw_json);
 
-    if (esp_result != ESP_OK) {
-        LOG_E("%s:%d | Schedule parsing failed: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+    // if (esp_result != ESP_OK) {
+    //     LOG_E("%s:%d | Schedule parsing failed: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
 
-        if (esp_result == ESP_ERR_INVALID_ARG) {
-            /* Respond with 500 Internal Server Error */
-            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid JSON");
-        } else {
-            /* Respond with 500 Internal Server Error */
-            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Internal server error.");
-        }
+    //     if (esp_result == ESP_ERR_INVALID_ARG) {
+    //         /* Respond with 500 Internal Server Error */
+    //         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid JSON");
+    //     } else {
+    //         /* Respond with 500 Internal Server Error */
+    //         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Internal server error.");
+    //     }
 
-        return esp_result;
-    }
+    //     return esp_result;
+    // }
 
     httpd_resp_sendstr(req, "Schedule has been updated.");
 
@@ -307,16 +307,17 @@ HttpController::SchedulePOST(httpd_req_t* req)
 esp_err_t
 HttpController::ScheduleGET(httpd_req_t* req)
 {
-    auto self = reinterpret_cast<HttpController*>(req->user_ctx);
+    // auto self = reinterpret_cast<HttpController*>(req->user_ctx);
 
-    std::string schedule_json = self->mSchedule.ToJson();
+    // std::string schedule_json = self->mSchedule.ToJson();
 
-    const esp_err_t esp_result = SendString(req, schedule_json, "application/json");
-    if (esp_result != ESP_OK) {
-        LOG_E("%s:%d | Error sending schedule: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
-    }
+    // const esp_err_t esp_result = SendString(req, schedule_json, "application/json");
+    // if (esp_result != ESP_OK) {
+    //     LOG_E("%s:%d | Error sending schedule: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
+    // }
 
-    return esp_result;
+    // return esp_result;
+    return ESP_ERR_NOT_SUPPORTED;
 }
 
 esp_err_t

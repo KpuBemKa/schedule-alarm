@@ -87,15 +87,15 @@ SleepController::ConfigureWakeup()
 uint64_t
 SleepController::GetSleepTimeUs()
 {
-    // return 30 * 1'000 * 1'000;
-    // minutes to microseconds conversion factor
-    constexpr uint64_t MINUTES_TO_US = 60 * 1'000 * 1'000;
+    return 30 * 1'000 * 1'000;
+    // // minutes to microseconds conversion factor
+    // constexpr uint64_t MINUTES_TO_US = 60 * 1'000 * 1'000;
 
-    if (mSchedule.IsEmpty()) {
-        return 60 * MINUTES_TO_US;
-    }
+    // if (mSchedule.IsEmpty()) {
+    //     return 60 * MINUTES_TO_US;
+    // }
 
-    const auto minute_difference = mSchedule.GetSchedulePoint().day_minute - mSchedule.GetSystemMinute();
+    // const auto minute_difference = mSchedule.GetSchedulePoint().day_minute - mSchedule.GetSystemMinute();
 
-    return minute_difference * MINUTES_TO_US; // microseconds
+    // return minute_difference * MINUTES_TO_US; // microseconds
 }

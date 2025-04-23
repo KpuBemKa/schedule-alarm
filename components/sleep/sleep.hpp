@@ -9,7 +9,7 @@
 class SleepController
 {
   public:
-    SleepController(wifi::WifiController& wifi_controller, srvr::HttpController& http_controller, Schedule& schedule)
+    SleepController(wifi::WifiController& wifi_controller, srvr::HttpController& http_controller, schd::Schedule& schedule)
       : m_wifi_controller(wifi_controller)
       , m_http_controller(http_controller)
       , mSchedule(schedule)
@@ -51,5 +51,5 @@ class SleepController
 
     wifi::WifiController& m_wifi_controller;
     srvr::HttpController& m_http_controller;
-    Schedule& mSchedule;
+    schd::Schedule& mSchedule;
 };

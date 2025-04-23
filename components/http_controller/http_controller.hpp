@@ -18,7 +18,7 @@ namespace srvr {
 class HttpController
 {
   public:
-    HttpController(Schedule& schedule, settings::Settings& settings)
+    HttpController(schd::Schedule& schedule, settings::Settings& settings)
       : mSchedule(schedule)
       , mSettings(settings)
     {
@@ -64,7 +64,7 @@ class HttpController
     static esp_err_t SendString(httpd_req_t* req, const std::string_view string, const std::string_view content_type);
 
   private:
-    Schedule& mSchedule;
+    schd::Schedule& mSchedule;
     settings::Settings& mSettings;
 
     httpd_handle_t mServerHandle;

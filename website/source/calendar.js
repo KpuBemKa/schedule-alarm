@@ -7,7 +7,7 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"];
 const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
-function createCalendar(targetClass, year) {
+function createCalendar(targetClass, year, showPopupFunc) {
     const calendarContainers = document.querySelectorAll(`.${targetClass}`);
 
     calendarContainers.forEach(calendarEl => {
@@ -41,7 +41,7 @@ function createCalendar(targetClass, year) {
                 const dayEl = document.createElement('div');
                 dayEl.className = 'c-day';
                 dayEl.textContent = day;
-                dayEl.addEventListener('click', () => showPopup(`${year}-${month + 1}-${day}`));
+                dayEl.addEventListener('click', () => showPopupFunc(`${year}-${month + 1}-${day}`));
                 daysGrid.appendChild(dayEl);
             }
 
@@ -51,12 +51,12 @@ function createCalendar(targetClass, year) {
     });
 }
 
-function showPopup(dateString) {
-    popupContentEl.innerHTML = `<h2>Selected Date: ${dateString}</h2>
-        <p>You can add any custom UI or actions here, like forms, buttons, etc.</p>`;
-    popupEl.style.display = 'block';
-}
+// function showPopup(dateString) {
+//     popupContentEl.innerHTML = `<h2>Selected Date: ${dateString}</h2>
+//         <p>You can add any custom UI or actions here, like forms, buttons, etc.</p>`;
+//     popupEl.style.display = 'block';
+// }
 
-function closePopup() {
-    popupEl.style.display = 'none';
-}
+// function closePopup() {
+//     popupEl.style.display = 'none';
+// }

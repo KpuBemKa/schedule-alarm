@@ -24,6 +24,7 @@
 #include "config.hpp"
 #include "http_controller.hpp"
 #include "schedule.hpp"
+#include "schedules/schedule_daily.hpp"
 #include "settings.hpp"
 #include "sleep.hpp"
 #include "sntp.hpp"
@@ -38,8 +39,10 @@ static const char TAG[] = "MAIN";
 bool s_button_pressed_flag = false;
 bool s_settings_reset_flag = false;
 
+std::array<uint8_t, 4> test = { 0, 0, 0, 5 };
+
 settings::Settings s_settings;
-Schedule s_schedule;
+schd::Schedule s_schedule;
 wifi::WifiController s_wifi_controller(s_settings);
 srvr::HttpController s_http_controller(s_schedule, s_settings);
 SleepController s_sleep_controller(s_wifi_controller, s_http_controller, s_schedule);
@@ -72,65 +75,93 @@ StopTimer();
 bool
 TimerFiredCallback(gptimer_handle_t timer, const gptimer_alarm_event_data_t* edata, void* user_ctx);
 
+// void
+// RingAlarm(const AlarmType alarm_type);
+
 void
-RingAlarm(const AlarmType alarm_type);
+print_schedule(const schd::ScheduleDaily& schedule)
+{
+    LOG_I("Schedule info:");
+    for (std::size_t i = 0, end = schedule.GetPointsCount(); i < end; ++i) {
+        const schd::SchedulePointDaily& point = schedule.GetPoint(i);
+
+        LOG_I("%d : %d", point.day_second, static_cast<int>(point.fire_action));
+    }
+    LOG_I("-----");
+}
 
 extern "C" void
 app_main(void)
 {
+    std::vector<schd::SchedulePointDaily> points = { { .day_second = 1, .fire_action = schd::Action::None },
+                                                     { .day_second = 2, .fire_action = schd::Action::OpenRelay },
+                                                     { .day_second = 3, .fire_action = schd::Action::CloseRelay },
+                                                     { .day_second = 4, .fire_action = schd::Action::OpenRelay },
+                                                     { .day_second = 5, .fire_action = schd::Action::CloseRelay } };
+    schd::ScheduleDaily schedule(points);
+
+    print_schedule(schedule);
+
+    const auto serialized = schedule.Serialize();
+
+    schd::ScheduleDaily new_schedule({});
+    print_schedule(new_schedule);
+    new_schedule.Deserialize(serialized);
+    print_schedule(new_schedule);
+
     // Configure GPIO pins
-    esp_err_t esp_result = gpio_set_direction(pins::BUTTON, gpio_mode_t::GPIO_MODE_INPUT);
-    esp_result |= gpio_set_pull_mode(pins::BUTTON, gpio_pull_mode_t::GPIO_PULLUP_ONLY);
-    if (esp_result != ESP_OK) {
-        LOG_E("Failed to configure the button pin: %s", esp_err_to_name(esp_result));
-    }
+    // esp_err_t esp_result = gpio_set_direction(pins::BUTTON, gpio_mode_t::GPIO_MODE_INPUT);
+    // esp_result |= gpio_set_pull_mode(pins::BUTTON, gpio_pull_mode_t::GPIO_PULLUP_ONLY);
+    // if (esp_result != ESP_OK) {
+    //     LOG_E("Failed to configure the button pin: %s", esp_err_to_name(esp_result));
+    // }
 
-    esp_result = gpio_set_direction(pins::RELAY, gpio_mode_t::GPIO_MODE_OUTPUT);
-    if (esp_result != ESP_OK) {
-        LOG_E("Failed to configure the relay pin: %s", esp_err_to_name(esp_result));
-    }
-    gpio_set_level(pins::RELAY, 1);
+    // esp_result = gpio_set_direction(pins::RELAY, gpio_mode_t::GPIO_MODE_OUTPUT);
+    // if (esp_result != ESP_OK) {
+    //     LOG_E("Failed to configure the relay pin: %s", esp_err_to_name(esp_result));
+    // }
+    // gpio_set_level(pins::RELAY, 1);
 
-    // vTaskDelay(pdMS_TO_TICKS(1'000));
-    ESP_ERROR_CHECK(nvs_flash_init());
+    // // vTaskDelay(pdMS_TO_TICKS(1'000));
+    // ESP_ERROR_CHECK(nvs_flash_init());
 
-    /* Initialize file storage */
-    ESP_ERROR_CHECK(MountSpiffsStorage(config::SPIFFS_BASE_PATH.data()));
+    // /* Initialize file storage */
+    // ESP_ERROR_CHECK(MountSpiffsStorage(config::SPIFFS_BASE_PATH.data()));
 
-    ESP_ERROR_CHECK(ConfigureTimer());
+    // ESP_ERROR_CHECK(ConfigureTimer());
 
-    ESP_ERROR_CHECK(s_wifi_controller.Init());
+    // ESP_ERROR_CHECK(s_wifi_controller.Init());
 
-    s_schedule.Load();
-    s_settings.Load();
-    s_sleep_controller.SetSleepTimeout(pdMS_TO_TICKS(60'000));
-    s_sntp.SetTimezone(s_settings.GetSettings().timezone);
+    // s_schedule.Load();
+    // s_settings.Load();
+    // s_sleep_controller.SetSleepTimeout(pdMS_TO_TICKS(60'000));
+    // s_sntp.SetTimezone(s_settings.GetSettings().timezone);
 
-    ESP_ERROR_CHECK(s_wifi_controller.Start());
-    ESP_ERROR_CHECK(s_http_controller.StartServer());
-    if (s_wifi_controller.IsConnected()) {
-        s_sntp.Init(20'000);
-    }
+    // ESP_ERROR_CHECK(s_wifi_controller.Start());
+    // ESP_ERROR_CHECK(s_http_controller.StartServer());
+    // if (s_wifi_controller.IsConnected()) {
+    //     s_sntp.Init(20'000);
+    // }
 
-    xTaskCreate(ScheduleTask, "SCHEDULE", 8192, nullptr, 8, &s_schedule_task_handle);
-    xTaskCreate(HttpServerTask, "SERVER", 16384, nullptr, 8, &s_schedule_task_handle);
-    xTaskCreate(s_sleep_controller.TaskRunner, "SLEEP", 8192, &s_sleep_controller, 8, &s_sleep_task_handle);
-    xTaskCreate(SntpTask, "SNTP", 8192, nullptr, 8, &s_sntp_task_handle);
+    // xTaskCreate(ScheduleTask, "SCHEDULE", 8192, nullptr, 8, &s_schedule_task_handle);
+    // xTaskCreate(HttpServerTask, "SERVER", 16384, nullptr, 8, &s_schedule_task_handle);
+    // xTaskCreate(s_sleep_controller.TaskRunner, "SLEEP", 8192, &s_sleep_controller, 8, &s_sleep_task_handle);
+    // xTaskCreate(SntpTask, "SNTP", 8192, nullptr, 8, &s_sntp_task_handle);
 
-    while (true) {
-        if (gpio_get_level(pins::BUTTON) == 0) {
-            s_button_pressed_flag = true;
-            StartTimer();
-        } else {
-            StopTimer();
-        }
+    // while (true) {
+    //     if (gpio_get_level(pins::BUTTON) == 0) {
+    //         s_button_pressed_flag = true;
+    //         StartTimer();
+    //     } else {
+    //         StopTimer();
+    //     }
 
-        if (s_timer_started) {
-            s_sleep_controller.ResetSleepTimeout();
-        }
+    //     if (s_timer_started) {
+    //         s_sleep_controller.ResetSleepTimeout();
+    //     }
 
-        vTaskDelay(pdMS_TO_TICKS(50));
-    }
+    //     vTaskDelay(pdMS_TO_TICKS(50));
+    // }
 }
 
 void
@@ -139,23 +170,23 @@ ScheduleTask(void* args)
     while (true) {
         vTaskDelay(pdMS_TO_TICKS(500));
 
-        if (s_schedule.IsEmpty())
-            continue;
+        // if (s_schedule.IsEmpty())
+        //     continue;
 
-        const auto schedule_point = s_schedule.GetSchedulePoint();
-        if (s_schedule.GetSystemMinute() != schedule_point.day_minute)
-            continue;
+        // const auto schedule_point = s_schedule.GetSchedulePoint();
+        // if (s_schedule.GetSystemMinute() != schedule_point.day_minute)
+        //     continue;
 
-        s_sleep_controller.ResetSleepTimeout();
-        RingAlarm(schedule_point.alarm_type);
+        // s_sleep_controller.ResetSleepTimeout();
+        // RingAlarm(schedule_point.alarm_type);
 
-        if (s_schedule.GetPointsCount() == 1) {
-            // LOG_I("Sleeping for a minute...");
-            vTaskDelay(pdMS_TO_TICKS(60 * 1'000));
-            // LOG_I("Woken");
-        }
+        // if (s_schedule.GetPointsCount() == 1) {
+        //     // LOG_I("Sleeping for a minute...");
+        //     vTaskDelay(pdMS_TO_TICKS(60 * 1'000));
+        //     // LOG_I("Woken");
+        // }
 
-        s_schedule.AdvanceSchedule();
+        // s_schedule.AdvanceSchedule();
     }
 }
 
@@ -364,16 +395,16 @@ TimerFiredCallback(gptimer_handle_t timer, const gptimer_alarm_event_data_t* eda
     return pdFALSE;
 }
 
-void
-RingAlarm(const AlarmType alarm_type)
-{
-    LOG_I("Ringing the alarm...");
-    std::size_t cycles = static_cast<uint16_t>(alarm_type);
+// void
+// RingAlarm(const AlarmType alarm_type)
+// {
+//     LOG_I("Ringing the alarm...");
+//     std::size_t cycles = static_cast<uint16_t>(alarm_type);
 
-    for (std::size_t i = 0; i < cycles; ++i) {
-        gpio_set_level(pins::RELAY, 0);
-        vTaskDelay(pdMS_TO_TICKS(1'000));
-        gpio_set_level(pins::RELAY, 1);
-        vTaskDelay(pdMS_TO_TICKS(1'000));
-    }
-}
+//     for (std::size_t i = 0; i < cycles; ++i) {
+//         gpio_set_level(pins::RELAY, 0);
+//         vTaskDelay(pdMS_TO_TICKS(1'000));
+//         gpio_set_level(pins::RELAY, 1);
+//         vTaskDelay(pdMS_TO_TICKS(1'000));
+//     }
+// }

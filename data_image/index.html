@@ -236,7 +236,7 @@ hr {
       </label>
       <select class="form-select" name="schedule_loop_type" required="">
        <option value="daily">
-        Dailyy
+        Daily
        </option>
        <option value="weekly">
         Weekly
@@ -319,6 +319,8 @@ hr {
     </form>
    </div>
   </div>
+  <div class="d-popup" id="schedule-day-popup">
+  </div>
   <script>
    function addScheduleRow(time = "", type = "single") {
     const table = document.getElementById("scheduleTable").getElementsByTagName("tbody")[0];
@@ -342,117 +344,7 @@ function deleteScheduleRow(button) {
 
 }
 
-function submitSchedule() {
-    const form = document.getElementById("alarmForm");
-    const times = Array.from(form.querySelectorAll("input[name='time[]']")).map(input => input.value);
-    const types = Array.from(form.querySelectorAll("select[name='type[]']")).map(select => select.value);
 
-    const schedule_items = times.map((time, index) => {
-        const [hour, minute] = time.split(":").map(Number);
-        return {
-            time: hour * 60 + minute,
-            type: types[index] === "single" ? 1 : types[index] === "double" ? 2 : 3
-        };
-    });
-
-    const jsonData = {
-        schedule_items: schedule_items
-    };
-
-    console.log(JSON.stringify(jsonData, null, 2));
-
-    fetch('/update_schedule', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(jsonData)
-    })
-        .then(response => response.text())
-        .then(data => console.log('Server Response:', data))
-        .catch(error => console.error('Error:', error));
-}
-
-function fetchSchedule() {
-    fetch('/get_schedule')
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.getElementById("scheduleTable").getElementsByTagName("tbody")[0];
-            tableBody.innerHTML = ""; // Clear existing rows
-            data.schedule_items.forEach(item => {
-                const hour = Math.floor(item.time / 60).toString().padStart(2, '0');
-                const minute = (item.time % 60).toString().padStart(2, '0');
-                addScheduleRow(`${hour}:${minute}`, item.type);
-            });
-        })
-        .catch(error => console.error('Error fetching schedule:', error));
-}
-
-function submitSettings() {
-    if (!confirm("Wi-Fi will restart after settings are applied. Do you want to proceed?")) {
-        return;
-    }
-
-    const form = document.getElementById("settingsForm");
-    const jsonData = {
-        wifi_ssid: form.wifi_ssid.value,
-        wifi_password: form.wifi_password.value,
-        remote_wifi_ssid: form.remote_wifi_ssid.value,
-        remote_wifi_password: form.remote_wifi_password.value,
-        timezone: form.timezone.value
-    };
-
-    console.log(JSON.stringify(jsonData, null, 2));
-
-    fetch('/update_settings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(jsonData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to update settings');
-            }
-            return response.text();
-        })
-        .then(data => console.log('Server Response:', data))
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error updating settings: ' + error.message);
-        });
-}
-
-function fetchSettings() {
-    fetch('/get_settings')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById("wifi_ssid").value = data.wifi_ssid || "";
-            document.getElementById("wifi_password").value = data.wifi_password || "";
-            document.getElementById("remote_wifi_ssid").value = data.remote_wifi_ssid || "";
-            document.getElementById("remote_wifi_password").value = data.remote_wifi_password || "";
-            document.getElementById("timezone").value = data.timezone || "";
-        })
-        .catch(error => {
-            console.error('Error fetching settings:', error);
-            // alert('Error fetching settings: ' + error.message);
-        });
-}
-
-function updateTime() {
-    fetch('/get_time')
-        .then(response => response.text())
-        .then(timeString => {
-            const date = new Date(timeString);
-            const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById("timeDisplay").textContent = "System Time: " + formattedTime;
-        })
-        .catch(error => {
-            console.error("Error fetching time:", error);
-            document.getElementById("timeDisplay").textContent = "System Time: Error loading time";
-        });
-}
 
 function showTab(tabId) {
     document.querySelectorAll('.tab').forEach(tab => {
@@ -468,8 +360,8 @@ function showTab(tabId) {
 }
 
 document.addEventListener("DOMContentLoaded", fetchSettings);
-document.addEventListener("DOMContentLoaded", updateTime);
 document.addEventListener("DOMContentLoaded", fetchSchedule);
+document.addEventListener("DOMContentLoaded", updateTime);
   </script>
   <script>
    const calendarEl = document.getElementById('calendar');
@@ -481,7 +373,7 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"];
 const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
-function createCalendar(targetClass, year) {
+function createCalendar(targetClass, year, showPopupFunc) {
     const calendarContainers = document.querySelectorAll(`.${targetClass}`);
 
     calendarContainers.forEach(calendarEl => {
@@ -515,7 +407,7 @@ function createCalendar(targetClass, year) {
                 const dayEl = document.createElement('div');
                 dayEl.className = 'c-day';
                 dayEl.textContent = day;
-                dayEl.addEventListener('click', () => showPopup(`${year}-${month + 1}-${day}`));
+                dayEl.addEventListener('click', () => showPopupFunc(`${year}-${month + 1}-${day}`));
                 daysGrid.appendChild(dayEl);
             }
 
@@ -525,14 +417,108 @@ function createCalendar(targetClass, year) {
     });
 }
 
-function showPopup(dateString) {
-    popupContentEl.innerHTML = `<h2>Selected Date: ${dateString}</h2>
-        <p>You can add any custom UI or actions here, like forms, buttons, etc.</p>`;
-    popupEl.style.display = 'block';
+// function showPopup(dateString) {
+//     popupContentEl.innerHTML = `<h2>Selected Date: ${dateString}</h2>
+//         <p>You can add any custom UI or actions here, like forms, buttons, etc.</p>`;
+//     popupEl.style.display = 'block';
+// }
+
+// function closePopup() {
+//     popupEl.style.display = 'none';
+// }
+  </script>
+  <script>
+   class SchedulePoint {
+    constructor(offset, action, duration) {
+        this.offset = offset; // seconds from loop start
+        this.action = action; // 'open' or 'close'
+        this.duration = duration; // in seconds
+    }
 }
 
-function closePopup() {
-    popupEl.style.display = 'none';
+class Schedule {
+    constructor(startTime = Date.now() / 1000, loopDuration = 86400) {
+        this.startTime = Math.floor(startTime); // Unix timestamp in seconds
+        this.loopDuration = loopDuration; // in seconds
+        this.schedulePoints = []; // array of SchedulePoint
+    }
+
+    // Add a new schedule point
+    addPoint(offset, action, duration) {
+        if (!['open', 'close'].includes(action)) {
+            throw new Error(`Invalid action "${action}". Must be 'open' or 'close'.`);
+        }
+        this.schedulePoints.push(new SchedulePoint(offset, action, duration));
+    }
+
+    // Update a point by index
+    updatePoint(index, newOffset, newAction, newDuration) {
+        if (index < 0 || index >= this.schedulePoints.length) return false;
+
+        if (!['open', 'close'].includes(newAction)) return false;
+
+        this.schedulePoints[index] = new SchedulePoint(newOffset, newAction, newDuration);
+        return true;
+    }
+
+    // Delete a point by index
+    deletePoint(index) {
+        if (index < 0 || index >= this.schedulePoints.length) return false;
+        this.schedulePoints.splice(index, 1);
+        return true;
+    }
+
+    // Clear the entire schedule
+    clear() {
+        this.schedulePoints = [];
+    }
+
+    // Get the current offset within the loop
+    getLoopTime(now = Date.now() / 1000) {
+        return (Math.floor(now) - this.startTime) % this.loopDuration;
+    }
+
+    // Get active points at current time (could return multiple)
+    getActivePoints(now = Date.now() / 1000) {
+        const loopTime = this.getLoopTime(now);
+        return this.schedulePoints.filter(pt => loopTime === pt.offset);
+    }
+
+    // Get serialized (JSON) schedule for storage or sending
+    toJSON() {
+        return {
+            startTime: this.startTime,
+            loopDuration: this.loopDuration,
+            schedulePoints: this.schedulePoints.map(pt => ({
+                offset: pt.offset,
+                action: pt.action,
+                duration: pt.duration
+            }))
+        };
+    }
+
+    // Load from JSON
+    static fromJSON(json) {
+        const schedule = new Schedule(json.startTime, json.loopDuration);
+        json.schedulePoints.forEach(pt => {
+            schedule.addPoint(pt.offset, pt.action, pt.duration);
+        });
+        return schedule;
+    }
+}
+
+class ScheduleModel {
+    constructor() {
+        this.schedules = {
+            yearly: new Schedule()
+        };
+        this.loopDuration = loopDuration; // in seconds
+        this.schedulePoints = []; // array of SchedulePoint
+    }
+
+    static createYearlyLoop() {
+        
+    }
 }
   </script>
   <script>

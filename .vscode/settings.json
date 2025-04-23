@@ -77,7 +77,9 @@
         "format": "cpp",
         "text_encoding": "cpp",
         "variant": "cpp",
-        "expected": "cpp"
+        "expected": "cpp",
+        "complex": "cpp",
+        "netfwd": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.errorSquiggles": "enabled",

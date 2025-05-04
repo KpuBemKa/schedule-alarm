@@ -10,39 +10,22 @@ body {
     }
 }
 
-table {
-    width: 100%;
-    max-width: 400px;
-    border-collapse: collapse;
-}
-
-td {
-    padding: 5px;
-}
-
-/* label {
-    display: block;
-    margin-top: 10px;
-} */
-
-input {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-}
-
 button {
     font-size: 1rem;
     font-weight: bold;
 }
 
-hr {
-    margin: 1.5rem 0 1.5rem 0;
-}
-
 #scheduleTable {
     margin: 2rem 0 1rem 0;
+}
+
+.d-center-header {
+    text-align: center;
+    margin: 5px 0 10px;
+}
+
+.d-hidden {
+    display: none !important;
 }
 
 .d-row {
@@ -51,12 +34,97 @@ hr {
     gap: 10px;
 }
 
+.d-schedule-rows-container {
+    min-width: 400px;
+}
+
+.d-justify-end {
+    justify-content: end;
+}
+
+.d-justify-space-between {
+    justify-content: space-between;
+}
+
 .d-settings-row {
     margin-top: 1rem;
 }
 
 .d-schedule-label {
     font-size: 1.15rem;
+}
+
+.d-button {
+    font-size: 1em;
+    padding: 0.5em 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    background-color: #d7d7d7;
+}
+
+.d-margin-top-5 {
+    margin-top: 5px;
+}
+
+.d-margin-top-10 {
+    margin-top: 10px;
+}
+
+/* .d-position-relative {
+    position: relative;
+} */
+
+.d-popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .d-center-header {
+        line-height: 2rem;
+        margin: 0;
+    }
+
+    .d-schedule-wrapper {
+        position: relative;
+        max-width: 400px;
+        background-color: white;
+        border-radius: 5px;
+        padding: 10px;
+
+        .d-close-button {
+            width: 2rem;
+            height: 2rem;
+            position: absolute;
+            right: 0;
+            top: 0;
+            line-height: 2rem;
+            box-sizing: border-box;
+            text-align: center;
+            padding: 0;
+            font-weight: 900;
+            font-size: 1.25rem;
+            margin: 10px 10px 0 0;
+        }
+    }
+
+    .d-bottom-buttons {
+        display: flex;
+        gap: 10px;
+
+        button {
+            flex: 0 0 100px;
+        }
+    }
 }
 
 .button-container {

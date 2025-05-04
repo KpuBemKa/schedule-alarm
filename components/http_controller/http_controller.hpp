@@ -41,8 +41,6 @@ class HttpController
     static esp_err_t EmptyHandlerGET(httpd_req_t* req);
     /// @brief Handle to fetch the site favicon
     static esp_err_t FaviconHandlerGET(httpd_req_t* req);
-    /// @brief Handle to fetch the settings page
-    static esp_err_t SettingsPageHandlerGET(httpd_req_t* req);
 
     /// @brief /update_schedule
     static esp_err_t SchedulePOST(httpd_req_t* req);
@@ -60,7 +58,6 @@ class HttpController
     static esp_err_t SyncTimePOST(httpd_req_t* req);
 
     static esp_err_t SendFile(httpd_req_t* req, const std::string_view file_name, const std::string_view content_type);
-
     static esp_err_t SendString(httpd_req_t* req, const std::string_view string, const std::string_view content_type);
 
   private:

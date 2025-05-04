@@ -9,6 +9,9 @@
 #include "config.hpp"
 #include "esp_log.h"
 
+#include "schedules/schedule_daily.hpp"
+#include "schedules/schedule_monthly.hpp"
+
 const char TAG[] = "SCHEDULE";
 
 #define LOG_I(...) ESP_LOGI(TAG, __VA_ARGS__)
@@ -88,6 +91,124 @@ Schedule::ReindexSchedule()
     mSchedule->ReindexSchedule();
 
     xSemaphoreGive(xScheduleMutex);
+}
+
+esp_err_t
+Schedule::Load()
+{
+    std::string file_path(config::SPIFFS_BASE_PATH);
+    file_path.append("/").append(SCHEDULE_FILE);
+
+    FILE* file_ptr = fopen(file_path.c_str(), "r");
+    if (file_ptr == nullptr) {
+        LOG_E("%s:%d | Failed to open the schedule file.", __FILE__, __LINE__);
+        return ESP_ERR_NOT_FOUND;
+    }
+
+    // Retreive the file size
+    fseek(file_ptr, 0L, SEEK_END);
+    std::size_t file_size = ftell(file_ptr);
+    fseek(file_ptr, 0L, SEEK_SET);
+
+    // Reserve memory for the file
+    std::vector<uint8_t> file_buf(file_size, 0);
+
+    // Copy file data into the reserved memory
+    const std::size_t read_count = fread(file_buf.data(), sizeof(char), file_size, file_ptr);
+    if (read_count != file_size) {
+        LOG_E("%s:%d | Error reading the schedule file. Ammount of bytes read: %u", __FILE__, __LINE__, read_count);
+        return ESP_ERR_NOT_FINISHED;
+    }
+
+    return Deserialize(file_buf);
+}
+
+esp_err_t
+Schedule::Save()
+{
+    const std::expected<std::vector<uint8_t>, esp_err_t> serialize_result = Serialize();
+    if (!serialize_result.has_value()) {
+        LOG_E(
+          "%s:%d | Schedule serialization failed: %s", __FILE__, __LINE__, esp_err_to_name(serialize_result.error()));
+        return serialize_result.error();
+    }
+
+    std::string file_path(config::SPIFFS_BASE_PATH);
+    file_path.append("/").append(SCHEDULE_FILE);
+    FILE* file_ptr = fopen(file_path.c_str(), "w");
+    if (file_ptr == nullptr) {
+        LOG_E("%s:%d | Failed to open the schedule file.", __FILE__, __LINE__);
+        return ESP_ERR_NOT_FOUND;
+    }
+
+    const auto& serialized_schedule = serialize_result.value();
+    const std::size_t written =
+      fwrite(serialized_schedule.data(), sizeof(serialized_schedule[0]), serialized_schedule.size(), file_ptr);
+    if (written != serialized_schedule.size()) {
+        LOG_E("%s:%d | Failed to fully save the schedule file.", __FILE__, __LINE__);
+    }
+
+    fclose(file_ptr);
+    return written == serialized_schedule.size() ? ESP_OK : ESP_FAIL;
+}
+
+std::expected<std::vector<uint8_t>, esp_err_t>
+Schedule::Serialize() const
+{
+    if (xSemaphoreTake(xScheduleMutex, pdMS_TO_TICKS(10'000)) != pdTRUE) {
+        LOG_E("%s:%d | Failed to obtain the schedule resource in time.", __FILE__, __LINE__);
+        return std::unexpected(ESP_ERR_TIMEOUT);
+    }
+
+    std::vector<uint8_t> result;
+    result.push_back(static_cast<uint8_t>(mSchedule->GetScheduleType()));
+
+    const std::vector<uint8_t> serialized = mSchedule->Serialize();
+    result.insert(result.end(), serialized.begin(), serialized.end());
+    result.shrink_to_fit();
+
+    xSemaphoreGive(xScheduleMutex);
+    return result;
+}
+
+esp_err_t
+Schedule::Serialize(std::span<uint8_t> output) const
+{
+    return ESP_ERR_NOT_SUPPORTED;
+}
+
+esp_err_t
+Schedule::Deserialize(const std::span<const uint8_t> raw_data)
+{
+    if (xSemaphoreTake(xScheduleMutex, pdMS_TO_TICKS(10'000)) != pdTRUE) {
+        LOG_E("%s:%d | Failed to obtain the schedule resource in time.", __FILE__, __LINE__);
+        return ESP_ERR_TIMEOUT;
+    }
+
+    const ScheduleType schedule_type = static_cast<ScheduleType>(raw_data[0]);
+
+    switch (schedule_type) {
+        case ScheduleType::Daily:
+            mSchedule.reset(new ScheduleDaily());
+            break;
+
+        case ScheduleType::Monthly:
+            mSchedule.reset(new ScheduleMonthly());
+            break;
+
+        default:
+            return ESP_ERR_INVALID_ARG;
+            LOG_E("%s:%d | Invalid schedule type: %lu", __FILE__, __LINE__, static_cast<uint32_t>(schedule_type));
+            break;
+    }
+
+    std::expected<uint32_t, esp_err_t> result = mSchedule->Deserialize(raw_data.subspan(sizeof(schedule_type)));
+    if (!result.has_value()) {
+        return result.error();
+    }
+
+    xSemaphoreGive(xScheduleMutex);
+    return ESP_OK;
 }
 
 } // namespace schd

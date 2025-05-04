@@ -23,40 +23,57 @@
         </div>
 
         <div id="schedule" class="tab-content active">
-            <form id="alarmForm">
-                <div class="d-row">
-                    <label for="schedule_loop_type" class="d-schedule-label">Schedule loops: </label>
-                    <select name="schedule_loop_type" class="form-select" required>
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="yearly">Yearly</option>
-                        <option value="custom">Custom range</option>
-                    </select>
+            <form id="scheduleForm">
+                <div class="d-row d-justify-space-between">
+                    <div>
+                        <label for="schedule_loop_type" class="d-schedule-label">Schedule loops: </label>
+                        <select id="schedule-loop-type" name="schedule_loop_type" class="form-select"
+                            onchange="scheduleTypeSelectChanged()" required>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                            <option value="custom">Custom range</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="button" class="d-button">Upload</button>
+                        <button type="button" class="d-button">Refresh</button>
+                    </div>
                 </div>
 
-                <table id="scheduleTable">
-                    <tbody>
-                        <div class="d-year-view">
-                            <div class="c-calendar-container"></div>
-                        </div>
+                <div id="d-schedule-views">
+                    <div class="d-yearly-view">
+                        <div class="c-schedule-container"></div>
+                    </div>
 
-                        <div class="d-month-view">
-                        </div>
+                    <div class="d-monthly-view">
+                        <div class="c-schedule-container"></div>
+                    </div>
 
-                        <div class="d-week-view">
-                        </div>
+                    <div class="d-weekly-view">
+                        <div class="c-schedule-container"></div>
+                    </div>
 
-                        <div class="d-day-view">
+                    <div class="d-daily-view">
+                        <div class="d-schedule-wrapper">
+                            <div>
+                                <div class="d-schedule-rows-container"></div>
+                                <div class="d-row d-justify-end d-margin-top-10">
+                                    <button type="button" class="d-button d-add-schedule-point"
+                                        onclick="createDailyScheduleRow(document.querySelector('.d-daily-view .d-schedule-rows-container'), 0, 0)">+</button>
+                                </div>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="d-custom-range-view">
-                        </div>
-                    </tbody>
-                </table>
-                <button type="button" onclick="addScheduleRow()" class="schedule-button">Add Row</button>
+                    <div class="d-custom-view">
+                    </div>
+                </div>
+
+                <!-- <button type="button" onclick="addScheduleRow()" class="schedule-button">Add Row</button>
                 <button type="button" onclick="submitSchedule()" class="schedule-button">Submit</button>
-                <button type="button" onclick="fetchSchedule()" class="schedule-button">Load Schedule</button>
+                <button type="button" onclick="fetchSchedule()" class="schedule-button">Load Schedule</button> -->
             </form>
         </div>
 
@@ -94,15 +111,44 @@
         </div>
     </div>
 
-    <div id="schedule-day-popup" class="d-popup">
-
+    <!-- <div id="d-day-schedule-popup" class="d-popup-container d-hidden"> -->
+    <div id="d-day-schedule-popup" class="d-popup-container d-hidden"
+        onclick="if (event.target === event.currentTarget) closePopup()">
+        <div class="d-schedule-wrapper">
+            <div>
+                <h3 id="popup-header" class="d-center-header">
+                    Day editor
+                </h3>
+            </div>
+            <div>
+                <div class="d-schedule-rows-container"></div>
+                <div class="d-row d-margin-top-10 d-justify-end">
+                    <button class="d-button d-add-schedule-point"
+                        onclick="createDailyScheduleRow(document.querySelector('#d-day-schedule-popup .d-schedule-rows-container'), 0, 0)">+</button>
+                </div>
+            </div>
+            <div class="d-bottom-buttons">
+                <button class="d-button" onclick="savePopupSchedule()">Save</button>
+                <button class="d-button" onclick="closePopup(false)">Cancel</button>
+            </div>
+            <div class="d-button d-close-button" onclick="closePopup()">✕</div>
+            <div>
+                <input id="d-popup-monthIndex" type="hidden">
+                <input id="d-popup-dayIndex" type="hidden">
+            </div>
+        </div>
     </div>
 
-    <script type="text/javascript" src="index.js"></script>
-    <script type="text/javascript" src="calendar.js"></script>
-    <script type="text/javascript" src="schedule.js"></script>
+    <script src="calendar.js"></script>
+    <script src="schedule.js"></script>
+    <script src="connectors.js"></script>
+
+    <script src="index.js"></script>
     <script>
-        createCalendar("c-calendar-container", year);
+        createMonthCalendar("d-monthly-view .c-schedule-container", -1, onMonthlyDayClick)
+        createYearCalendar("d-yearly-view .c-schedule-container", onYearlyDayClick);
+
+        loadSchedule();
     </script>
 </body>
 

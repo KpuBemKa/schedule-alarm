@@ -41,10 +41,6 @@ HttpController::StartServer()
     constexpr httpd_uri_t uri_handler_get_favicon = {
         .uri = "/favicon.ico", .method = HTTP_GET, .handler = HttpController::FaviconHandlerGET, .user_ctx = nullptr
     };
-    constexpr httpd_uri_t uri_handler_settings_page = { .uri = "/settings.html",
-                                                        .method = HTTP_GET,
-                                                        .handler = HttpController::SettingsPageHandlerGET,
-                                                        .user_ctx = nullptr };
     constexpr httpd_uri_t uri_handler_get_time = {
         .uri = "/get_time", .method = HTTP_GET, .handler = HttpController::SystemTimeGET, .user_ctx = nullptr
     };
@@ -105,16 +101,6 @@ HttpController::StartServer()
               __FILE__,
               __LINE__,
               uri_handler_get_favicon.uri,
-              esp_err_to_name(esp_result));
-        full_success = false;
-    }
-
-    esp_result = httpd_register_uri_handler(mServerHandle, &uri_handler_settings_page);
-    if (esp_result != ESP_OK) {
-        LOG_E("%s:%d | Handler for '%s' could not be registered: %s",
-              __FILE__,
-              __LINE__,
-              uri_handler_settings_page.uri,
               esp_err_to_name(esp_result));
         full_success = false;
     }
@@ -237,12 +223,6 @@ HttpController::FaviconHandlerGET(httpd_req_t* req)
 }
 
 esp_err_t
-HttpController::SettingsPageHandlerGET(httpd_req_t* req)
-{
-    return SendFile(req, "/spiffs/settings.html", "text/html");
-}
-
-esp_err_t
 HttpController::SchedulePOST(httpd_req_t* req)
 {
     std::string schedule_raw_json;
@@ -307,6 +287,7 @@ HttpController::SchedulePOST(httpd_req_t* req)
 esp_err_t
 HttpController::ScheduleGET(httpd_req_t* req)
 {
+    return SendFile(req, "/spiffs/schedule.bin", "application/octet-stream");
     // auto self = reinterpret_cast<HttpController*>(req->user_ctx);
 
     // std::string schedule_json = self->mSchedule.ToJson();
@@ -317,7 +298,7 @@ HttpController::ScheduleGET(httpd_req_t* req)
     // }
 
     // return esp_result;
-    return ESP_ERR_NOT_SUPPORTED;
+    // return ESP_ERR_NOT_SUPPORTED;
 }
 
 esp_err_t

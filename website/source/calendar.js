@@ -1,62 +1,124 @@
-const calendarEl = document.getElementById('calendar');
-const popupEl = document.getElementById('popup');
-const popupContentEl = document.getElementById('popup-content');
+const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+];
 
-const year = new Date().getFullYear();
-const monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"];
-const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+const monthDayCounts = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-function createCalendar(targetClass, year, showPopupFunc) {
-    const calendarContainers = document.querySelectorAll(`.${targetClass}`);
+function monthIndexToName(monthIndex) {
+    return monthNames[monthIndex];
+}
 
-    calendarContainers.forEach(calendarEl => {
-        calendarEl.innerHTML = ''; // Clear previous content if any
+function createMonthBlock(monthIndex, onDayClick) {
+    let title = "";
+    let dayCount = "";
 
-        for (let month = 0; month < 12; month++) {
-            const monthDiv = document.createElement('div');
-            monthDiv.className = 'c-month';
-            monthDiv.innerHTML = `<h3>${monthNames[month]}</h3>`;
+    if (monthIndex >= 0) {
+        title = monthIndexToName(monthIndex);
+        dayCount = monthDayCounts[monthIndex];
+    } else {
+        title = "Month";
+        dayCount = 31;
+    }
 
-            const daysGrid = document.createElement('div');
-            daysGrid.className = 'c-days';
+    const monthDiv = document.createElement('div');
+    monthDiv.className = 'c-month';
 
-            weekdays.forEach(d => {
-                const wd = document.createElement('div');
-                wd.className = 'c-weekday';
-                wd.textContent = d;
-                daysGrid.appendChild(wd);
-            });
+    const titleEl = document.createElement('h3');
+    titleEl.textContent = title;
+    monthDiv.appendChild(titleEl);
 
-            const firstDay = new Date(year, month, 0).getDay();
-            const numDays = new Date(year, month + 1, 0).getDate();
+    const daysGrid = document.createElement('div');
+    daysGrid.className = 'c-days';
 
-            // empty slots before first day
-            for (let i = 0; i < firstDay; i++) {
-                const empty = document.createElement('div');
-                daysGrid.appendChild(empty);
-            }
+    for (let day = 1; day <= dayCount; day++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'c-day';
+        dayEl.textContent = day;
+        dayEl.addEventListener('click', () => {
+            onDayClick(monthIndex, day);
+        });
+        daysGrid.appendChild(dayEl);
+    }
 
-            for (let day = 1; day <= numDays; day++) {
-                const dayEl = document.createElement('div');
-                dayEl.className = 'c-day';
-                dayEl.textContent = day;
-                dayEl.addEventListener('click', () => showPopupFunc(`${year}-${month + 1}-${day}`));
-                daysGrid.appendChild(dayEl);
-            }
+    monthDiv.appendChild(daysGrid);
+    return monthDiv;
+}
 
-            monthDiv.appendChild(daysGrid);
-            calendarEl.appendChild(monthDiv);
-        }
+function createMonthCalendar(targetDivClass, monthIndex, onDayClick) {
+    const calendarContainers = document.querySelectorAll(`.${targetDivClass}`);
+    calendarContainers.forEach(containerEl => {
+        containerEl.innerHTML = '';
+        const monthEl = createMonthBlock(monthIndex, onDayClick);
+        containerEl.appendChild(monthEl);
     });
 }
 
-// function showPopup(dateString) {
-//     popupContentEl.innerHTML = `<h2>Selected Date: ${dateString}</h2>
-//         <p>You can add any custom UI or actions here, like forms, buttons, etc.</p>`;
-//     popupEl.style.display = 'block';
-// }
+function createYearCalendar(targetDivClass, onDayClick) {
+    const calendarContainers = document.querySelectorAll(`.${targetDivClass}`);
+    calendarContainers.forEach(containerEl => {
+        containerEl.innerHTML = '';
+        // const yearDiv = document.createElement('div');
+        // yearDiv.className = "c-schedule-container";
 
-// function closePopup() {
-//     popupEl.style.display = 'none';
-// }
+        for (let month = 0; month < 12; month++) {
+            const monthEl = createMonthBlock(month, onDayClick);
+            // yearDiv.appendChild(monthEl);
+            containerEl.appendChild(monthEl);
+        }
+
+        // containerEl.appendChild(yearDiv);
+    });
+}
+
+/// -------------
+
+function timeToSeconds(hhmmss) {
+    const [h, m, s] = hhmmss.split(':').map(Number);
+    return h * 3600 + m * 60 + s;
+}
+
+function secondsToTime(seconds) {
+    const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    return `${h}:${m}:${s}`;
+}
+
+function createDailyScheduleRow(rowsContainer, secondOfDay, actionType) {
+    const row = document.createElement('div');
+    row.classList.add('d-schedule-row', 'd-margin-top-10');
+
+    const timeInput = Object.assign(document.createElement('input'), {
+        type: 'time',
+        step: 1,
+        value: secondsToTime(secondOfDay),
+    });
+
+    const actionSelect = document.createElement('select');
+    actionSelect.innerHTML = `
+        <option value="${ActionType.CLOSE_RELAY}">Close Relay</option>
+        <option value="${ActionType.OPEN_RELAY}">Open Relay</option>
+    `;
+    actionSelect.value = actionType;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = '✕';
+    removeBtn.className = "d-button";
+
+    removeBtn.addEventListener('click', () => {
+        row.remove();
+    });
+
+    row.append(timeInput, actionSelect, removeBtn);
+    rowsContainer.appendChild(row);
+}
+
+function generateDailyScheduleRows(rowsContainer, initialSchedule = []) {
+    rowsContainer.innerHTML = "";
+    
+    initialSchedule.forEach(item => {
+        createDailyScheduleRow(rowsContainer, item.daySecond, item.fireAction)
+    });
+}
+

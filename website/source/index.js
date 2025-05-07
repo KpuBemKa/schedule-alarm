@@ -178,7 +178,7 @@ function loadSchedule() {
 
     generateDailyScheduleRows(
         document.querySelector(`.d-daily-view .d-schedule-rows-container`),
-        (deviceSchedule.scheduleType === "daily") ? storedSchedule : [{ daySecond: 0, fireAction: 0 }]
+        (deviceSchedule.scheduleType === "daily") ? deviceSchedule.schedule : [{ daySecond: 0, fireAction: 0 }]
     );
 
     if (deviceSchedule.scheduleType === 'weekly') {

@@ -102,6 +102,14 @@ function decodeMonthlySchedule(dataView) {
 
 function getSchedulePlacholder() {
     return {
+        scheduleType: "daily",
+        schedule: [{
+            "daySecond": 2730,
+            "fireAction": 0
+        }]
+    }
+
+    return {
         scheduleType: "monthly",
         schedule: [
             [

@@ -94,15 +94,18 @@ function createDailyScheduleRow(rowsContainer, secondOfDay, actionType) {
         step: 1,
         value: secondsToTime(secondOfDay),
     });
+    timeInput.classList.add("d-schedule-row-input");
 
     const actionSelect = document.createElement('select');
+    actionSelect.classList.add("d-schedule-row-input");
     actionSelect.innerHTML = `
-        <option value="${ActionType.CLOSE_RELAY}">Close Relay</option>
-        <option value="${ActionType.OPEN_RELAY}">Open Relay</option>
+    <option value="${ActionType.CLOSE_RELAY}">Close Relay</option>
+    <option value="${ActionType.OPEN_RELAY}">Open Relay</option>
     `;
     actionSelect.value = actionType;
 
     const removeBtn = document.createElement('button');
+    removeBtn.classList.add("d-schedule-row-input");
     removeBtn.textContent = '✕';
     removeBtn.className = "d-button";
 
@@ -110,13 +113,27 @@ function createDailyScheduleRow(rowsContainer, secondOfDay, actionType) {
         row.remove();
     });
 
-    row.append(timeInput, actionSelect, removeBtn);
+    const durationSelectContainer = document.createElement("div");
+    durationSelectContainer.classList.add("d-duration-select-container", "d-schedule-row-input");
+
+    const durationSelect = document.createElement("input");
+    durationSelect.type = "number";
+    durationSelect.value = 0;
+    durationSelect.min = 0;
+    durationSelect.max = Number.MAX_SAFE_INTEGER;
+
+    const durationSelectText = document.createElement("div");
+    durationSelectText.innerHTML = "sec";
+
+    durationSelectContainer.append(durationSelect, durationSelectText);
+
+    row.append(timeInput, actionSelect, durationSelectContainer, removeBtn);
     rowsContainer.appendChild(row);
 }
 
 function generateDailyScheduleRows(rowsContainer, initialSchedule = []) {
     rowsContainer.innerHTML = "";
-    
+
     initialSchedule.forEach(item => {
         createDailyScheduleRow(rowsContainer, item.daySecond, item.fireAction)
     });

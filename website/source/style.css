@@ -34,10 +34,6 @@ button {
     gap: 10px;
 }
 
-.d-schedule-rows-container {
-    min-width: 400px;
-}
-
 .d-justify-end {
     justify-content: end;
 }
@@ -113,10 +109,13 @@ button {
 
     .d-schedule-wrapper {
         position: relative;
-        max-width: 400px;
         background-color: white;
         border-radius: 5px;
         padding: 10px;
+
+        .d-popup-main-content {
+            margin-top: 2rem;
+        }
 
         .d-close-button {
             width: 2rem;

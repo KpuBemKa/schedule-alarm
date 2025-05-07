@@ -1,18 +1,19 @@
 const POPUP_WINDOW_ID = "d-day-schedule-popup";
+const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const schedule = new Schedule();
 
 
-function showTab(tabId) {
-    document.querySelectorAll('.tab').forEach(tab => {
+function showTab(tabGroup, tabId) {
+    document.querySelectorAll(`.${tabGroup} .tab`).forEach(tab => {
         tab.classList.remove('active');
     });
 
-    document.querySelectorAll('.tab-content').forEach(content => {
+    document.querySelectorAll(`.${tabGroup}.tab-content`).forEach(content => {
         content.classList.remove('active');
     });
 
-    document.querySelector(`.tab[onclick*="${tabId}"]`).classList.add('active');
+    document.querySelector(`.${tabGroup} .tab[onclick*="${tabId}"]`).classList.add('active');
     document.getElementById(tabId).classList.add('active');
 }
 
@@ -119,6 +120,57 @@ function savePopupSchedule() {
     closePopup(promptConfirm = false);
 }
 
+
+function generateWeeklyView() {
+    const weekViewTabGroup = "weekly-schedule";
+
+    const tabButtonsContainer = document.querySelector(".tab-group-weekly-schedule.tabs");
+    WEEK_DAYS.forEach(weekDay => {
+        weekDayButton = document.createElement("button");
+        weekDayButton.innerHTML = weekDay;
+        weekDayButton.classList = "tab";
+        weekDayButton.type = "button";
+
+        // `setAttribute()` adds the onclick attribute inside the html itself,
+        // which the `showTab()` then uses to find the button when user clicks it
+        weekDayButton.setAttribute("onclick", `showTab('tab-group-${weekViewTabGroup}', '${weekViewTabGroup}-${weekDay.toLowerCase()}')`);
+
+        tabButtonsContainer.appendChild(weekDayButton);
+    });
+
+    const WEEK_DAYSContainer = document.querySelector(".d-weekly-view .d-schedule-wrapper");
+    WEEK_DAYS.forEach(weekDay => {
+        const weekDayContainer = document.createElement("div");
+        weekDayContainer.classList.add(`tab-group-${weekViewTabGroup}`, "tab-content");
+        const containerId = `${weekViewTabGroup}-${weekDay.toLowerCase()}`
+        weekDayContainer.id = containerId;
+
+        const scheduleContainer = document.createElement("div");
+        scheduleContainer.classList.add("d-schedule-rows-container");
+        weekDayContainer.appendChild(scheduleContainer);
+        WEEK_DAYSContainer.appendChild(weekDayContainer);
+
+        generateDailyScheduleRows(
+            document.querySelector(`#${containerId} .d-schedule-rows-container`),
+            [{ daySecond: 0, fireAction: 0 }]
+        );
+
+        const addRowButtonContainer = document.createElement("div");
+        addRowButtonContainer.classList.add("d-row", "d-justify-end", "d-margin-top-10");
+
+        const addRowButton = document.createElement("button");
+        addRowButton.classList.add("d-button", "d-add-schedule-point");
+        addRowButton.type = "button";
+        addRowButton.onclick = () => createDailyScheduleRow(document.querySelector(`#${containerId} .d-schedule-rows-container`), 0, 0);
+        addRowButton.innerHTML = '+';
+
+        addRowButtonContainer.appendChild(addRowButton);
+        weekDayContainer.appendChild(addRowButtonContainer);
+    });
+
+    showTab(`tab-group-${weekViewTabGroup}`, `${weekViewTabGroup}-mon`)
+}
+
 function loadSchedule() {
     const deviceSchedule = fetchSchedule();
     schedule.setScheduleType(deviceSchedule.scheduleType);
@@ -128,6 +180,21 @@ function loadSchedule() {
         document.querySelector(`.d-daily-view .d-schedule-rows-container`),
         (deviceSchedule.scheduleType === "daily") ? storedSchedule : [{ daySecond: 0, fireAction: 0 }]
     );
+
+    if (deviceSchedule.scheduleType === 'weekly') {
+        if (WEEK_DAYS.length != deviceSchedule.schedule.length) {
+            throw new RangeError(`Device schedule does not have the correct amount of days for a weekly schedule type. Device days: ${deviceSchedule.schedule.length}; Required days: ${WEEK_DAYS.length}`);
+        }
+
+        for (let i = 0; i < WEEK_DAYS.length; ++i) {
+            const location = document.querySelector(
+                `#${weekViewTabGroup}-${WEEK_DAYS[i].toLowerCase()} .d-schedule-rows-container`
+            );
+            const data = deviceSchedule.schedule[i];
+
+            generateDailyScheduleRows(location, data);
+        }
+    }
 
     document.getElementById("schedule-loop-type").value = deviceSchedule.scheduleType;
 

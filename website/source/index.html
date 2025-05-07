@@ -17,12 +17,12 @@
     </div>
 
     <div>
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('schedule')">Schedule</button>
-            <button class="tab" onclick="showTab('settings')">Settings</button>
+        <div class="tab-group-main tabs">
+            <button class="tab active" onclick="showTab('tab-group-main', 'tab-schedule')">Schedule</button>
+            <button class="tab" onclick="showTab('tab-group-main', 'tab-settings')">Settings</button>
         </div>
 
-        <div id="schedule" class="tab-content active">
+        <div id="tab-schedule" class="tab-group-main tab-content active">
             <form id="scheduleForm">
                 <div class="d-row d-justify-space-between">
                     <div>
@@ -52,7 +52,8 @@
                     </div>
 
                     <div class="d-weekly-view">
-                        <div class="c-schedule-container"></div>
+                        <div class="tab-group-weekly-schedule tabs"></div>
+                        <div class="d-schedule-wrapper"></div>
                     </div>
 
                     <div class="d-daily-view">
@@ -77,35 +78,37 @@
             </form>
         </div>
 
-        <div id="settings" class="tab-content">
+        <div id="tab-settings" class="tab-group-main tab-content">
             <form id="settingsForm">
-                <div class="d-settings-row">
-                    <label for="wifi_ssid">Wi-Fi SSID:</label>
-                    <input type="text" id="wifi_ssid" name="wifi_ssid" required>
-                </div>
+                <div class="d-settings-content">
+                    <div class="d-settings-row">
+                        <label for="wifi_ssid">Wi-Fi SSID:</label>
+                        <input type="text" id="wifi_ssid" name="wifi_ssid" required>
+                    </div>
 
-                <div class="d-settings-row">
-                    <label for="wifi_password">Wi-Fi Password:</label>
-                    <input type="text" id="wifi_password" name="wifi_password">
-                </div>
+                    <div class="d-settings-row">
+                        <label for="wifi_password">Wi-Fi Password:</label>
+                        <input type="text" id="wifi_password" name="wifi_password">
+                    </div>
 
-                <div class="d-settings-row">
-                    <label for="remote_wifi_ssid">Remote Wi-Fi SSID:</label>
-                    <input type="text" id="remote_wifi_ssid" name="remote_wifi_ssid">
-                </div>
+                    <div class="d-settings-row">
+                        <label for="remote_wifi_ssid">Remote Wi-Fi SSID:</label>
+                        <input type="text" id="remote_wifi_ssid" name="remote_wifi_ssid">
+                    </div>
 
-                <div class="d-settings-row">
-                    <label for="remote_wifi_password">Remote Wi-Fi Password:</label>
-                    <input type="text" id="remote_wifi_password" name="remote_wifi_password">
-                </div>
+                    <div class="d-settings-row">
+                        <label for="remote_wifi_password">Remote Wi-Fi Password:</label>
+                        <input type="text" id="remote_wifi_password" name="remote_wifi_password">
+                    </div>
 
-                <div class="d-settings-row">
-                    <label for="timezone">Timezone format:</label>
-                    <input type="text" id="timezone" name="timezone">
-                </div>
+                    <div class="d-settings-row">
+                        <label for="timezone">Timezone format:</label>
+                        <input type="text" id="timezone" name="timezone">
+                    </div>
 
-                <div class="button-container">
-                    <button class="schedule-button" type="button" onclick="submitSettings()">Save Settings</button>
+                    <div class="button-container">
+                        <button class="d-button" type="button" onclick="submitSettings()">Save Settings</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -147,6 +150,7 @@
     <script>
         createMonthCalendar("d-monthly-view .c-schedule-container", -1, onMonthlyDayClick)
         createYearCalendar("d-yearly-view .c-schedule-container", onYearlyDayClick);
+        generateWeeklyView();
 
         loadSchedule();
     </script>

@@ -2,20 +2,18 @@
 
 #include <array>
 
-#include "schedule_daily.hpp"
+#include "schedule_monthly.hpp"
 
 namespace schd {
 
-class ScheduleMonthly : public ISchedule
+class ScheduleYearly : public ISchedule
 {
   public:
-    constexpr ScheduleType GetScheduleType() const override { return ScheduleType::Daily; }
-
     bool IsEmpty() const override { return mSchedule.empty(); };
     std::size_t GetPointsCount() const override { return mSchedule.size(); };
 
-    Action GetAction() const override { return mSchedule.at(GetLocalMonthDay() - 1).GetAction(); }
-    bool IsFired() const override { return mSchedule.at(GetLocalMonthDay() - 1).IsFired(); }
+    Action GetAction() const override { return mSchedule.at(GetLocalMonth()).GetAction(); }
+    bool IsFired() const override { return mSchedule.at(GetLocalMonth()).IsFired(); }
 
     void AdvanceSchedule() override;
     void ReindexSchedule() override;
@@ -25,12 +23,10 @@ class ScheduleMonthly : public ISchedule
     std::expected<uint32_t, esp_err_t> Deserialize(const std::span<const uint8_t> raw_data) override;
 
   private:
-    static std::size_t GetLocalMonthDay();
+    static std::size_t GetLocalMonth();
 
   private:
-    std::array<ScheduleDaily, 31> mSchedule;
+    std::array<ScheduleMonthly, 12> mSchedule;
 };
-
-
 
 } // namespace schd

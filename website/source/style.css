@@ -46,9 +46,26 @@ button {
     justify-content: space-between;
 }
 
-.d-settings-row {
-    margin-top: 1rem;
+.d-settings-content {
+    max-width: 400px;
+    margin: 0 auto 0 auto;
+
+    .d-settings-row {
+        margin-top: 1rem;
+    }
+
+    label {
+        display: block;
+    }
+
+    input {
+        padding: 5px;
+        width: 100%;
+        margin-top: 5px;
+        box-sizing: border-box;
+    }
 }
+
 
 .d-schedule-label {
     font-size: 1.15rem;
@@ -178,6 +195,11 @@ button {
 .tabs {
     display: flex;
     border-bottom: 2px solid #ccc;
+}
+
+.tab-group-weekly-schedule.tabs{
+    width: 600px;
+    margin: 2rem auto 0 auto;
 }
 
 .tab {

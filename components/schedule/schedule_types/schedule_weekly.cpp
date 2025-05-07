@@ -1,30 +1,35 @@
-#include "schedule_monthly.hpp"
+#include "schedule_weekly.hpp"
 
 namespace schd {
 
-std::size_t
-ScheduleMonthly::GetLocalMonthDay()
-{
+const char TAG[] = "SCHEDULE";
 
+#define LOG_I(...) ESP_LOGI(TAG, __VA_ARGS__)
+#define LOG_W(...) ESP_LOGW(TAG, __VA_ARGS__)
+#define LOG_E(...) ESP_LOGE(TAG, __VA_ARGS__)
+
+std::size_t
+ScheduleWeekly::GetLocalWeekDay()
+{
     const std::time_t raw_time = std::time(nullptr);
     const tm* const tl = localtime(&raw_time);
-    return static_cast<std::size_t>(tl->tm_mday);
+    return static_cast<std::size_t>(tl->tm_wday);
 }
 
 void
-ScheduleMonthly::AdvanceSchedule()
+ScheduleWeekly::AdvanceSchedule()
 {
-    mSchedule.at(GetLocalMonthDay() - 1).AdvanceSchedule();
+    mSchedule.at(GetLocalWeekDay() - 1).AdvanceSchedule();
 }
 
 void
-ScheduleMonthly::ReindexSchedule()
+ScheduleWeekly::ReindexSchedule()
 {
-    mSchedule.at(GetLocalMonthDay() - 1).ReindexSchedule();
+    mSchedule.at(GetLocalWeekDay() - 1).ReindexSchedule();
 }
 
 std::vector<uint8_t>
-ScheduleMonthly::Serialize() const
+ScheduleWeekly::Serialize() const
 {
     std::vector<uint8_t> result;
     for (const ScheduleDaily& schedule : mSchedule) {
@@ -37,13 +42,13 @@ ScheduleMonthly::Serialize() const
 }
 
 esp_err_t
-ScheduleMonthly::Serialize(std::span<uint8_t> output) const
+ScheduleWeekly::Serialize(std::span<uint8_t> output) const
 {
     return (ESP_ERR_NOT_FOUND);
 }
 
 std::expected<uint32_t, esp_err_t>
-ScheduleMonthly::Deserialize(const std::span<const uint8_t> raw_data)
+ScheduleWeekly::Deserialize(const std::span<const uint8_t> raw_data)
 {
     uint32_t read_count = 0;
     std::vector<uint8_t> result;
@@ -53,7 +58,11 @@ ScheduleMonthly::Deserialize(const std::span<const uint8_t> raw_data)
         const std::expected<uint32_t, esp_err_t> result = schedule.Deserialize(raw_data.subspan(read_count));
 
         if (!result.has_value()) {
-            LOG_E("%s:%d | Error deserializing monthly schedule at read_count = %lu: %s", __FILE__, __LINE__, read_count, esp_err_to_name(result.error()));
+            LOG_E("%s:%d | Error deserializing monthly schedule at read_count = %lu: %s",
+                  __FILE__,
+                  __LINE__,
+                  read_count,
+                  esp_err_to_name(result.error()));
             return result.error();
         }
 

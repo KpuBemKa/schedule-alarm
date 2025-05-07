@@ -9,8 +9,8 @@
 #include "config.hpp"
 #include "esp_log.h"
 
-#include "schedules/schedule_daily.hpp"
-#include "schedules/schedule_monthly.hpp"
+#include "schedule_types/schedule_daily.hpp"
+#include "schedule_types/schedule_monthly.hpp"
 
 const char TAG[] = "SCHEDULE";
 

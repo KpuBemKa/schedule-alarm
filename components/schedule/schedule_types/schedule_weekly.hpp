@@ -1,3 +1,38 @@
+#pragma once
+
+#include <array>
+
+#include "schedule_daily.hpp"
+
+namespace schd {
+
+class ScheduleWeekly : public ISchedule
+{
+  public:
+    constexpr ScheduleType GetScheduleType() const override { return ScheduleType::Weekly; }
+
+    bool IsEmpty() const override { return mSchedule.empty(); };
+    std::size_t GetPointsCount() const override { return mSchedule.size(); };
+
+    Action GetAction() const override { return mSchedule.at(GetLocalWeekDay()).GetAction(); }
+    bool IsFired() const override { return mSchedule.at(GetLocalWeekDay()).IsFired(); }
+
+    void AdvanceSchedule() override;
+    void ReindexSchedule() override;
+
+    std::vector<uint8_t> Serialize() const override;
+    esp_err_t Serialize(std::span<uint8_t> output) const override;
+    std::expected<uint32_t, esp_err_t> Deserialize(const std::span<const uint8_t> raw_data) override;
+
+  private:
+    static std::size_t GetLocalWeekDay();
+
+  private:
+    std::array<ScheduleDaily, 7> mSchedule;
+};
+
+} // namespace schd
+
 // #pragma once
 
 // #include <array>

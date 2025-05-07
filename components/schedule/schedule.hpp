@@ -6,7 +6,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 
-#include "schedules/i_schedule.hpp"
+#include "schedule_types/i_schedule.hpp"
 
 namespace schd {
 

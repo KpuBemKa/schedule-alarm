@@ -1,5 +1,13 @@
 #include "schedule_daily.hpp"
 
+#include "memory_utils.hpp"
+
+const char TAG[] = "SCHEDULE";
+
+#define LOG_I(...) ESP_LOGI(TAG, __VA_ARGS__)
+#define LOG_W(...) ESP_LOGW(TAG, __VA_ARGS__)
+#define LOG_E(...) ESP_LOGE(TAG, __VA_ARGS__)
+
 namespace schd {
 
 std::size_t
@@ -18,10 +26,7 @@ ScheduleDaily::Serialize() const
     std::vector<uint8_t> result;
     result.reserve(schedule_bytes + sizeof(uint32_t));
 
-    const uint32_t items_count = mSchedule.size();
-    result.insert(result.end(),
-                  reinterpret_cast<const uint8_t*>(&items_count),
-                  reinterpret_cast<const uint8_t*>(&items_count) + sizeof(items_count));
+    util::AppendAsBytes(result, mSchedule.size());
 
     const uint8_t* schedule_list_ptr = reinterpret_cast<const uint8_t*>(mSchedule.data());
     result.insert(result.end(), schedule_list_ptr, schedule_list_ptr + schedule_bytes);

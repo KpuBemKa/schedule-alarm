@@ -31,6 +31,21 @@ class DayScheduleItem {
     }
 }
 
+class CustomScheduleItem {
+    constructor(offsetSecond, action) {
+        this.offsetSecond = offsetSecond;
+        this.action = action;
+    }
+
+    serialize() {
+        const buffer = new ArrayBuffer(9);
+        const view = new DataView(buffer);
+        view.setBigUint64(0, this.offsetSecond, true); // little-endian
+        view.setUint8(8, this.action.type);
+        return new Uint8Array(buffer);
+    }
+}
+
 // Holds a list of schedule points for a single day
 class DaySchedule {
     constructor() {
@@ -56,6 +71,34 @@ class DaySchedule {
         new DataView(header).setUint32(0, this.items.length, true);
         const itemBuffers = this.items.map(item => item.serialize());
         return new Uint8Array([...new Uint8Array(header), ...itemBuffers.flat()]);
+    }
+}
+
+// Weekly schedule with 7 day slots
+class WeeklySchedule {
+    constructor() {
+        this.days = Array.from({ length: 7 }, () => new DaySchedule());
+    }
+
+    getDaySchedule(dayIndex) {
+        if (dayIndex < 0 || dayIndex >= 7) {
+            throw new Error("Invalid day index (must be 0–6 for days 1–7)");
+        }
+        return this.days[dayIndex];
+    }
+
+    serialize() {
+        const serializedDays = this.days.map(day => day.serialize());
+        const totalLength = serializedDays.reduce((sum, arr) => sum + arr.length, 0);
+        const output = new Uint8Array(totalLength);
+
+        let offset = 0;
+        for (const dayData of serializedDays) {
+            output.set(dayData, offset);
+            offset += dayData.length;
+        }
+
+        return output;
     }
 }
 
@@ -104,14 +147,34 @@ class YearlySchedule {
     }
 }
 
+class CustomSchedule {
+    constructor() {
+        this.startTime = 0;
+        this.loopTime = 0;
+        this.items = [];
+    }
+
+    serialize() {
+        const header = new ArrayBuffer(16);
+        const headerView = new DataView(header)
+        headerView.setBigUint64(0, this.startTime, true);
+        headerView.setBigUint64(0, this.loopTime, true);
+
+        const itemBuffers = this.items.map(item => item.serialize());
+        return new Uint8Array([...new Uint8Array(header), ...itemBuffers.flat()]);
+    }
+}
+
 class Schedule {
-    static SCHEDULE_TYPES = ["daily", "monthly", "yearly"];
+    static SCHEDULE_TYPES = ["daily", "weekly", "monthly", "yearly", "custom"];
 
     constructor(scheduleType = null) {
         this.schedules = {
             daily: new DaySchedule(),
+            weekly: new WeeklySchedule(),
             monthly: new MonthlySchedule(),
             yearly: new YearlySchedule(),
+            custom: new CustomSchedule(),
         };
         this.scheduleType = scheduleType;     // "daily", "monthly", etc.
     }
@@ -130,6 +193,10 @@ class Schedule {
                 this.schedules.daily.items = schedule;
                 break;
 
+            case "weekly":
+                this.schedules.weekly.getDaySchedule(dayIndex).items = schedule;
+                break;
+
             case "monthly":
                 this.schedules.monthly.getDaySchedule(dayIndex).items = schedule;
                 break;
@@ -137,6 +204,10 @@ class Schedule {
             case "yearly":
                 this.schedules.yearly.getMonthSchedule(monthIndex).getDaySchedule(dayIndex).items = schedule;
                 break;
+
+
+            case "custom":
+                throw new Error("Custom schedule type does not have day schedules. Use setSchedule() instead.")
 
             default:
                 throw new Error(`Unsupported operation for current schedule type: ${this.scheduleType}`);
@@ -147,6 +218,13 @@ class Schedule {
         switch (this.scheduleType) {
             case "daily":
                 this.schedules.daily.items = schedule;
+                break;
+
+            case "weekly":
+                if (schedule.length != 7)
+                    throw new RangeError("A weekly schedule should have 7 items.");
+
+                this.schedules.weekly.items = schedule;
                 break;
 
             case "monthly":
@@ -163,9 +241,19 @@ class Schedule {
                 this.schedules.yearly.items = schedule;
                 break;
 
+            case "custom":
+                this.schedules.custom.items = schedule;
+                break;
+
             default:
                 throw new Error(`Unsupported operation for current schedule type: ${this.scheduleType}`);
         }
+    }
+
+    setCustomScheduleParams(newStartTime, newLoopTime)
+    {
+        this.schedules.custom.startTime = newStartTime;
+        this.schedules.custom.loopTime = newLoopTime;
     }
 
     // Add a schedule point

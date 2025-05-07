@@ -9,12 +9,6 @@
 
 namespace schd {
 
-const char TAG[] = "SCHEDULE";
-
-#define LOG_I(...) ESP_LOGI(TAG, __VA_ARGS__)
-#define LOG_W(...) ESP_LOGW(TAG, __VA_ARGS__)
-#define LOG_E(...) ESP_LOGE(TAG, __VA_ARGS__)
-
 #pragma pack(1)
 struct SchedulePointDaily
 {

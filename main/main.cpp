@@ -24,7 +24,7 @@
 #include "config.hpp"
 #include "http_controller.hpp"
 #include "schedule.hpp"
-#include "schedules/schedule_daily.hpp"
+// #include "schedules/schedule_daily.hpp"
 #include "settings.hpp"
 #include "sleep.hpp"
 #include "sntp.hpp"

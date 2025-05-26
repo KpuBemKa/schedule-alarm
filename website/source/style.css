@@ -42,6 +42,10 @@ button {
     justify-content: space-between;
 }
 
+.d-justify-evenly {
+    justify-content: space-evenly;
+}
+
 .d-settings-content {
     max-width: 400px;
     margin: 0 auto 0 auto;
@@ -83,6 +87,14 @@ button {
 
 .d-margin-top-10 {
     margin-top: 10px;
+}
+
+.d-margin-top-1rem {
+    margin-top: 1rem;
+}
+
+.d-margin-top-1-5rem {
+    margin-top: 1.5rem;
 }
 
 /* .d-position-relative {
@@ -143,6 +155,32 @@ button {
     }
 }
 
+.d-border-wrong {
+    border: 2px dashed indianred;
+    border-radius: 5px;
+    padding: 3px;
+}
+
+.d-border-wrong-tab {
+    border-top: 3px solid indianred !important;
+}
+
+.d-custom-view {
+
+    .d-header label {
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .d-schedule-row-input {
+        width: 13.5rem;
+    }
+
+    .d-duration-select-container input {
+        width: calc(100% - 2.6rem);
+    }
+}
+
 .button-container {
     display: flex;
     justify-content: flex-end;
@@ -196,7 +234,7 @@ button {
     border-bottom: 2px solid #ccc;
 }
 
-.tab-group-weekly-schedule.tabs{
+.tab-group-weekly-schedule.tabs {
     width: 600px;
     margin: 2rem auto 0 auto;
 }

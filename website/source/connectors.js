@@ -102,10 +102,21 @@ function decodeMonthlySchedule(dataView) {
 
 function getSchedulePlacholder() {
     return {
+        scheduleType: "custom",
+        startTime: 10,
+        loopTime: 3000,
+        schedule: [{
+            "timeOffset": 2730,
+            "action": 0,
+            "duration": 0,
+        }]
+    }
+
+    return {
         scheduleType: "daily",
         schedule: [{
-            "daySecond": 2730,
-            "fireAction": 0
+            "timeOffset": 2730,
+            "action": 0
         }]
     }
 
@@ -114,952 +125,952 @@ function getSchedulePlacholder() {
         schedule: [
             [
                 {
-                    "daySecond": 2730,
-                    "fireAction": 0
+                    "timeOffset": 2730,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5078,
-                    "fireAction": 1
+                    "timeOffset": 5078,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5370,
-                    "fireAction": 1
+                    "timeOffset": 5370,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5871,
-                    "fireAction": 1
+                    "timeOffset": 5871,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7363,
-                    "fireAction": 0
+                    "timeOffset": 7363,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 1896,
-                    "fireAction": 0
+                    "timeOffset": 1896,
+                    "action": 0
                 },
                 {
-                    "daySecond": 3739,
-                    "fireAction": 0
+                    "timeOffset": 3739,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5514,
-                    "fireAction": 1
+                    "timeOffset": 5514,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7998,
-                    "fireAction": 1
+                    "timeOffset": 7998,
+                    "action": 1
                 },
                 {
-                    "daySecond": 9685,
-                    "fireAction": 1
+                    "timeOffset": 9685,
+                    "action": 1
                 },
                 {
-                    "daySecond": 12399,
-                    "fireAction": 1
+                    "timeOffset": 12399,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13731,
-                    "fireAction": 0
+                    "timeOffset": 13731,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14311,
-                    "fireAction": 1
+                    "timeOffset": 14311,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 941,
-                    "fireAction": 1
+                    "timeOffset": 941,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2057,
-                    "fireAction": 1
+                    "timeOffset": 2057,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4563,
-                    "fireAction": 0
+                    "timeOffset": 4563,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5603,
-                    "fireAction": 0
+                    "timeOffset": 5603,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8431,
-                    "fireAction": 0
+                    "timeOffset": 8431,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2350,
-                    "fireAction": 0
+                    "timeOffset": 2350,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5193,
-                    "fireAction": 1
+                    "timeOffset": 5193,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7266,
-                    "fireAction": 0
+                    "timeOffset": 7266,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7557,
-                    "fireAction": 1
+                    "timeOffset": 7557,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7817,
-                    "fireAction": 0
+                    "timeOffset": 7817,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9554,
-                    "fireAction": 0
+                    "timeOffset": 9554,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2517,
-                    "fireAction": 1
+                    "timeOffset": 2517,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4271,
-                    "fireAction": 0
+                    "timeOffset": 4271,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4425,
-                    "fireAction": 1
+                    "timeOffset": 4425,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7206,
-                    "fireAction": 0
+                    "timeOffset": 7206,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7866,
-                    "fireAction": 1
+                    "timeOffset": 7866,
+                    "action": 1
                 },
                 {
-                    "daySecond": 9901,
-                    "fireAction": 0
+                    "timeOffset": 9901,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12507,
-                    "fireAction": 1
+                    "timeOffset": 12507,
+                    "action": 1
                 },
                 {
-                    "daySecond": 15069,
-                    "fireAction": 1
+                    "timeOffset": 15069,
+                    "action": 1
                 },
                 {
-                    "daySecond": 16621,
-                    "fireAction": 1
+                    "timeOffset": 16621,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 2290,
-                    "fireAction": 1
+                    "timeOffset": 2290,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2808,
-                    "fireAction": 0
+                    "timeOffset": 2808,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6269,
-                    "fireAction": 1
+                    "timeOffset": 6269,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6276,
-                    "fireAction": 0
+                    "timeOffset": 6276,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8730,
-                    "fireAction": 0
+                    "timeOffset": 8730,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 457,
-                    "fireAction": 1
+                    "timeOffset": 457,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2926,
-                    "fireAction": 1
+                    "timeOffset": 2926,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4630,
-                    "fireAction": 1
+                    "timeOffset": 4630,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4644,
-                    "fireAction": 0
+                    "timeOffset": 4644,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7650,
-                    "fireAction": 1
+                    "timeOffset": 7650,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8664,
-                    "fireAction": 1
+                    "timeOffset": 8664,
+                    "action": 1
                 },
                 {
-                    "daySecond": 9288,
-                    "fireAction": 1
+                    "timeOffset": 9288,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1754,
-                    "fireAction": 0
+                    "timeOffset": 1754,
+                    "action": 0
                 },
                 {
-                    "daySecond": 3295,
-                    "fireAction": 1
+                    "timeOffset": 3295,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5558,
-                    "fireAction": 0
+                    "timeOffset": 5558,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8696,
-                    "fireAction": 0
+                    "timeOffset": 8696,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12168,
-                    "fireAction": 1
+                    "timeOffset": 12168,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13419,
-                    "fireAction": 0
+                    "timeOffset": 13419,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 3153,
-                    "fireAction": 1
+                    "timeOffset": 3153,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6164,
-                    "fireAction": 1
+                    "timeOffset": 6164,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8733,
-                    "fireAction": 0
+                    "timeOffset": 8733,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8997,
-                    "fireAction": 1
+                    "timeOffset": 8997,
+                    "action": 1
                 },
                 {
-                    "daySecond": 12424,
-                    "fireAction": 0
+                    "timeOffset": 12424,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14070,
-                    "fireAction": 0
+                    "timeOffset": 14070,
+                    "action": 0
                 },
                 {
-                    "daySecond": 17346,
-                    "fireAction": 1
+                    "timeOffset": 17346,
+                    "action": 1
                 },
                 {
-                    "daySecond": 19368,
-                    "fireAction": 0
+                    "timeOffset": 19368,
+                    "action": 0
                 },
                 {
-                    "daySecond": 22606,
-                    "fireAction": 0
+                    "timeOffset": 22606,
+                    "action": 0
                 },
                 {
-                    "daySecond": 24665,
-                    "fireAction": 1
+                    "timeOffset": 24665,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1928,
-                    "fireAction": 1
+                    "timeOffset": 1928,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5014,
-                    "fireAction": 1
+                    "timeOffset": 5014,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7878,
-                    "fireAction": 1
+                    "timeOffset": 7878,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8165,
-                    "fireAction": 1
+                    "timeOffset": 8165,
+                    "action": 1
                 },
                 {
-                    "daySecond": 11516,
-                    "fireAction": 1
+                    "timeOffset": 11516,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 579,
-                    "fireAction": 1
+                    "timeOffset": 579,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3495,
-                    "fireAction": 1
+                    "timeOffset": 3495,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6484,
-                    "fireAction": 1
+                    "timeOffset": 6484,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6894,
-                    "fireAction": 0
+                    "timeOffset": 6894,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8441,
-                    "fireAction": 0
+                    "timeOffset": 8441,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9985,
-                    "fireAction": 1
+                    "timeOffset": 9985,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10719,
-                    "fireAction": 0
+                    "timeOffset": 10719,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12214,
-                    "fireAction": 1
+                    "timeOffset": 12214,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 3175,
-                    "fireAction": 1
+                    "timeOffset": 3175,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6221,
-                    "fireAction": 1
+                    "timeOffset": 6221,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6572,
-                    "fireAction": 1
+                    "timeOffset": 6572,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8045,
-                    "fireAction": 1
+                    "timeOffset": 8045,
+                    "action": 1
                 },
                 {
-                    "daySecond": 9621,
-                    "fireAction": 1
+                    "timeOffset": 9621,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10416,
-                    "fireAction": 1
+                    "timeOffset": 10416,
+                    "action": 1
                 },
                 {
-                    "daySecond": 12273,
-                    "fireAction": 1
+                    "timeOffset": 12273,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 2138,
-                    "fireAction": 1
+                    "timeOffset": 2138,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4755,
-                    "fireAction": 1
+                    "timeOffset": 4755,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6103,
-                    "fireAction": 0
+                    "timeOffset": 6103,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6550,
-                    "fireAction": 0
+                    "timeOffset": 6550,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7582,
-                    "fireAction": 0
+                    "timeOffset": 7582,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9832,
-                    "fireAction": 1
+                    "timeOffset": 9832,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10809,
-                    "fireAction": 0
+                    "timeOffset": 10809,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14377,
-                    "fireAction": 0
+                    "timeOffset": 14377,
+                    "action": 0
                 },
                 {
-                    "daySecond": 16458,
-                    "fireAction": 0
+                    "timeOffset": 16458,
+                    "action": 0
                 },
                 {
-                    "daySecond": 19666,
-                    "fireAction": 0
+                    "timeOffset": 19666,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 1245,
-                    "fireAction": 0
+                    "timeOffset": 1245,
+                    "action": 0
                 },
                 {
-                    "daySecond": 2114,
-                    "fireAction": 1
+                    "timeOffset": 2114,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3932,
-                    "fireAction": 1
+                    "timeOffset": 3932,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4197,
-                    "fireAction": 1
+                    "timeOffset": 4197,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5909,
-                    "fireAction": 0
+                    "timeOffset": 5909,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7543,
-                    "fireAction": 1
+                    "timeOffset": 7543,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10972,
-                    "fireAction": 0
+                    "timeOffset": 10972,
+                    "action": 0
                 },
                 {
-                    "daySecond": 11504,
-                    "fireAction": 0
+                    "timeOffset": 11504,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12123,
-                    "fireAction": 0
+                    "timeOffset": 12123,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12224,
-                    "fireAction": 1
+                    "timeOffset": 12224,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 226,
-                    "fireAction": 0
+                    "timeOffset": 226,
+                    "action": 0
                 },
                 {
-                    "daySecond": 1307,
-                    "fireAction": 1
+                    "timeOffset": 1307,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2406,
-                    "fireAction": 1
+                    "timeOffset": 2406,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4961,
-                    "fireAction": 0
+                    "timeOffset": 4961,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6780,
-                    "fireAction": 1
+                    "timeOffset": 6780,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7204,
-                    "fireAction": 1
+                    "timeOffset": 7204,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7739,
-                    "fireAction": 0
+                    "timeOffset": 7739,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 384,
-                    "fireAction": 0
+                    "timeOffset": 384,
+                    "action": 0
                 },
                 {
-                    "daySecond": 1814,
-                    "fireAction": 1
+                    "timeOffset": 1814,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4813,
-                    "fireAction": 0
+                    "timeOffset": 4813,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8117,
-                    "fireAction": 1
+                    "timeOffset": 8117,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10485,
-                    "fireAction": 0
+                    "timeOffset": 10485,
+                    "action": 0
                 },
                 {
-                    "daySecond": 11303,
-                    "fireAction": 0
+                    "timeOffset": 11303,
+                    "action": 0
                 },
                 {
-                    "daySecond": 13644,
-                    "fireAction": 0
+                    "timeOffset": 13644,
+                    "action": 0
                 },
                 {
-                    "daySecond": 16711,
-                    "fireAction": 1
+                    "timeOffset": 16711,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1041,
-                    "fireAction": 1
+                    "timeOffset": 1041,
+                    "action": 1
                 },
                 {
-                    "daySecond": 1517,
-                    "fireAction": 1
+                    "timeOffset": 1517,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3295,
-                    "fireAction": 0
+                    "timeOffset": 3295,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5750,
-                    "fireAction": 0
+                    "timeOffset": 5750,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7546,
-                    "fireAction": 1
+                    "timeOffset": 7546,
+                    "action": 1
                 },
                 {
-                    "daySecond": 11036,
-                    "fireAction": 1
+                    "timeOffset": 11036,
+                    "action": 1
                 },
                 {
-                    "daySecond": 12406,
-                    "fireAction": 0
+                    "timeOffset": 12406,
+                    "action": 0
                 },
                 {
-                    "daySecond": 15571,
-                    "fireAction": 1
+                    "timeOffset": 15571,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 2558,
-                    "fireAction": 1
+                    "timeOffset": 2558,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5481,
-                    "fireAction": 1
+                    "timeOffset": 5481,
+                    "action": 1
                 },
                 {
-                    "daySecond": 9064,
-                    "fireAction": 0
+                    "timeOffset": 9064,
+                    "action": 0
                 },
                 {
-                    "daySecond": 11978,
-                    "fireAction": 0
+                    "timeOffset": 11978,
+                    "action": 0
                 },
                 {
-                    "daySecond": 15010,
-                    "fireAction": 1
+                    "timeOffset": 15010,
+                    "action": 1
                 },
                 {
-                    "daySecond": 15925,
-                    "fireAction": 0
+                    "timeOffset": 15925,
+                    "action": 0
                 },
                 {
-                    "daySecond": 19022,
-                    "fireAction": 1
+                    "timeOffset": 19022,
+                    "action": 1
                 },
                 {
-                    "daySecond": 19826,
-                    "fireAction": 1
+                    "timeOffset": 19826,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 394,
-                    "fireAction": 1
+                    "timeOffset": 394,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2484,
-                    "fireAction": 0
+                    "timeOffset": 2484,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4037,
-                    "fireAction": 1
+                    "timeOffset": 4037,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5078,
-                    "fireAction": 0
+                    "timeOffset": 5078,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5796,
-                    "fireAction": 1
+                    "timeOffset": 5796,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7120,
-                    "fireAction": 0
+                    "timeOffset": 7120,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9385,
-                    "fireAction": 1
+                    "timeOffset": 9385,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 3517,
-                    "fireAction": 0
+                    "timeOffset": 3517,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4858,
-                    "fireAction": 0
+                    "timeOffset": 4858,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7909,
-                    "fireAction": 0
+                    "timeOffset": 7909,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8328,
-                    "fireAction": 1
+                    "timeOffset": 8328,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10397,
-                    "fireAction": 1
+                    "timeOffset": 10397,
+                    "action": 1
                 },
                 {
-                    "daySecond": 11853,
-                    "fireAction": 0
+                    "timeOffset": 11853,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14587,
-                    "fireAction": 0
+                    "timeOffset": 14587,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14896,
-                    "fireAction": 0
+                    "timeOffset": 14896,
+                    "action": 0
                 },
                 {
-                    "daySecond": 15619,
-                    "fireAction": 0
+                    "timeOffset": 15619,
+                    "action": 0
                 },
                 {
-                    "daySecond": 15827,
-                    "fireAction": 1
+                    "timeOffset": 15827,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1244,
-                    "fireAction": 1
+                    "timeOffset": 1244,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2136,
-                    "fireAction": 1
+                    "timeOffset": 2136,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3859,
-                    "fireAction": 1
+                    "timeOffset": 3859,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5635,
-                    "fireAction": 0
+                    "timeOffset": 5635,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5762,
-                    "fireAction": 0
+                    "timeOffset": 5762,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2665,
-                    "fireAction": 1
+                    "timeOffset": 2665,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5923,
-                    "fireAction": 0
+                    "timeOffset": 5923,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6988,
-                    "fireAction": 0
+                    "timeOffset": 6988,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7197,
-                    "fireAction": 1
+                    "timeOffset": 7197,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7645,
-                    "fireAction": 1
+                    "timeOffset": 7645,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10727,
-                    "fireAction": 1
+                    "timeOffset": 10727,
+                    "action": 1
                 },
                 {
-                    "daySecond": 11852,
-                    "fireAction": 0
+                    "timeOffset": 11852,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14003,
-                    "fireAction": 1
+                    "timeOffset": 14003,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1966,
-                    "fireAction": 0
+                    "timeOffset": 1966,
+                    "action": 0
                 },
                 {
-                    "daySecond": 2301,
-                    "fireAction": 0
+                    "timeOffset": 2301,
+                    "action": 0
                 },
                 {
-                    "daySecond": 2997,
-                    "fireAction": 1
+                    "timeOffset": 2997,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3637,
-                    "fireAction": 1
+                    "timeOffset": 3637,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5031,
-                    "fireAction": 0
+                    "timeOffset": 5031,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2850,
-                    "fireAction": 0
+                    "timeOffset": 2850,
+                    "action": 0
                 },
                 {
-                    "daySecond": 3941,
-                    "fireAction": 0
+                    "timeOffset": 3941,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4281,
-                    "fireAction": 0
+                    "timeOffset": 4281,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7065,
-                    "fireAction": 1
+                    "timeOffset": 7065,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8588,
-                    "fireAction": 0
+                    "timeOffset": 8588,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2191,
-                    "fireAction": 0
+                    "timeOffset": 2191,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4190,
-                    "fireAction": 0
+                    "timeOffset": 4190,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6896,
-                    "fireAction": 0
+                    "timeOffset": 6896,
+                    "action": 0
                 },
                 {
-                    "daySecond": 10376,
-                    "fireAction": 0
+                    "timeOffset": 10376,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12294,
-                    "fireAction": 1
+                    "timeOffset": 12294,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13098,
-                    "fireAction": 0
+                    "timeOffset": 13098,
+                    "action": 0
                 },
                 {
-                    "daySecond": 16105,
-                    "fireAction": 0
+                    "timeOffset": 16105,
+                    "action": 0
                 },
                 {
-                    "daySecond": 18978,
-                    "fireAction": 1
+                    "timeOffset": 18978,
+                    "action": 1
                 },
                 {
-                    "daySecond": 21961,
-                    "fireAction": 0
+                    "timeOffset": 21961,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2212,
-                    "fireAction": 1
+                    "timeOffset": 2212,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4439,
-                    "fireAction": 1
+                    "timeOffset": 4439,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6718,
-                    "fireAction": 1
+                    "timeOffset": 6718,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8317,
-                    "fireAction": 0
+                    "timeOffset": 8317,
+                    "action": 0
                 },
                 {
-                    "daySecond": 10970,
-                    "fireAction": 1
+                    "timeOffset": 10970,
+                    "action": 1
                 },
                 {
-                    "daySecond": 14333,
-                    "fireAction": 0
+                    "timeOffset": 14333,
+                    "action": 0
                 },
                 {
-                    "daySecond": 17362,
-                    "fireAction": 1
+                    "timeOffset": 17362,
+                    "action": 1
                 },
                 {
-                    "daySecond": 19572,
-                    "fireAction": 1
+                    "timeOffset": 19572,
+                    "action": 1
                 },
                 {
-                    "daySecond": 20915,
-                    "fireAction": 0
+                    "timeOffset": 20915,
+                    "action": 0
                 },
                 {
-                    "daySecond": 21015,
-                    "fireAction": 0
+                    "timeOffset": 21015,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 1001,
-                    "fireAction": 1
+                    "timeOffset": 1001,
+                    "action": 1
                 },
                 {
-                    "daySecond": 1763,
-                    "fireAction": 0
+                    "timeOffset": 1763,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4162,
-                    "fireAction": 0
+                    "timeOffset": 4162,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6015,
-                    "fireAction": 0
+                    "timeOffset": 6015,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6196,
-                    "fireAction": 1
+                    "timeOffset": 6196,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7417,
-                    "fireAction": 1
+                    "timeOffset": 7417,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 3160,
-                    "fireAction": 0
+                    "timeOffset": 3160,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4956,
-                    "fireAction": 1
+                    "timeOffset": 4956,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6874,
-                    "fireAction": 1
+                    "timeOffset": 6874,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8315,
-                    "fireAction": 0
+                    "timeOffset": 8315,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9724,
-                    "fireAction": 1
+                    "timeOffset": 9724,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 3380,
-                    "fireAction": 1
+                    "timeOffset": 3380,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4975,
-                    "fireAction": 0
+                    "timeOffset": 4975,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6309,
-                    "fireAction": 1
+                    "timeOffset": 6309,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8021,
-                    "fireAction": 0
+                    "timeOffset": 8021,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9734,
-                    "fireAction": 1
+                    "timeOffset": 9734,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13223,
-                    "fireAction": 1
+                    "timeOffset": 13223,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13371,
-                    "fireAction": 1
+                    "timeOffset": 13371,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13476,
-                    "fireAction": 0
+                    "timeOffset": 13476,
+                    "action": 0
                 },
                 {
-                    "daySecond": 17017,
-                    "fireAction": 1
+                    "timeOffset": 17017,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1567,
-                    "fireAction": 1
+                    "timeOffset": 1567,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3240,
-                    "fireAction": 1
+                    "timeOffset": 3240,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4273,
-                    "fireAction": 1
+                    "timeOffset": 4273,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6604,
-                    "fireAction": 1
+                    "timeOffset": 6604,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8785,
-                    "fireAction": 1
+                    "timeOffset": 8785,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10111,
-                    "fireAction": 1
+                    "timeOffset": 10111,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 3487,
-                    "fireAction": 1
+                    "timeOffset": 3487,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6777,
-                    "fireAction": 1
+                    "timeOffset": 6777,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6868,
-                    "fireAction": 0
+                    "timeOffset": 6868,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9240,
-                    "fireAction": 1
+                    "timeOffset": 9240,
+                    "action": 1
                 },
                 {
-                    "daySecond": 12402,
-                    "fireAction": 0
+                    "timeOffset": 12402,
+                    "action": 0
                 }
             ]
         ]

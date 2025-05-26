@@ -31,10 +31,10 @@ function createMonthBlock(monthIndex, onDayClick) {
     const daysGrid = document.createElement('div');
     daysGrid.className = 'c-days';
 
-    for (let day = 1; day <= dayCount; day++) {
+    for (let day = 0; day < dayCount; ++day) {
         const dayEl = document.createElement('div');
         dayEl.className = 'c-day';
-        dayEl.textContent = day;
+        dayEl.textContent = day + 1;
         dayEl.addEventListener('click', () => {
             onDayClick(monthIndex, day);
         });
@@ -85,14 +85,14 @@ function secondsToTime(seconds) {
     return `${h}:${m}:${s}`;
 }
 
-function createDailyScheduleRow(rowsContainer, secondOfDay, actionType) {
+function createDailyScheduleRow(rowsContainer, daySecond = 0, actionType = 0, duration = 0) {
     const row = document.createElement('div');
     row.classList.add('d-schedule-row', 'd-margin-top-10');
 
     const timeInput = Object.assign(document.createElement('input'), {
         type: 'time',
         step: 1,
-        value: secondsToTime(secondOfDay),
+        value: secondsToTime(daySecond),
     });
     timeInput.classList.add("d-schedule-row-input");
 
@@ -118,7 +118,7 @@ function createDailyScheduleRow(rowsContainer, secondOfDay, actionType) {
 
     const durationSelect = document.createElement("input");
     durationSelect.type = "number";
-    durationSelect.value = 0;
+    durationSelect.value = duration;
     durationSelect.min = 0;
     durationSelect.max = Number.MAX_SAFE_INTEGER;
 
@@ -131,11 +131,16 @@ function createDailyScheduleRow(rowsContainer, secondOfDay, actionType) {
     rowsContainer.appendChild(row);
 }
 
-function generateDailyScheduleRows(rowsContainer, initialSchedule = []) {
+function generateDailyScheduleRows(rowsContainer, initialSchedule = [{ timeOffset: 0, action: 0, duration: 0 }]) {
     rowsContainer.innerHTML = "";
 
     initialSchedule.forEach(item => {
-        createDailyScheduleRow(rowsContainer, item.daySecond, item.fireAction)
+        createDailyScheduleRow(
+            rowsContainer,
+            item.timeOffset,
+            item.action.type,
+            item.duration
+        );
     });
 }
 

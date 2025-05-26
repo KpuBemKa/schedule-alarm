@@ -1,8 +1,34 @@
 const POPUP_WINDOW_ID = "d-day-schedule-popup";
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+
 const schedule = new Schedule();
 
+
+function getScheduleTypeSelection() {
+    return document.getElementById("schedule-loop-type").value;
+}
+
+/**
+ * 
+ * @param { String } rowsSelector 
+ * @returns { [SchedulePoint] }
+ */
+function getScheduleFromBaseRows(rowsSelector) {
+    let scheduleData = [];
+
+    document.querySelectorAll(rowsSelector).forEach(scheduleRow => {
+        scheduleData.push(new SchedulePoint(
+            timeToSeconds(scheduleRow.children[0].value),
+            Number(scheduleRow.children[1].value),
+            Number(scheduleRow.children[2].children[0].value)
+        ));
+    });
+
+    scheduleData.sort((a, b) => a.timeOffset - b.timeOffset);
+
+    return scheduleData;
+}
 
 function showTab(tabGroup, tabId) {
     document.querySelectorAll(`.${tabGroup} .tab`).forEach(tab => {
@@ -18,9 +44,9 @@ function showTab(tabGroup, tabId) {
 }
 
 function scheduleTypeSelectChanged() {
-    const newType = document.getElementById("schedule-loop-type").value;
+    const newType = getScheduleTypeSelection();
     const targetClass = `d-${newType}-view`;
-    console.log(targetClass);
+    // console.log(targetClass);
 
     const viewsHolder = document.getElementById("d-schedule-views");
     // console.log(viewsHolder.children);
@@ -54,73 +80,6 @@ function onMonthlyDayClick(_, day) {
     showPopup({ dayIndex: day });
 }
 
-function showPopup({ monthIndex = -1, dayIndex = 0 }) {
-    document.getElementById(POPUP_WINDOW_ID).classList.remove("d-hidden");
-    const rowsContainer = document.querySelector(`#${POPUP_WINDOW_ID} .d-schedule-rows-container`);
-    const storedSchedule = schedule.getDaySchedule({ monthIndex: monthIndex, dayIndex: dayIndex });
-    generateDailyScheduleRows(rowsContainer, (storedSchedule != undefined && storedSchedule.length != 0) ? storedSchedule : [{ daySecond: 0, fireAction: 0 }]);
-
-    let headerText;
-    if (monthIndex >= 0)
-        headerText = `${monthIndexToName(monthIndex)} ${dayIndex}`;
-    else
-        headerText = `Day: ${dayIndex}`
-
-    const editorHeader = document.querySelector(`#${POPUP_WINDOW_ID} #popup-header`);
-    editorHeader.innerHTML = headerText;
-
-    document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-monthIndex`).value = monthIndex;
-    document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-dayIndex`).value = dayIndex;
-}
-
-function closePopup(promptConfirm = true) {
-    // check if the confirmation should be asked, then, if confirmation declined, skip the closing process
-    if (promptConfirm && !confirm("Close the editor without saving?")) {
-        return;
-    }
-
-    document.getElementById(POPUP_WINDOW_ID).classList.add("d-hidden");
-}
-
-function savePopupSchedule() {
-    const scheduleRows = document.querySelectorAll(`#${POPUP_WINDOW_ID} .d-schedule-row`);
-    console.log(scheduleRows);
-
-    const newDayschedule = [];
-    scheduleRows.forEach(scheduleRow => {
-        const time = scheduleRow.children[0].value;
-        const action = scheduleRow.children[1].value;
-
-        newDayschedule.push({
-            daySecond: timeToSeconds(time),
-            fireAction: action
-        });
-    });
-
-    newDayschedule.sort((lhs, rhs) => {
-        if (rhs.daySecond > lhs.daySecond)
-            return -1
-        else if (rhs.daySecond < lhs.daySecond)
-            return 1
-
-        return 0;
-    });
-
-    const monthIndex = document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-monthIndex`).value;
-    const dayIndex = document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-dayIndex`).value;
-
-    // console.log(`Day index: ${dayIndex}, Month index: ${monthIndex}`);
-
-    schedule.setDaySchedule({
-        schedule: newDayschedule,
-        monthIndex: Number(monthIndex),
-        dayIndex: Number(dayIndex)
-    });
-
-    closePopup(promptConfirm = false);
-}
-
-
 function generateWeeklyView() {
     const weekViewTabGroup = "weekly-schedule";
 
@@ -150,10 +109,7 @@ function generateWeeklyView() {
         weekDayContainer.appendChild(scheduleContainer);
         WEEK_DAYSContainer.appendChild(weekDayContainer);
 
-        generateDailyScheduleRows(
-            document.querySelector(`#${containerId} .d-schedule-rows-container`),
-            [{ daySecond: 0, fireAction: 0 }]
-        );
+        generateDailyScheduleRows(document.querySelector(`#${containerId} .d-schedule-rows-container`));
 
         const addRowButtonContainer = document.createElement("div");
         addRowButtonContainer.classList.add("d-row", "d-justify-end", "d-margin-top-10");
@@ -161,7 +117,7 @@ function generateWeeklyView() {
         const addRowButton = document.createElement("button");
         addRowButton.classList.add("d-button", "d-add-schedule-point");
         addRowButton.type = "button";
-        addRowButton.onclick = () => createDailyScheduleRow(document.querySelector(`#${containerId} .d-schedule-rows-container`), 0, 0);
+        addRowButton.onclick = () => createDailyScheduleRow(document.querySelector(`#${containerId} .d-schedule-rows-container`));
         addRowButton.innerHTML = '+';
 
         addRowButtonContainer.appendChild(addRowButton);
@@ -171,14 +127,107 @@ function generateWeeklyView() {
     showTab(`tab-group-${weekViewTabGroup}`, `${weekViewTabGroup}-mon`)
 }
 
+function showPopup({ monthIndex = -1, dayIndex = 0 }) {
+    document.getElementById(POPUP_WINDOW_ID).classList.remove("d-hidden");
+    const rowsContainer = document.querySelector(`#${POPUP_WINDOW_ID} .d-schedule-rows-container`);
+    const storedSchedule = schedule.getDaySchedule({ monthIndex: monthIndex, dayIndex: dayIndex });
+    // console.log(storedSchedule);
+    generateDailyScheduleRows(rowsContainer, (storedSchedule && storedSchedule.length > 0) ? storedSchedule : undefined);
+
+    let headerText;
+    if (monthIndex == -1)
+        headerText = `Day: ${dayIndex + 1}`;
+    else
+        headerText = `${monthIndexToName(monthIndex)} ${dayIndex}`;
+
+    const editorHeader = document.querySelector(`#${POPUP_WINDOW_ID} #popup-header`);
+    editorHeader.innerHTML = headerText;
+
+    document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-monthIndex`).value = monthIndex;
+    document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-dayIndex`).value = dayIndex;
+}
+
+function closePopup(promptConfirm = true) {
+    // check if the confirmation should be asked, then, if user cancels the closing, skip the closing process
+    if (promptConfirm && !confirm("Close the editor without saving?"))
+        return;
+
+    document.getElementById(POPUP_WINDOW_ID).classList.add("d-hidden");
+}
+
+function savePopupSchedule() {
+    const monthIndex = document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-monthIndex`).value;
+    const dayIndex = document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-dayIndex`).value;
+
+    if (saveDailySchedule(`#${POPUP_WINDOW_ID}`, monthIndex, dayIndex))
+        closePopup(promptConfirm = false);
+
+    // const newDaySchedule = getScheduleFromBaseRows(`#${POPUP_WINDOW_ID} .d-schedule-row`);
+
+    // newDaySchedule.sort((lhs, rhs) => {
+    //     if (rhs.daySecond > lhs.daySecond)
+    //         return -1
+
+    //     if (rhs.daySecond < lhs.daySecond)
+    //         return 1
+
+    //     return 0;
+    // }); 1
+
+    // const invalidItems = schedule.getInvalidItemsDaily(newDaySchedule);
+
+    // if (invalidItems.invalidIndexes.length == 0) {
+    //     const monthIndex = document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-monthIndex`).value;
+    //     const dayIndex = document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-dayIndex`).value;
+
+    //     schedule.setDaySchedule({
+    //         schedule: newDaySchedule,
+    //         monthIndex: Number(monthIndex),
+    //         dayIndex: Number(dayIndex)
+    //     });
+
+    //     closePopup(promptConfirm = false);
+    //     return;
+    // }
+
+    // // re-generate the rows with the sorted schedule
+    // generateDailyScheduleRows(
+    //     document.querySelector(`#${POPUP_WINDOW_ID} .d-schedule-rows-container`),
+    //     newDaySchedule
+    // );
+
+    // // re-querry the rows after the re-generation
+    // let scheduleRows = document.querySelectorAll(`#${POPUP_WINDOW_ID} .d-schedule-row`);
+    // // and mark the invalid rows
+    // invalidItems.invalidIndexes.forEach(index => {
+    //     scheduleRows[index].classList.add('d-border-wrong');
+    // })
+
+    // alert('Some issues have been found with the schedule:\n' +
+    //     `${invalidItems.reasons.map(reason => `  - ${InvalidReason.toString(reason)};`).join("\n")}\n\n` +
+    //     'Invalid items have been marked with red.');
+}
+
 function loadSchedule() {
     const deviceSchedule = fetchSchedule();
+
+    if (deviceSchedule.scheduleType === 'custom') {
+        document.getElementById('startTime').value = new Date(deviceSchedule.startTime * 1_000).toISOString().slice(0, 19);
+        document.getElementById('loopTime').value = deviceSchedule.loopTime;
+        schedule.setCustomScheduleParams(deviceSchedule.startTime, deviceSchedule.loopTime);
+    }
+
     schedule.setScheduleType(deviceSchedule.scheduleType);
     schedule.setSchedule(deviceSchedule.schedule);
 
     generateDailyScheduleRows(
         document.querySelector(`.d-daily-view .d-schedule-rows-container`),
-        (deviceSchedule.scheduleType === "daily") ? deviceSchedule.schedule : [{ daySecond: 0, fireAction: 0 }]
+        (deviceSchedule.scheduleType === "daily") ? deviceSchedule.schedule : undefined
+    );
+
+    generateDailyScheduleRows(
+        document.querySelector(`.d-custom-view .d-schedule-rows-container`),
+        (deviceSchedule.scheduleType === "custom") ? deviceSchedule.schedule : undefined
     );
 
     if (deviceSchedule.scheduleType === 'weekly') {
@@ -186,17 +235,175 @@ function loadSchedule() {
             throw new RangeError(`Device schedule does not have the correct amount of days for a weekly schedule type. Device days: ${deviceSchedule.schedule.length}; Required days: ${WEEK_DAYS.length}`);
         }
 
-        for (let i = 0; i < WEEK_DAYS.length; ++i) {
+        WEEK_DAYS.forEach((weekDay, index) => {
             const location = document.querySelector(
-                `#${weekViewTabGroup}-${WEEK_DAYS[i].toLowerCase()} .d-schedule-rows-container`
+                `#${weekViewTabGroup}-${weekDay.toLowerCase()} .d-schedule-rows-container`
             );
-            const data = deviceSchedule.schedule[i];
+            const data = deviceSchedule.schedule[index];
 
             generateDailyScheduleRows(location, data);
-        }
+        });
     }
 
     document.getElementById("schedule-loop-type").value = deviceSchedule.scheduleType;
 
     scheduleTypeSelectChanged();
+}
+
+/**
+ * @param { String } scheduleContainer 
+ * A HTML element inside of which the desired schedule is located.
+ * Should include both the rows & the rows' container.
+ * Identifier should include the prefix: '.', '#' or nothing.
+ * @returns { Boolean } Whether the saving was successful or not: true in case of success, false otherwise.
+ */
+function saveDailySchedule(scheduleContainer, monthIndex, dayIndex) {
+    try {
+        const userSchedule = getScheduleFromBaseRows(`${scheduleContainer} .d-schedule-row`);
+
+        // re-generate the rows with the sorted schedule
+        generateDailyScheduleRows(document.querySelector(`${scheduleContainer} .d-schedule-rows-container`), userSchedule);
+
+        schedule.setDaySchedule({ schedule: userSchedule, monthIndex: monthIndex, dayIndex: dayIndex });
+
+        return true;
+    }
+    catch (error) {
+        if (!(error instanceof InvalidScheduleException))
+            throw error;
+
+        /** @type { [{ index: Number, reason: InvalidReason }] } */
+        const invalidPoints = error.params.invalidPoints;
+        const invalidReasons = new Set();
+        const invalidIndexes = new Set();
+        invalidPoints.forEach(invalidPoint => {
+            invalidIndexes.add(invalidPoint.index);
+            invalidReasons.add(invalidPoint.reason);
+        });
+
+        const scheduleRows = document.querySelectorAll(`${scheduleContainer} .d-schedule-row`);
+        invalidIndexes.forEach((_, invalidIndex) => scheduleRows[invalidIndex].classList.add('d-border-wrong'));
+
+        const invalidReasonsString =
+            Array.from(
+                invalidReasons,
+                reason => `  - ${InvalidReason.toString(reason)};`
+            ).join("\n");
+
+        alert(
+            'Some issues have been found with the schedule:\n' +
+            `${invalidReasonsString}\n\n` +
+            'Invalid items have been marked with red.'
+        );
+
+        return false;
+    }
+}
+
+function saveWeeklySchedule() {
+    try {
+        /** @type { [[SchedulePoint]] } */
+        const userSchedule = [];
+        WEEK_DAYS.forEach((weekDay) => {
+            userSchedule.push(
+                getScheduleFromBaseRows(`#weekly-schedule-${weekDay.toLowerCase()} .d-schedule-row`)
+            );
+        });
+
+        // re-generate the rows with the sorted schedule
+        WEEK_DAYS.forEach((weekDay, index) => {
+            const location = document.querySelector(
+                `#weekly-schedule-${weekDay.toLowerCase()} .d-schedule-rows-container`
+            );
+            const data = userSchedule[index];
+
+            generateDailyScheduleRows(location, data);
+        });
+
+        // try to save the schedule, even if it is invalid
+        schedule.setSchedule(userSchedule);
+    }
+    catch (error) {
+        if (!(error instanceof InvalidScheduleException))
+            throw error;
+
+        /** @type { [{dayIndex: Number, invalidPoints: [{ index: Number, reason: InvalidReason }]}] } */
+        const invalidDays = error.params.invalidDays;
+        const invalidReasons = new Set();
+        const invalidIndexes = Array.from({ length: 7 }, () => new Set());
+        invalidDays.forEach(invalidDay => {
+            invalidDay.invalidPoints.forEach((invalidPoint) => {
+                invalidIndexes[invalidDay.dayIndex].add(invalidPoint.index);
+                invalidReasons.add(invalidPoint.reason);
+            });
+        });
+
+        WEEK_DAYS.forEach((weekDay, weekDayIndex) => {
+            const weekRows = document.querySelectorAll(`#weekly-schedule-${weekDay.toLowerCase()} .d-schedule-row`);
+            invalidIndexes[weekDayIndex].forEach(pointIndex => {
+                weekRows[pointIndex].classList.add('d-border-wrong');
+            });
+        });
+
+        const weekDayTabButtons = document.querySelectorAll('.tab-group-weekly-schedule.tabs button');
+        invalidIndexes.forEach((dayInvalidPoints, index) => {
+            if (dayInvalidPoints.size !== 0)
+                weekDayTabButtons[index].classList.add('d-border-wrong-tab');
+            else
+                weekDayTabButtons[index].classList.remove('d-border-wrong-tab');
+
+        })
+
+        const invalidReasonsString =
+            Array.from(
+                invalidReasons,
+                reason => `  - ${InvalidReason.toString(reason)};`
+            ).join("\n");
+
+        alert(
+            'Some issues have been found with the schedule:\n' +
+            `${invalidReasonsString}\n\n` +
+            'Invalid items have been marked with red.'
+        );
+    }
+}
+
+function saveScheduleData() {
+    const selectedType = getScheduleTypeSelection();
+    if (schedule.scheduleType != selectedType)
+        throw new EvalError(`Selected schedule and internal schedule types don't match. Selected: ${selectedType}; internal: ${schedule.scheduleType}`);
+
+    try {
+        switch (selectedType) {
+            case "daily":
+                saveDailySchedule('.d-daily-view');
+                break;
+
+            case "weekly":
+                saveWeeklySchedule();
+                break;
+
+            case "custom":
+                schedule.setCustomScheduleParams(
+                    Date.parse(`${document.getElementById('startTime').value}Z`) / 1_000,
+                    Number(document.getElementById('loopTime').value),
+                );
+                saveDailySchedule('.d-custom-view');
+                break;
+
+            default:
+                throw new TypeError(`Unsupported opperation for schedule type: ${selectedType}`);
+        }
+    }
+    catch (error) {
+        if (!(error instanceof InvalidScheduleException))
+            throw error
+
+        alertInvalidSchedule(error.params);
+    }
+}
+
+function uploadScheduleClick() {
+    saveScheduleData();
+    // console.log(schedule.getInvalidDays());
 }

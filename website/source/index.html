@@ -37,7 +37,7 @@
                         </select>
                     </div>
                     <div>
-                        <button type="button" class="d-button">Upload</button>
+                        <button type="button" class="d-button" onclick="uploadScheduleClick()">Upload</button>
                         <button type="button" class="d-button">Refresh</button>
                     </div>
                 </div>
@@ -60,18 +60,45 @@
                         <div class="d-schedule-wrapper">
                             <div>
                                 <div>
-                                    
+
                                 </div>
                                 <div class="d-schedule-rows-container"></div>
                                 <div class="d-row d-justify-end d-margin-top-10">
                                     <button type="button" class="d-button d-add-schedule-point"
-                                        onclick="createDailyScheduleRow(document.querySelector('.d-daily-view .d-schedule-rows-container'), 0, 0)">+</button>
+                                        onclick="createDailyScheduleRow(document.querySelector('.d-daily-view .d-schedule-rows-container'))">+</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="d-custom-view">
+                        <div class="d-schedule-wrapper">
+                            <div class="d-header d-row d-justify-space-between">
+                                <div class="d-custom-param-wrapper">
+                                    <label for="startTime">Start date:</label>
+                                    <input id="startTime" name="startTime" type="datetime-local" step="1"
+                                        class="d-schedule-row-input">
+                                </div>
+                                <div class="d-custom-param-wrapper">
+                                    <label for="loopTime">Loop time:</label>
+                                    <div class="d-duration-select-container d-schedule-row-input">
+                                        <input id="loopTime" type="number" min="0" max="9007199254740991">
+                                        <div>sec</div>
+                                    </div>
+                                </div>
+                                <!-- <label for="loopTime">Loop time:</label>
+                                    <input id="loopTime" name="loopTime" type="time" class="d-schedule-row-input"> -->
+                            </div>
+
+                            <div class="d-schedule-rows-container d-margin-top-1-5rem">
+
+                            </div>
+
+                            <div class="d-row d-justify-end d-margin-top-10">
+                                <button type="button" class="d-button d-add-schedule-point"
+                                    onclick="createDailyScheduleRow(document.querySelector('.d-custom-view .d-schedule-rows-container'))">+</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -130,7 +157,7 @@
                 <div class="d-schedule-rows-container"></div>
                 <div class="d-row d-margin-top-10 d-justify-end">
                     <button class="d-button d-add-schedule-point"
-                        onclick="createDailyScheduleRow(document.querySelector('#d-day-schedule-popup .d-schedule-rows-container'), 0, 0)">+</button>
+                        onclick="createDailyScheduleRow(document.querySelector('#d-day-schedule-popup .d-schedule-rows-container'))">+</button>
                 </div>
             </div>
             <div class="d-bottom-buttons">

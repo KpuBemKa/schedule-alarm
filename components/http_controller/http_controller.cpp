@@ -225,7 +225,7 @@ HttpController::FaviconHandlerGET(httpd_req_t* req)
 esp_err_t
 HttpController::SchedulePOST(httpd_req_t* req)
 {
-    std::string schedule_raw_json;
+    std::vector<uint8_t> schedule_raw_data;
     int remaining = req->content_len;
     std::size_t retries_count = 0;
     auto self = reinterpret_cast<HttpController*>(req->user_ctx);
@@ -253,29 +253,14 @@ HttpController::SchedulePOST(httpd_req_t* req)
             return ESP_FAIL;
         }
 
-        retries_count = 0;
+        schedule_raw_data.insert(
+          schedule_raw_data.end(), self->mReceiveBuffer.data(), self->mReceiveBuffer.data() + received);
 
-        schedule_raw_json.append(self->mReceiveBuffer.data(), received);
+        retries_count = 0;
         remaining -= received;
     }
 
-    LOG_I("Received data: %.*s", schedule_raw_json.length(), schedule_raw_json.c_str());
-
-    // const esp_err_t esp_result = self->mSchedule.FromJson(schedule_raw_json);
-
-    // if (esp_result != ESP_OK) {
-    //     LOG_E("%s:%d | Schedule parsing failed: %s", __FILE__, __LINE__, esp_err_to_name(esp_result));
-
-    //     if (esp_result == ESP_ERR_INVALID_ARG) {
-    //         /* Respond with 500 Internal Server Error */
-    //         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid JSON");
-    //     } else {
-    //         /* Respond with 500 Internal Server Error */
-    //         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Internal server error.");
-    //     }
-
-    //     return esp_result;
-    // }
+    const esp_err_t esp_result = self->mSchedule.Deserialize(schedule_raw_data);
 
     httpd_resp_sendstr(req, "Schedule has been updated.");
 

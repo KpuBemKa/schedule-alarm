@@ -12,7 +12,7 @@
 <body>
     <div class="top">
         <div class="left">
-            <span id="timeDisplay" style="font-weight: bold;">Loading...</span>
+            <span id="timeDisplay" style="font-weight: bold;">Device time: Loading...</span>
         </div>
     </div>
 
@@ -28,7 +28,7 @@
                     <div>
                         <label for="schedule_loop_type" class="d-schedule-label">Schedule loops: </label>
                         <select id="schedule-loop-type" name="schedule_loop_type" class="form-select"
-                            onchange="scheduleTypeSelectChanged()" required>
+                            onchange="onScheduleTypeSelectChanged()" required>
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
@@ -86,8 +86,6 @@
                                         <div>sec</div>
                                     </div>
                                 </div>
-                                <!-- <label for="loopTime">Loop time:</label>
-                                    <input id="loopTime" name="loopTime" type="time" class="d-schedule-row-input"> -->
                             </div>
 
                             <div class="d-schedule-rows-container d-margin-top-1-5rem">
@@ -101,10 +99,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- <button type="button" onclick="addScheduleRow()" class="schedule-button">Add Row</button>
-                <button type="button" onclick="submitSchedule()" class="schedule-button">Submit</button>
-                <button type="button" onclick="fetchSchedule()" class="schedule-button">Load Schedule</button> -->
             </form>
         </div>
 
@@ -144,7 +138,6 @@
         </div>
     </div>
 
-    <!-- <div id="d-day-schedule-popup" class="d-popup-container d-hidden"> -->
     <div id="d-day-schedule-popup" class="d-popup-container d-hidden"
         onclick="if (event.target === event.currentTarget) closePopup()">
         <div class="d-schedule-wrapper">

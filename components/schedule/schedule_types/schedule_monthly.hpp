@@ -6,30 +6,36 @@
 
 namespace schd {
 
-class ScheduleMonthly : public ISchedule
-{
-  public:
-    constexpr ScheduleType GetScheduleType() const override { return ScheduleType::Monthly; }
+class 
 
-    bool IsEmpty() const override { return mSchedule.empty(); };
-    std::size_t GetPointsCount() const override { return mSchedule.size(); };
+// class ScheduleMonthly : public ISchedule
+// {
+//   public:
+//     constexpr ScheduleType GetScheduleType() const override { return ScheduleType::Monthly; }
 
-    Action GetAction() const override { return mSchedule.at(GetLocalMonthDay() - 1).GetAction(); }
-    bool IsFired() const override { return mSchedule.at(GetLocalMonthDay() - 1).IsFired(); }
+//     bool IsEmpty() const override { return mDaySchedule.IsEmpty(); };
+//     std::size_t GetPointsCount() const override { return mDaySchedule.GetPointsCount(); };
 
-    void AdvanceSchedule() override;
-    void ReindexSchedule() override;
+//     Action GetAction() const override { return mDaySchedule.GetAction(); }
+//     bool IsFired() const override { return mDaySchedule.IsFired(); }
 
-    std::vector<uint8_t> Serialize() const override;
-    esp_err_t Serialize(std::span<uint8_t> output) const override;
-    std::expected<uint32_t, esp_err_t> Deserialize(const std::span<const uint8_t> raw_data) override;
+//     void AdvanceSchedule() override;
+//     void ReindexSchedule() override;
+//     ScheduleError VerifySchedule() const override;
 
-  private:
-    static std::size_t GetLocalMonthDay();
+//     // std::vector<uint8_t> Serialize() const override;
+//     // esp_err_t Serialize(std::span<uint8_t> output) const override;
+//     // std::expected<uint32_t, ScheduleError> Deserialize(const std::span<const uint8_t> raw_data) override;
 
-  private:
-    std::array<ScheduleDaily, 31> mSchedule;
-};
+//   private:
+//     static std::size_t GetMonthDayIndex();
+    
+//     esp_err_t ReadDayScheduleFromStorage(const std::size_t day_index);
+
+//   private:
+//     std::size_t mDayIndex;
+//     ScheduleDaily mDaySchedule;
+// };
 
 
 

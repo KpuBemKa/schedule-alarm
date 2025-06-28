@@ -9,11 +9,13 @@ namespace schd {
 class ScheduleYearly : public ISchedule
 {
   public:
+    constexpr virtual ScheduleType GetScheduleType() const override { return ScheduleType::Yearly; }
+
     bool IsEmpty() const override { return mSchedule.empty(); };
     std::size_t GetPointsCount() const override { return mSchedule.size(); };
 
-    Action GetAction() const override { return mSchedule.at(GetLocalMonth()).GetAction(); }
-    bool IsFired() const override { return mSchedule.at(GetLocalMonth()).IsFired(); }
+    Action GetAction() const override { return mSchedule.at(GetMonthIndex()).GetAction(); }
+    bool IsFired() const override { return mSchedule.at(GetMonthIndex()).IsFired(); }
 
     void AdvanceSchedule() override;
     void ReindexSchedule() override;
@@ -23,7 +25,7 @@ class ScheduleYearly : public ISchedule
     std::expected<uint32_t, esp_err_t> Deserialize(const std::span<const uint8_t> raw_data) override;
 
   private:
-    static std::size_t GetLocalMonth();
+    static std::size_t GetMonthIndex();
 
   private:
     std::array<ScheduleMonthly, 12> mSchedule;

@@ -9,23 +9,31 @@ const char TAG[] = "SCHEDULE";
 #define LOG_E(...) ESP_LOGE(TAG, __VA_ARGS__)
 
 std::size_t
-ScheduleWeekly::GetLocalWeekDay()
+ScheduleWeekly::GetWeekDayIndex()
 {
     const std::time_t raw_time = std::time(nullptr);
     const tm* const tl = localtime(&raw_time);
-    return static_cast<std::size_t>(tl->tm_wday);
+    return static_cast<std::size_t>(tl->tm_wday - 1);
 }
 
 void
 ScheduleWeekly::AdvanceSchedule()
 {
-    mSchedule.at(GetLocalWeekDay() - 1).AdvanceSchedule();
+    static std::size_t last_day = GetWeekDayIndex();
+
+    if (last_day != GetWeekDayIndex()) {
+        last_day = GetWeekDayIndex();
+        mSchedule.at(last_day).ReindexSchedule();
+        return;
+    }
+
+    mSchedule.at(last_day).AdvanceSchedule();
 }
 
 void
 ScheduleWeekly::ReindexSchedule()
 {
-    mSchedule.at(GetLocalWeekDay() - 1).ReindexSchedule();
+    mSchedule.at(GetWeekDayIndex()).ReindexSchedule();
 }
 
 std::vector<uint8_t>

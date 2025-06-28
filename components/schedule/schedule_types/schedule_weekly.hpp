@@ -14,8 +14,8 @@ class ScheduleWeekly : public ISchedule
     bool IsEmpty() const override { return mSchedule.empty(); };
     std::size_t GetPointsCount() const override { return mSchedule.size(); };
 
-    Action GetAction() const override { return mSchedule.at(GetLocalWeekDay()).GetAction(); }
-    bool IsFired() const override { return mSchedule.at(GetLocalWeekDay()).IsFired(); }
+    Action GetAction() const override { return mSchedule.at(GetWeekDayIndex()).GetAction(); }
+    bool IsFired() const override { return mSchedule.at(GetWeekDayIndex()).IsFired(); }
 
     void AdvanceSchedule() override;
     void ReindexSchedule() override;
@@ -25,7 +25,7 @@ class ScheduleWeekly : public ISchedule
     std::expected<uint32_t, esp_err_t> Deserialize(const std::span<const uint8_t> raw_data) override;
 
   private:
-    static std::size_t GetLocalWeekDay();
+    static std::size_t GetWeekDayIndex();
 
   private:
     std::array<ScheduleDaily, 7> mSchedule;
@@ -47,8 +47,8 @@ class ScheduleWeekly : public ISchedule
 //     bool IsEmpty() const override { return mSchedule.empty(); };
 //     std::size_t GetPointsCount() const override { return mSchedule.size(); };
 
-//     Action GetAction() const override { return mSchedule.at(GetLocalWeekDay()).GetAction(); }
-//     bool IsFired() const override { return mSchedule.at(GetLocalWeekDay()).IsFired(); }
+//     Action GetAction() const override { return mSchedule.at(GetWeekDayIndex()).GetAction(); }
+//     bool IsFired() const override { return mSchedule.at(GetWeekDayIndex()).IsFired(); }
 
 //     void AdvanceSchedule() override;
 //     void ReindexSchedule() override;
@@ -58,14 +58,14 @@ class ScheduleWeekly : public ISchedule
 //     esp_err_t Deserialize(const std::span<const uint8_t> raw_data) override;
 
 //   private:
-//     static std::size_t GetLocalWeekDay();
+//     static std::size_t GetWeekDayIndex();
 
 //   private:
 //     std::array<ScheduleDaily, 7> mSchedule;
 // };
 
 // std::size_t
-// ScheduleWeekly::GetLocalWeekDay()
+// ScheduleWeekly::GetWeekDayIndex()
 // {
 //     const std::time_t raw_time = std::time(nullptr);
 //     const tm* const tl = localtime(&raw_time);
@@ -75,7 +75,7 @@ class ScheduleWeekly : public ISchedule
 // void
 // ScheduleWeekly::ReindexSchedule()
 // {
-//     mSchedule.at(GetLocalWeekDay()).ReindexSchedule();
+//     mSchedule.at(GetWeekDayIndex()).ReindexSchedule();
 // }
 
 // std::expected<std::vector<uint8_t>, esp_err_t>

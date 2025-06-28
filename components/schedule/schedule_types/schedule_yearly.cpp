@@ -8,6 +8,26 @@ const char TAG[] = "SCHEDULE";
 
 namespace schd {
 
+void
+ScheduleYearly::AdvanceSchedule()
+{
+    static std::size_t last_month = GetMonthIndex();
+
+    if (last_month != GetMonthIndex()) {
+        last_month = GetMonthIndex();
+        mSchedule.at(last_month).ReindexSchedule();
+        return;
+    }
+
+    mSchedule.at(last_month).AdvanceSchedule();
+}
+
+void
+ScheduleYearly::ReindexSchedule()
+{
+    mSchedule.at(GetMonthIndex()).ReindexSchedule();
+}
+
 std::vector<uint8_t>
 ScheduleYearly::Serialize() const
 {
@@ -37,7 +57,11 @@ ScheduleYearly::Deserialize(const std::span<const uint8_t> raw_data)
         const std::expected<uint32_t, esp_err_t> result = monthly.Deserialize(raw_data.subspan(read_count));
 
         if (!result.has_value()) {
-            LOG_E("%s:%d | Error deserializing yearly schedule at read_count = %lu: %s", __FILE__, __LINE__, read_count, esp_err_to_name(result.error()));
+            LOG_E("%s:%d | Error deserializing yearly schedule at read_count = %lu: %s",
+                  __FILE__,
+                  __LINE__,
+                  read_count,
+                  esp_err_to_name(result.error()));
             return result.error();
         }
 
@@ -50,7 +74,7 @@ ScheduleYearly::Deserialize(const std::span<const uint8_t> raw_data)
 }
 
 std::size_t
-ScheduleYearly::GetLocalMonth()
+ScheduleYearly::GetMonthIndex()
 {
     const std::time_t raw_time = std::time(nullptr);
     const tm* const tl = localtime(&raw_time);

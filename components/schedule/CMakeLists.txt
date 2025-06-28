@@ -1,4 +1,5 @@
 idf_component_register(SRCS "schedule.cpp"
+                            "schedule_types/multiple_days_schedule.cpp"
                             "schedule_types/schedule_daily.cpp"
                             "schedule_types/schedule_weekly.cpp"
                             "schedule_types/schedule_monthly.cpp"

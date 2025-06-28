@@ -10,7 +10,10 @@
 #include "esp_log.h"
 
 #include "schedule_types/schedule_daily.hpp"
+#include "schedule_types/schedule_weekly.hpp"
 #include "schedule_types/schedule_monthly.hpp"
+#include "schedule_types/schedule_yearly.hpp"
+#include "schedule_types/schedule_custom.hpp"
 
 const char TAG[] = "SCHEDULE";
 
@@ -192,8 +195,20 @@ Schedule::Deserialize(const std::span<const uint8_t> raw_data)
             mSchedule.reset(new ScheduleDaily());
             break;
 
+        case ScheduleType::Weekly:
+            mSchedule.reset(new ScheduleWeekly());
+            break;
+
         case ScheduleType::Monthly:
             mSchedule.reset(new ScheduleMonthly());
+            break;
+
+        case ScheduleType::Yearly:
+            mSchedule.reset(new ScheduleYearly());
+            break;
+
+        case ScheduleType::Custom:
+            mSchedule.reset(new ScheduleCustom());
             break;
 
         default:

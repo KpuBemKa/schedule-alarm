@@ -43,16 +43,16 @@ button {
     gap: 10px;
 }
 
-.d-schedule-rows-container {
-    min-width: 400px;
-}
-
 .d-justify-end {
     justify-content: end;
 }
 
 .d-justify-space-between {
     justify-content: space-between;
+}
+
+.d-justify-evenly {
+    justify-content: space-evenly;
 }
 
 .d-settings-content {
@@ -98,6 +98,14 @@ button {
     margin-top: 10px;
 }
 
+.d-margin-top-1rem {
+    margin-top: 1rem;
+}
+
+.d-margin-top-1-5rem {
+    margin-top: 1.5rem;
+}
+
 /* .d-position-relative {
     position: relative;
 } */
@@ -122,10 +130,13 @@ button {
 
     .d-schedule-wrapper {
         position: relative;
-        max-width: 400px;
         background-color: white;
         border-radius: 5px;
         padding: 10px;
+
+        .d-popup-main-content {
+            margin-top: 2rem;
+        }
 
         .d-close-button {
             width: 2rem;
@@ -150,6 +161,32 @@ button {
         button {
             flex: 0 0 100px;
         }
+    }
+}
+
+.d-border-wrong {
+    border: 2px dashed indianred;
+    border-radius: 5px;
+    padding: 3px;
+}
+
+.d-border-wrong-tab {
+    border-top: 3px solid indianred !important;
+}
+
+.d-custom-view {
+
+    .d-header label {
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .d-schedule-row-input {
+        width: 13.5rem;
+    }
+
+    .d-duration-select-container input {
+        width: calc(100% - 2.6rem);
     }
 }
 
@@ -204,6 +241,11 @@ button {
 .tabs {
     display: flex;
     border-bottom: 2px solid #ccc;
+}
+
+.tab-group-weekly-schedule.tabs {
+    width: 600px;
+    margin: 2rem auto 0 auto;
 }
 
 .tab {
@@ -294,10 +336,7 @@ button {
 }
 
 .d-schedule-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
     font-family: sans-serif;
     padding: 1.5rem 0;
@@ -315,7 +354,15 @@ button {
     gap: 0.5rem;
 }
 
-.d-schedule-row input[type="time"] {
+/* .d-schedule-row input[type="time"] {
+    flex: 1 1 120px;
+    padding: 0.3rem;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    height: 2rem;
+}
+
+.d-schedule-row input[type="number"] {
     flex: 1 1 120px;
     padding: 0.3rem;
     font-size: 0.95rem;
@@ -329,6 +376,18 @@ button {
     font-size: 0.95rem;
     box-sizing: border-box;
     height: 2rem;
+} */
+.d-schedule-row-inputs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.d-schedule-row-input {
+    padding: 0.3rem;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    height: 2rem;
+    width: 30%;
 }
 
 .d-schedule-row button {
@@ -361,6 +420,28 @@ button {
 }
 
 
+.d-duration-select-container {
+    padding: 0;
+    margin: 0;
+    border: 1px solid rgb(118, 118, 118);
+    border-radius: 3px;
+
+    input {
+        display: inline-block;
+        height: 100%;
+        width: calc(100% - 2.25rem);
+        box-sizing: border-box;
+        border: 0;
+        text-align: right;
+        padding-right: 0.5rem;
+    }
+
+    div {
+        display: inline-block;
+        width: 2.25rem;
+    }
+}
+
 #popup {
     position: fixed;
     top: 20%;
@@ -383,27 +464,27 @@ button {
   <div class="top">
    <div class="left">
     <span id="timeDisplay" style="font-weight: bold;">
-     Loading...
+     Device time: Loading...
     </span>
    </div>
   </div>
   <div>
-   <div class="tabs">
-    <button class="tab active" onclick="showTab('schedule')">
+   <div class="tab-group-main tabs">
+    <button class="tab active" onclick="showTab('tab-group-main', 'tab-schedule')">
      Schedule
     </button>
-    <button class="tab" onclick="showTab('settings')">
+    <button class="tab" onclick="showTab('tab-group-main', 'tab-settings')">
      Settings
     </button>
    </div>
-   <div class="tab-content active" id="schedule">
+   <div class="tab-group-main tab-content active" id="tab-schedule">
     <form id="scheduleForm">
      <div class="d-row d-justify-space-between">
       <div>
        <label class="d-schedule-label" for="schedule_loop_type">
         Schedule loops:
        </label>
-       <select class="form-select" id="schedule-loop-type" name="schedule_loop_type" onchange="scheduleTypeSelectChanged()" required="">
+       <select class="form-select" id="schedule-loop-type" name="schedule_loop_type" onchange="onScheduleTypeSelectChanged()" required="">
         <option value="daily">
          Daily
         </option>
@@ -422,7 +503,7 @@ button {
        </select>
       </div>
       <div>
-       <button class="d-button" type="button">
+       <button class="d-button" onclick="uploadScheduleClick()" type="button">
         Upload
        </button>
        <button class="d-button" type="button">
@@ -440,12 +521,16 @@ button {
        </div>
       </div>
       <div class="d-weekly-view">
-       <div class="c-schedule-container">
+       <div class="tab-group-weekly-schedule tabs">
+       </div>
+       <div class="d-schedule-wrapper">
        </div>
       </div>
       <div class="d-daily-view">
        <div class="d-schedule-wrapper">
         <div>
+         <div>
+         </div>
          <div class="d-schedule-rows-container">
          </div>
          <div class="d-row d-justify-end d-margin-top-10">
@@ -457,14 +542,39 @@ button {
        </div>
       </div>
       <div class="d-custom-view">
+       <div class="d-schedule-wrapper">
+        <div class="d-header d-row d-justify-space-between">
+         <div class="d-custom-param-wrapper">
+          <label for="startTime">
+           Start date:
+          </label>
+          <input class="d-schedule-row-input" id="startTime" name="startTime" step="1" type="datetime-local"/>
+         </div>
+         <div class="d-custom-param-wrapper">
+          <label for="loopTime">
+           Loop time:
+          </label>
+          <div class="d-duration-select-container d-schedule-row-input">
+           <input id="loopTime" max="9007199254740991" min="0" type="number"/>
+           <div>
+            sec
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="d-schedule-rows-container d-margin-top-1-5rem">
+        </div>
+        <div class="d-row d-justify-end d-margin-top-10">
+         <button class="d-button d-add-schedule-point" onclick="createDailyScheduleRow(document.querySelector('.d-custom-view .d-schedule-rows-container'))" type="button">
+          +
+         </button>
+        </div>
+       </div>
       </div>
      </div>
-     <!-- <button type="button" onclick="addScheduleRow()" class="schedule-button">Add Row</button>
-                <button type="button" onclick="submitSchedule()" class="schedule-button">Submit</button>
-                <button type="button" onclick="fetchSchedule()" class="schedule-button">Load Schedule</button> -->
     </form>
    </div>
-   <div class="tab-content" id="settings">
+   <div class="tab-group-main tab-content" id="tab-settings">
     <form id="settingsForm">
      <div class="d-settings-content">
       <div class="d-settings-row">
@@ -506,7 +616,6 @@ button {
     </form>
    </div>
   </div>
-  <!-- <div id="d-day-schedule-popup" class="d-popup-container d-hidden"> -->
   <div class="d-popup-container d-hidden" id="d-day-schedule-popup" onclick="if (event.target === event.currentTarget) closePopup()">
    <div class="d-schedule-wrapper">
     <div>
@@ -514,11 +623,11 @@ button {
       Day editor
      </h3>
     </div>
-    <div>
+    <div class="d-popup-main-content">
      <div class="d-schedule-rows-container">
      </div>
      <div class="d-row d-margin-top-10 d-justify-end">
-      <button class="d-button d-add-schedule-point" onclick="createDailyScheduleRow(document.querySelector('#d-day-schedule-popup .d-schedule-rows-container'), 0, 0)">
+      <button class="d-button d-add-schedule-point" onclick="createDailyScheduleRow(document.querySelector('#d-day-schedule-popup .d-schedule-rows-container'))">
        +
       </button>
      </div>
@@ -574,10 +683,10 @@ function createMonthBlock(monthIndex, onDayClick) {
     const daysGrid = document.createElement('div');
     daysGrid.className = 'c-days';
 
-    for (let day = 1; day <= dayCount; day++) {
+    for (let day = 0; day < dayCount; ++day) {
         const dayEl = document.createElement('div');
         dayEl.className = 'c-day';
-        dayEl.textContent = day;
+        dayEl.textContent = day + 1;
         dayEl.addEventListener('click', () => {
             onDayClick(monthIndex, day);
         });
@@ -628,24 +737,27 @@ function secondsToTime(seconds) {
     return `${h}:${m}:${s}`;
 }
 
-function createDailyScheduleRow(rowsContainer, secondOfDay, actionType) {
+function createDailyScheduleRow(rowsContainer, daySecond = 0, actionType = 0, duration = 0) {
     const row = document.createElement('div');
     row.classList.add('d-schedule-row', 'd-margin-top-10');
 
     const timeInput = Object.assign(document.createElement('input'), {
         type: 'time',
         step: 1,
-        value: secondsToTime(secondOfDay),
+        value: secondsToTime(daySecond),
     });
+    timeInput.classList.add("d-schedule-row-input");
 
     const actionSelect = document.createElement('select');
+    actionSelect.classList.add("d-schedule-row-input");
     actionSelect.innerHTML = `
-        <option value="${ActionType.CLOSE_RELAY}">Close Relay</option>
-        <option value="${ActionType.OPEN_RELAY}">Open Relay</option>
+    <option value="${ActionType.CLOSE_RELAY}">Close Relay</option>
+    <option value="${ActionType.OPEN_RELAY}">Open Relay</option>
     `;
     actionSelect.value = actionType;
 
     const removeBtn = document.createElement('button');
+    removeBtn.classList.add("d-schedule-row-input");
     removeBtn.textContent = '✕';
     removeBtn.className = "d-button";
 
@@ -653,95 +765,503 @@ function createDailyScheduleRow(rowsContainer, secondOfDay, actionType) {
         row.remove();
     });
 
-    row.append(timeInput, actionSelect, removeBtn);
+    const durationSelectContainer = document.createElement("div");
+    durationSelectContainer.classList.add("d-duration-select-container", "d-schedule-row-input");
+
+    const durationSelect = document.createElement("input");
+    durationSelect.type = "number";
+    durationSelect.value = duration;
+    durationSelect.min = 0;
+    durationSelect.max = Number.MAX_SAFE_INTEGER;
+
+    const durationSelectText = document.createElement("div");
+    durationSelectText.innerHTML = "sec";
+
+    durationSelectContainer.append(durationSelect, durationSelectText);
+
+    row.append(timeInput, actionSelect, durationSelectContainer, removeBtn);
     rowsContainer.appendChild(row);
 }
 
-function generateDailyScheduleRows(rowsContainer, initialSchedule = []) {
+function generateDailyScheduleRows(rowsContainer, initialSchedule = [{ timeOffset: 0, action: 0, duration: 0 }]) {
     rowsContainer.innerHTML = "";
-    
+
     initialSchedule.forEach(item => {
-        createDailyScheduleRow(rowsContainer, item.daySecond, item.fireAction)
+        createDailyScheduleRow(
+            rowsContainer,
+            item.timeOffset,
+            item.action.type,
+            item.duration
+        );
     });
 }
   </script>
   <script>
    // Constants for action types
-const ActionType = {
+const ActionType = Object.freeze({
     CLOSE_RELAY: 0,
     OPEN_RELAY: 1,
-};
+});
+
+const InvalidReason = {
+    OVERLAP: 0,
+    DUPLICATE: 1,
+    LOOP_OVERFLOW: 2,
+    UNORDERED: 3,
+
+    toString(reason) {
+        switch (reason) {
+            case InvalidReason.OVERLAP:
+                return "Some schedule points overlap";
+
+            case InvalidReason.DUPLICATE:
+                return "Some schedule points are marked to fire at the same time";
+
+            case InvalidReason.LOOP_OVERFLOW:
+                return "Some schedule activation time points exceed the maximum value";
+
+            case InvalidReason.UNORDERED:
+                return "Some schedule items are not in order. If you see this, something has definitely has gone wrong under the hood. Report this incedent to your provider";
+
+            default:
+                throw new TypeError(`Unknown InvalidReason: ${reason}`);
+        }
+    }
+}
+
+class InvalidScheduleException extends Error {
+    constructor(message, params) {
+        super(message);
+        this.name = this.constructor.name;
+        this.params = params;
+    }
+}
 
 // Simple Action class
 class Action {
+    /**
+     * @type { ActionType } type 
+     */
+    #type
+
     constructor(type) {
         this.type = type;
+    }
+
+    get type() { return this.#type }
+    set type(newType) {
+        if (!Number.isInteger(newType))
+            throw new TypeError(`Invalid ActionType; Got: ${newType}`);
+
+        if (newType < ActionType.CLOSE_RELAY || newType > ActionType.OPEN_RELAY)
+            throw new RangeError(`Invalid ActionType; Got: ${newType}`);
+
+        this.#type = newType;
     }
 
     serialize() {
         return new Uint8Array([this.type]);
     }
+
+    getInverse() {
+        switch (this.type) {
+            case ActionType.CLOSE_RELAY:
+                return ActionType.OPEN_RELAY;
+
+            case ActionType.OPEN_RELAY:
+                return ActionType.CLOSE_RELAY;
+
+            default:
+                throw new TypeError(`Unknown action type: ${this.type}`);
+        }
+    }
 }
 
-// Represents a single schedule point within a day
-class DayScheduleItem {
-    constructor(secondOfDay, action) {
-        this.secondOfDay = secondOfDay; // integer (0-86399)
-        this.action = action; // instance of Action
+class SchedulePoint {
+    /** @type { Number } timeOffset */
+    #timeOffset;
+    /** @type { Action } action */
+    #action;
+    /** @type { Number } duration */
+    #duration;
+
+    /**
+     * 
+     * @param { Number } timeOffset 
+     * @param { Action } action 
+     * @param { Number } duration 
+     */
+    constructor(timeOffset, action, duration) {
+        this.timeOffset = timeOffset;
+        this.action = action;
+        this.duration = duration;
+    }
+
+    get timeOffset() { return this.#timeOffset; }
+    get action() { return this.#action; }
+    get duration() { return this.#duration; }
+
+    set timeOffset(newValue) {
+        if (!Number.isInteger(newValue))
+            throw new TypeError(`Invalid timeOffset type; Got: ${newValue} with type: ${typeof newValue}`);
+
+        if (newValue < 0 || newValue > Number.MAX_SAFE_INTEGER)
+            throw new RangeError(`Invalid timeOffset value: ${newValue}`);
+
+        this.#timeOffset = newValue;
+    }
+
+    set action(newValue) {
+        if (Number.isInteger(newValue))
+            newValue = new Action(newValue);
+
+        if (!(newValue instanceof Action))
+            throw new TypeError(`Invalid Action type; Got: ${newValue} with type: ${typeof newValue}`);
+
+        this.#action = newValue;
+    }
+
+    set duration(newValue) {
+        if (!Number.isInteger(newValue))
+            throw new TypeError(`Invalid duration; Got: ${newValue} with type: ${typeof newValue}`);
+
+        if (newValue < 0 || newValue > Number.MAX_SAFE_INTEGER)
+            throw new RangeError(`Invalid duration value: ${newValue}`);
+
+        this.#duration = newValue;
+    }
+}
+
+class CustomSchedule {
+    /** @type { Number } */
+    #startTime
+    /** @type { Number } */
+    #loopTime
+    /** @type { [SchedulePoint] } */
+    #items
+
+    /**
+     * 
+     * @param { Number } startTime 
+     * @param { Number } loopTime 
+     * @param { [SchedulePoint] } items 
+     */
+    constructor(startTime = 0, loopTime = 1, items = []) {
+        this.startTime = startTime;
+        this.loopTime = loopTime;
+        this.items = items;
+    }
+
+    get startTime() { return this.#startTime; }
+    set startTime(newValue) {
+        if (!Number.isInteger(newValue))
+            throw new TypeError(`Invalid startTime; Got: ${newValue} with type: ${typeof newValue}`);
+
+        if (newValue < 0 || newValue > Number.MAX_SAFE_INTEGER)
+            throw new RangeError(`Invalid startTime value: ${newValue}`);
+
+        this.#startTime = newValue
+    }
+
+    get loopTime() { return this.#loopTime; }
+    set loopTime(newValue) {
+        if (!Number.isInteger(newValue))
+            throw new TypeError(`Invalid loopTime; Got: ${newValue} with type: ${typeof newValue}`);
+
+        if (newValue < 1 || newValue > Number.MAX_SAFE_INTEGER)
+            throw new RangeError(`Invalid loopTime value: ${newValue}`);
+
+        this.#loopTime = newValue
+    }
+
+    get items() { return this.#items; }
+    set items(newSchedule) {
+        if (!Array.isArray(newSchedule))
+            throw new TypeError("Schedule should be an array.");
+
+        // attempt to construct the SchedulePoint objects if not already
+        newSchedule = newSchedule.map(schedulePoint => {
+            if (schedulePoint instanceof SchedulePoint)
+                return schedulePoint;
+
+            return new SchedulePoint(schedulePoint.timeOffset, schedulePoint.action, schedulePoint.duration);
+        });
+
+        const invalidItems = this.getIndexesOfInvalidItems(newSchedule);
+        if (invalidItems.length != 0)
+            throw new InvalidScheduleException("Invalid schedule formation.", { invalidPoints: invalidItems });
+
+        this.#items = newSchedule
+    }
+
+    /**
+     * 
+     * @param { [SchedulePoint | undefined] } itemsToCheck 
+     * @param { Number | undefined } startTime 
+     * @param { Number | undefined } loopTime 
+     * @returns { [{ index: Number, reason: InvalidReason }] }
+     */
+    getIndexesOfInvalidItems(itemsToCheck, startTime, loopTime) {
+        loopTime = (loopTime === null || loopTime === undefined)
+            ? this.loopTime
+            : loopTime;
+
+        startTime = (startTime === null || startTime === undefined)
+            ? this.startTime
+            : startTime;
+
+        itemsToCheck = (itemsToCheck === null || itemsToCheck === undefined)
+            ? this.items
+            : itemsToCheck;
+
+        const invalidIndexes = [];
+
+        // skip last item to avoid triggering out-of-bounds
+        for (let i = 0; i < itemsToCheck.length - 1; ++i) {
+            const current = itemsToCheck[i];
+            const next = itemsToCheck[i + 1];
+
+            // check if the schedule is ordered by timeOffset
+            if (current.timeOffset > next.timeOffset) {
+                invalidIndexes.push({ index: i, reason: InvalidReason.UNORDERED });
+                continue; // other checks won't work correctly if the list is not in order
+            }
+
+            // check for overlapping schedule points
+            if (current.timeOffset + current.duration > next.timeOffset)
+                invalidIndexes.push({ index: i, reason: InvalidReason.OVERLAP }, { index: i + 1, reason: InvalidReason.OVERLAP });
+
+            // check for schedule points with the same day time
+            if (current.timeOffset === next.timeOffset)
+                invalidIndexes.push({ index: i, reason: InvalidReason.DUPLICATE }, { index: i + 1, reason: InvalidReason.DUPLICATE });
+
+            // check for overflow beyond to loop end
+            if (current.timeOffset > loopTime)
+                invalidIndexes.push({ index: i, reason: InvalidReason.LOOP_OVERFLOW });
+        }
+
+        // check the last item here
+        if (itemsToCheck.length > 0) {
+            const lastIndex = itemsToCheck.length - 1;
+
+            // check for overflow
+            if (itemsToCheck.at(lastIndex).timeOffset > loopTime)
+                invalidIndexes.push({ index: lastIndex, reason: InvalidReason.LOOP_OVERFLOW });
+        }
+
+        // return invalidIndexes.filter((value, index, self) => self.indexOf(value) === index);
+        return Array.from(
+            new Map(invalidIndexes.map(obj => [JSON.stringify(obj), obj])).values()
+        );
+    }
+
+    /**
+     * 
+     * @param { [SchedulePoint | undefined] } itemsToCheck 
+     * @param { Number | undefined } startTime 
+     * @param { Number | undefined } loopTime 
+     * @returns { boolean }
+     */
+    isScheduleValid(itemsToCheck, startTime, loopTime) {
+        return this.getIndexesOfInvalidItems(itemsToCheck, startTime, loopTime).length == 0;
+    }
+
+    /**
+     * @returns { {startTime: Number, loopTime: Number, items: [{timeOffset: Number, action: Action}]} }
+     */
+    toSystemSchedule() {
+        /** @type { [{timeOffset: Number, action: Number}] } */
+        const transformedItems = [];
+        this.items.forEach(item => {
+            transformedItems.push({
+                timeOffset: item.timeOffset,
+                action: item.action
+            });
+
+            if (item.duration != 0) {
+                transformedItems.push({
+                    timeOffset: item.timeOffset + item.duration,
+                    action: item.action.getInverse()
+                });
+            }
+        });
+
+        transformedItems.sort((a, b) => a.timeOffset - b.timeOffset);
+
+        return { startTime: this.startTime, loopTime: this.loopTime, items: transformedItems };
     }
 
     serialize() {
-        const buffer = new ArrayBuffer(5);
-        const view = new DataView(buffer);
-        view.setUint32(0, this.secondOfDay, true); // little-endian
-        view.setUint8(4, this.action.type);
-        return new Uint8Array(buffer);
+        const schedule = this.toSystemSchedule();
+
+        const header = new ArrayBuffer(20);
+        const headerView = new DataView(header)
+        headerView.setBigUint64(0, BigInt(schedule.startTime), true);
+        headerView.setBigUint64(8, BigInt(schedule.loopTime), true);
+        headerView.setUint32(16, schedule.items.length, true);
+
+        const itemsByteLength = schedule.items.length * 5;
+        const itemsBuffer = new ArrayBuffer(itemsByteLength);
+        const itemsView = new DataView(itemsBuffer);
+        let bufferOffset = 0;        
+
+        schedule.items.forEach(item => {
+            itemsView.setUint32(bufferOffset + 0, item.timeOffset, true); // little-endian
+            itemsView.setUint8(bufferOffset + 4, item.action.type);
+            bufferOffset += 5;
+        });
+
+        return new Uint8Array([...new Uint8Array(header), ...new Uint8Array(itemsBuffer)]);
     }
 }
 
 // Holds a list of schedule points for a single day
 class DaySchedule {
-    constructor() {
-        this.items = [];
+    #customSchedule;
+
+    /**
+     * @param { [SchedulePoint] } items 
+     */
+    constructor(items) {
+        this.#customSchedule = new CustomSchedule(0, 86_000, items);
     }
 
-    addItem(secondOfDay, actionType) {
-        this.items.push(new DayScheduleItem(secondOfDay, new Action(actionType)));
+    get schedule() { return this.#customSchedule.items; }
+    set schedule(newSchedule) { this.#customSchedule.items = newSchedule }
+
+    /**
+     * @param { [SchedulePoint] | undefined } scheduleToCheck 
+     */
+    getIndexesOfInvalidItems(scheduleToCheck) {
+        return this.#customSchedule.getIndexesOfInvalidItems(
+            scheduleToCheck,
+            this.#customSchedule.startTime,
+            this.#customSchedule.loopTime,
+        );
     }
 
-    removeItem(index) {
-        if (index >= 0 && index < this.items.length) {
-            this.items.splice(index, 1);
-        }
-    }
-
-    clear() {
-        this.items = [];
+    /**
+     * @param { [SchedulePoint | undefined] } scheduleToCheck 
+     */
+    isScheduleValid(scheduleToCheck) {
+        return this.#customSchedule.isScheduleValid({
+            startTime: this.#customSchedule.startTime,
+            loopTime: this.#customSchedule.loopTime,
+            itemsToCheck: scheduleToCheck
+        });
     }
 
     serialize() {
+        const transformedSchedule = this.#customSchedule.toSystemSchedule();
+
         const header = new ArrayBuffer(4);
-        new DataView(header).setUint32(0, this.items.length, true);
-        const itemBuffers = this.items.map(item => item.serialize());
+        new DataView(header).setUint32(0, transformedSchedule.items.length, true);
+
+        const itemBuffers = transformedSchedule.items.map(item => {
+            const buffer = new ArrayBuffer(5);
+            const view = new DataView(buffer);
+            view.setUint32(0, item.daySecond, true); // little-endian
+            view.setUint8(4, item.action.type);
+            return new Uint8Array(buffer);
+        });
+
         return new Uint8Array([...new Uint8Array(header), ...itemBuffers.flat()]);
     }
 }
 
-// Monthly schedule with 31 day slots
-class MonthlySchedule {
-    constructor() {
-        this.days = Array.from({ length: 31 }, () => new DaySchedule());
+class MutlipleDaysSchedule {
+    /** @type [DaySchedule] */
+    #days;
+
+    /**
+     * @param { Number } daysCount 
+     * @param { [DaySchedule] | [[SchedulePoint]] } newSchedule An array of DaySchedules or an array of arrays of schedule points
+     */
+    constructor(daysCount, newSchedule = []) {
+        this.#days = Array.from({ length: daysCount }, () => new DaySchedule());
+        this.setSchedule(newSchedule);
     }
 
-    getDaySchedule(dayIndex) {
-        if (dayIndex < 0 || dayIndex >= 31) {
-            throw new Error("Invalid day index (must be 0–30 for days 1–31)");
+    get length() { return this.#days.length };
+    get count() { return this.#days.length };
+
+    /**
+     * 
+     * @param { [DaySchedule] | [[SchedulePoint]] } newSchedule An array of DaySchedules or an array of arrays of schedule points
+     */
+    setSchedule(newSchedule = []) {
+        if (!Array.isArray(newSchedule))
+            throw new TypeError("Schedule should be an array.");
+
+        // reset the schedule if it's an empty array
+        if (newSchedule.length === 0) {
+            this.#days.forEach(day => day.schedule = []);
+            return;
         }
-        return this.days[dayIndex];
+
+        if (newSchedule.length != this.#days.length)
+            throw new RangeError(`New multiple-days schedule should have either ${this.length} items or 0 items.`);
+
+        const invalidDays = this.getInvalidDays(newSchedule);
+        if (invalidDays.length !== 0)
+            throw new InvalidScheduleException('Invalid schedule formation.', { invalidDays: invalidDays });
+
+        this.#days.forEach((_, index) => this.setDaySchedule(index, newSchedule[index]));
+    }
+
+    /**
+     * 
+     * @param { Number } dayIndex 
+     * @param { Number } newSchedule 
+     */
+    setDaySchedule(dayIndex, newSchedule) {
+        if (dayIndex >= this.#days.length)
+            throw new RangeError(`Invalid week day index. Must be in the [0-${this.#days.length - 1}] range.`);
+
+        const daySchedule =
+            (newSchedule instanceof DaySchedule)
+                ? newSchedule
+                : new DaySchedule(newSchedule);
+
+        const invalidItems = daySchedule.getIndexesOfInvalidItems();
+        if (invalidItems.length != 0)
+            throw new InvalidScheduleException('Failed to set weekly schedule day.', invalidItems);
+
+        this.#days[dayIndex] = daySchedule;
+    }
+
+    /**
+     * 
+     * @param { Number } dayIndex 
+     * @returns { [SchedulePoint] }
+     */
+    getDaySchedule(dayIndex) {
+        if (dayIndex >= this.#days.length)
+            throw new RangeError(`Invalid week day index. Must be in the [0-${this.#days.length - 1}] range.`);
+
+        return this.#days[dayIndex].schedule;
+    }
+
+    /**
+     * @param { [[SchedulePoint]] } daysToCheck
+     * @returns { [{dayIndex: Number, invalidPoints: [{ index: Number, reason: InvalidReason }]}] }
+     */
+    getInvalidDays(daysToCheck) {
+        const dayChecker = new DaySchedule();
+        const invalidDays = [];
+        daysToCheck.forEach((day, index) => {
+            const dayInvalidPoints = dayChecker.getIndexesOfInvalidItems(day);
+            if (dayInvalidPoints.length === 0)
+                return;
+
+            invalidDays.push({ dayIndex: index, invalidPoints: dayInvalidPoints });
+        });
+
+        return invalidDays;
     }
 
     serialize() {
-        const serializedDays = this.days.map(day => day.serialize());
+        const serializedDays = this.#days.map(day => day.serialize());
         const totalLength = serializedDays.reduce((sum, arr) => sum + arr.length, 0);
         const output = new Uint8Array(totalLength);
 
@@ -755,36 +1275,118 @@ class MonthlySchedule {
     }
 }
 
+/* Weekly schedule with 7 day slots */
+class WeeklySchedule extends MutlipleDaysSchedule {
+    constructor(newSchedule = []) {
+        super(7, newSchedule);
+    }
+}
+
+/* Monthly schedule with 31 day slots */
+class MonthlySchedule extends MutlipleDaysSchedule {
+    constructor(newSchedule = []) {
+        super(31, newSchedule);
+    }
+}
+
 class YearlySchedule {
+    /** @type [MonthlySchedule] */
+    #months;
+
     constructor() {
-        this.months = Array.from({ length: 12 }, () => new MonthlySchedule());
+        this.#months = Array.from({ length: 12 }, () => new MonthlySchedule());
     }
 
-    getMonthSchedule(monthIndex) {
-        if (monthIndex < 0 || monthIndex >= 12) {
-            throw new Error("Invalid month index (must be 0–11 for months 1–12)");
+    /**
+     * 
+     * @param { [MonthlySchedule | [[[SchedulePoint]]]] } newSchedule 
+     * An array of month schedules or an array of arrays of arrays of schedule points
+     */
+    setSchedule(newSchedule) {
+        if (!Array.isArray(newSchedule))
+            throw new TypeError("Schedule should be an array.");
+
+        // Reset the schedule if it's an empty array
+        if (newSchedule.length === 0) {
+            this.#months = Array.from({ length: 12 }, () => new MonthlySchedule());
+            return;
         }
-        return this.months[monthIndex];
+
+        if (newSchedule.length != this.#months.length)
+            throw new RangeError("Yearly schedule should contain either 12 items or 0 items.");
+
+        this.#months.forEach((month, index) => {
+            if (newSchedule[index] instanceof MonthlySchedule)
+                month = newSchedule[index];
+            else
+                month.setSchedule(newSchedule[index]);
+        });
+    }
+
+    /**
+     * 
+     * @param { Number } monthIndex 
+     * @param { Number } dayIndex 
+     * @param { [DaySchedule | [SchedulePoint]] } newSchedule A day schedule of an array of schedule points
+     */
+    setDaySchedule(monthIndex, dayIndex, newSchedule) {
+        this.#months[monthIndex].setDaySchedule(dayIndex, newSchedule);
+    }
+
+    /**
+     * 
+     * @param { Number } monthIndex 
+     * @param { Number } dayIndex 
+     */
+    getDaySchedule(monthIndex, dayIndex) {
+        return this.getMonthSchedule(monthIndex).getDaySchedule(dayIndex);
+    }
+
+    /**
+     * 
+     * @param { Number } monthIndex 
+     */
+    getMonthSchedule(monthIndex) {
+        if (monthIndex >= 12) {
+            throw new RangeError("Invalid month index (must be up to 11)");
+        }
+
+        return this.#months[monthIndex];
     }
 
     serialize() {
-        throw new Error("Not implemented.");
+        const serializedMonths = this.#months.map(day => day.serialize());
+        const totalLength = serializedMonths.reduce((sum, arr) => sum + arr.length, 0);
+        const output = new Uint8Array(totalLength);
+
+        let offset = 0;
+        for (const dayData of serializedMonths) {
+            output.set(dayData, offset);
+            offset += dayData.length;
+        }
+
+        return output;
     }
 }
 
 class Schedule {
-    static SCHEDULE_TYPES = ["daily", "monthly", "yearly"];
+    static SCHEDULE_TYPES = ["daily", "weekly", "monthly", "yearly", "custom"];
 
     constructor(scheduleType = null) {
         this.schedules = {
             daily: new DaySchedule(),
+            weekly: new WeeklySchedule(),
             monthly: new MonthlySchedule(),
             yearly: new YearlySchedule(),
+            custom: new CustomSchedule(),
         };
-        this.scheduleType = scheduleType;     // "daily", "monthly", etc.
+        this.scheduleType = scheduleType; // one option from SCHEDULE_TYPES
     }
 
-    // Set schedule type and initialize corresponding structure
+    /**
+     * 
+     * @param { String } type One of the strings from `Schedule.SCHEDULE_TYPES`
+     */
     setScheduleType(type) {
         if (!Schedule.SCHEDULE_TYPES.includes(type))
             throw new Error(`Unsupported schedule type: ${type}`);
@@ -795,15 +1397,23 @@ class Schedule {
     setDaySchedule({ schedule = [], monthIndex = 0, dayIndex = 0 }) {
         switch (this.scheduleType) {
             case "daily":
-                this.schedules.daily.items = schedule;
+                this.schedules.daily.schedule = schedule;
+                break;
+
+            case "weekly":
+                this.schedules.weekly.setDaySchedule(dayIndex);
                 break;
 
             case "monthly":
-                this.schedules.monthly.getDaySchedule(dayIndex).items = schedule;
+                this.schedules.monthly.setDaySchedule(dayIndex, schedule);
                 break;
 
             case "yearly":
-                this.schedules.yearly.getMonthSchedule(monthIndex).getDaySchedule(dayIndex).items = schedule;
+                this.schedules.yearly.setDaySchedule(monthIndex, dayIndex, schedule);
+                break;
+
+            case "custom":
+                this.schedules.custom.items = schedule;
                 break;
 
             default:
@@ -814,21 +1424,23 @@ class Schedule {
     setSchedule(schedule) {
         switch (this.scheduleType) {
             case "daily":
-                this.schedules.daily.items = schedule;
+                this.schedules.daily.schedule = schedule;
+                break;
+
+            case "weekly":
+                this.schedules.weekly.setSchedule(schedule);
                 break;
 
             case "monthly":
-                if (schedule.length != 31)
-                    throw new RangeError("A monthly schedule should have 31 items.");
-
-                this.schedules.monthly.items = schedule;
+                this.schedules.monthly.setSchedule(schedule);
                 break;
 
             case "yearly":
-                if (schedule.length != 12)
-                    throw new RangeError("A yearly schedule should have 12 items.");
+                this.schedules.yearly.setSchedule(schedule);
+                break;
 
-                this.schedules.yearly.items = schedule;
+            case "custom":
+                this.schedules.custom.items = schedule;
                 break;
 
             default:
@@ -836,72 +1448,42 @@ class Schedule {
         }
     }
 
-    // Add a schedule point
-    // addItem({ dayIndex = 0, secondOfDay, actionType }) {
-    //     switch (this.scheduleType) {
-    //         case "daily":
-    //             this.schedules.daily.addItem(secondOfDay, actionType);
-    //             break;
-
-    //         case "monthly":
-    //             this.schedules.monthly.getDaySchedule(dayIndex).addItem(secondOfDay, actionType);
-    //             break;
-
-    //         default:
-    //             throw new Error(`Unsupported operation for current schedule type: ${this.scheduleType}`);
-    //     }
-    // }
-
-    // Remove an item by index (and dayIndex for monthly)
-    // removeItem({ dayIndex = 0, itemIndex }) {
-    //     switch (this.scheduleType) {
-    //         case "daily":
-    //             this.schedules.daily.removeItem(itemIndex);
-    //             break;
-
-    //         case "monthly":
-    //             this.schedules.monthly.getDaySchedule(dayIndex).removeItem(itemIndex);
-    //             break;
-
-    //         default:
-    //             throw new Error(`Unsupported operation for current schedule type: ${this.scheduleType}`);
-    //     }
-    // }
-
-    // Clear the schedule
-    // clear() {
-    //     switch (this.scheduleType) {
-    //         case "daily":
-    //             this.schedules.daily.clear();
-    //             break;
-
-    //         case "monthly":
-    //             this.schedules.monthly.forEach(day => day.clear());
-    //             break;
-
-    //         default:
-    //             throw new Error(`Unsupported operation for current schedule type: ${this.scheduleType}`);
-    //     }
-    // }
+    setCustomScheduleParams(newStartTime, newLoopTime) {
+        this.schedules.custom.startTime = newStartTime;
+        this.schedules.custom.loopTime = newLoopTime;
+    }
 
     // Access schedule items
     getDaySchedule({ monthIndex = 0, dayIndex = 0 }) {
         switch (this.scheduleType) {
             case "daily":
-                return this.schedules.daily.items;
+                return this.schedules.daily.schedule;
+
+            case "weekly":
+                return this.schedules.weekly.getDaySchedule(dayIndex);
 
             case "monthly":
-                return this.schedules.monthly.getDaySchedule(dayIndex).items;
+                return this.schedules.monthly.getDaySchedule(dayIndex);
 
             case "yearly":
-                return this.schedules.yearly.getMonthSchedule(monthIndex).getDaySchedule(dayIndex).items;
+                return this.schedules.yearly.getMonthSchedule(monthIndex).getDaySchedule(dayIndex);
+
+            case "custom":
+                throw new Error("Custom schedule type does not have day schedules.")
 
             default:
                 throw new Error(`Unsupported operation for current schedule type: ${this.scheduleType}`);
         }
     }
 
-    // Serialize entire schedule
+    getInvalidItemsDaily(dailySchedule = null) {
+        return this.schedules.daily.getIndexesOfInvalidItems(dailySchedule);
+    }
+
+    getInvalidItemsWeekly() { return this.schedules.weekly.getInvalidIndexes(); }
+    getInvalidItemsCustom() { return this.schedules.custom.getIndexesOfInvalidItems(); }
+
+    // Serialize the selected schedule
     serialize() {
         return this.schedules[this.scheduleType].serialize();
     }
@@ -1032,956 +1614,975 @@ function decodeMonthlySchedule(dataView) {
 
 function getSchedulePlacholder() {
     return {
+        scheduleType: "custom",
+        startTime: 10,
+        loopTime: 3000,
+        schedule: [{
+            "timeOffset": 2730,
+            "action": 0,
+            "duration": 0,
+        }]
+    }
+
+    return {
+        scheduleType: "daily",
+        schedule: [{
+            "timeOffset": 2730,
+            "action": 0
+        }]
+    }
+
+    return {
         scheduleType: "monthly",
         schedule: [
             [
                 {
-                    "daySecond": 2730,
-                    "fireAction": 0
+                    "timeOffset": 2730,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5078,
-                    "fireAction": 1
+                    "timeOffset": 5078,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5370,
-                    "fireAction": 1
+                    "timeOffset": 5370,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5871,
-                    "fireAction": 1
+                    "timeOffset": 5871,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7363,
-                    "fireAction": 0
+                    "timeOffset": 7363,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 1896,
-                    "fireAction": 0
+                    "timeOffset": 1896,
+                    "action": 0
                 },
                 {
-                    "daySecond": 3739,
-                    "fireAction": 0
+                    "timeOffset": 3739,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5514,
-                    "fireAction": 1
+                    "timeOffset": 5514,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7998,
-                    "fireAction": 1
+                    "timeOffset": 7998,
+                    "action": 1
                 },
                 {
-                    "daySecond": 9685,
-                    "fireAction": 1
+                    "timeOffset": 9685,
+                    "action": 1
                 },
                 {
-                    "daySecond": 12399,
-                    "fireAction": 1
+                    "timeOffset": 12399,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13731,
-                    "fireAction": 0
+                    "timeOffset": 13731,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14311,
-                    "fireAction": 1
+                    "timeOffset": 14311,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 941,
-                    "fireAction": 1
+                    "timeOffset": 941,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2057,
-                    "fireAction": 1
+                    "timeOffset": 2057,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4563,
-                    "fireAction": 0
+                    "timeOffset": 4563,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5603,
-                    "fireAction": 0
+                    "timeOffset": 5603,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8431,
-                    "fireAction": 0
+                    "timeOffset": 8431,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2350,
-                    "fireAction": 0
+                    "timeOffset": 2350,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5193,
-                    "fireAction": 1
+                    "timeOffset": 5193,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7266,
-                    "fireAction": 0
+                    "timeOffset": 7266,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7557,
-                    "fireAction": 1
+                    "timeOffset": 7557,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7817,
-                    "fireAction": 0
+                    "timeOffset": 7817,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9554,
-                    "fireAction": 0
+                    "timeOffset": 9554,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2517,
-                    "fireAction": 1
+                    "timeOffset": 2517,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4271,
-                    "fireAction": 0
+                    "timeOffset": 4271,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4425,
-                    "fireAction": 1
+                    "timeOffset": 4425,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7206,
-                    "fireAction": 0
+                    "timeOffset": 7206,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7866,
-                    "fireAction": 1
+                    "timeOffset": 7866,
+                    "action": 1
                 },
                 {
-                    "daySecond": 9901,
-                    "fireAction": 0
+                    "timeOffset": 9901,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12507,
-                    "fireAction": 1
+                    "timeOffset": 12507,
+                    "action": 1
                 },
                 {
-                    "daySecond": 15069,
-                    "fireAction": 1
+                    "timeOffset": 15069,
+                    "action": 1
                 },
                 {
-                    "daySecond": 16621,
-                    "fireAction": 1
+                    "timeOffset": 16621,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 2290,
-                    "fireAction": 1
+                    "timeOffset": 2290,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2808,
-                    "fireAction": 0
+                    "timeOffset": 2808,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6269,
-                    "fireAction": 1
+                    "timeOffset": 6269,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6276,
-                    "fireAction": 0
+                    "timeOffset": 6276,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8730,
-                    "fireAction": 0
+                    "timeOffset": 8730,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 457,
-                    "fireAction": 1
+                    "timeOffset": 457,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2926,
-                    "fireAction": 1
+                    "timeOffset": 2926,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4630,
-                    "fireAction": 1
+                    "timeOffset": 4630,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4644,
-                    "fireAction": 0
+                    "timeOffset": 4644,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7650,
-                    "fireAction": 1
+                    "timeOffset": 7650,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8664,
-                    "fireAction": 1
+                    "timeOffset": 8664,
+                    "action": 1
                 },
                 {
-                    "daySecond": 9288,
-                    "fireAction": 1
+                    "timeOffset": 9288,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1754,
-                    "fireAction": 0
+                    "timeOffset": 1754,
+                    "action": 0
                 },
                 {
-                    "daySecond": 3295,
-                    "fireAction": 1
+                    "timeOffset": 3295,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5558,
-                    "fireAction": 0
+                    "timeOffset": 5558,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8696,
-                    "fireAction": 0
+                    "timeOffset": 8696,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12168,
-                    "fireAction": 1
+                    "timeOffset": 12168,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13419,
-                    "fireAction": 0
+                    "timeOffset": 13419,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 3153,
-                    "fireAction": 1
+                    "timeOffset": 3153,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6164,
-                    "fireAction": 1
+                    "timeOffset": 6164,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8733,
-                    "fireAction": 0
+                    "timeOffset": 8733,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8997,
-                    "fireAction": 1
+                    "timeOffset": 8997,
+                    "action": 1
                 },
                 {
-                    "daySecond": 12424,
-                    "fireAction": 0
+                    "timeOffset": 12424,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14070,
-                    "fireAction": 0
+                    "timeOffset": 14070,
+                    "action": 0
                 },
                 {
-                    "daySecond": 17346,
-                    "fireAction": 1
+                    "timeOffset": 17346,
+                    "action": 1
                 },
                 {
-                    "daySecond": 19368,
-                    "fireAction": 0
+                    "timeOffset": 19368,
+                    "action": 0
                 },
                 {
-                    "daySecond": 22606,
-                    "fireAction": 0
+                    "timeOffset": 22606,
+                    "action": 0
                 },
                 {
-                    "daySecond": 24665,
-                    "fireAction": 1
+                    "timeOffset": 24665,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1928,
-                    "fireAction": 1
+                    "timeOffset": 1928,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5014,
-                    "fireAction": 1
+                    "timeOffset": 5014,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7878,
-                    "fireAction": 1
+                    "timeOffset": 7878,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8165,
-                    "fireAction": 1
+                    "timeOffset": 8165,
+                    "action": 1
                 },
                 {
-                    "daySecond": 11516,
-                    "fireAction": 1
+                    "timeOffset": 11516,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 579,
-                    "fireAction": 1
+                    "timeOffset": 579,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3495,
-                    "fireAction": 1
+                    "timeOffset": 3495,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6484,
-                    "fireAction": 1
+                    "timeOffset": 6484,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6894,
-                    "fireAction": 0
+                    "timeOffset": 6894,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8441,
-                    "fireAction": 0
+                    "timeOffset": 8441,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9985,
-                    "fireAction": 1
+                    "timeOffset": 9985,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10719,
-                    "fireAction": 0
+                    "timeOffset": 10719,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12214,
-                    "fireAction": 1
+                    "timeOffset": 12214,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 3175,
-                    "fireAction": 1
+                    "timeOffset": 3175,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6221,
-                    "fireAction": 1
+                    "timeOffset": 6221,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6572,
-                    "fireAction": 1
+                    "timeOffset": 6572,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8045,
-                    "fireAction": 1
+                    "timeOffset": 8045,
+                    "action": 1
                 },
                 {
-                    "daySecond": 9621,
-                    "fireAction": 1
+                    "timeOffset": 9621,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10416,
-                    "fireAction": 1
+                    "timeOffset": 10416,
+                    "action": 1
                 },
                 {
-                    "daySecond": 12273,
-                    "fireAction": 1
+                    "timeOffset": 12273,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 2138,
-                    "fireAction": 1
+                    "timeOffset": 2138,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4755,
-                    "fireAction": 1
+                    "timeOffset": 4755,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6103,
-                    "fireAction": 0
+                    "timeOffset": 6103,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6550,
-                    "fireAction": 0
+                    "timeOffset": 6550,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7582,
-                    "fireAction": 0
+                    "timeOffset": 7582,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9832,
-                    "fireAction": 1
+                    "timeOffset": 9832,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10809,
-                    "fireAction": 0
+                    "timeOffset": 10809,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14377,
-                    "fireAction": 0
+                    "timeOffset": 14377,
+                    "action": 0
                 },
                 {
-                    "daySecond": 16458,
-                    "fireAction": 0
+                    "timeOffset": 16458,
+                    "action": 0
                 },
                 {
-                    "daySecond": 19666,
-                    "fireAction": 0
+                    "timeOffset": 19666,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 1245,
-                    "fireAction": 0
+                    "timeOffset": 1245,
+                    "action": 0
                 },
                 {
-                    "daySecond": 2114,
-                    "fireAction": 1
+                    "timeOffset": 2114,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3932,
-                    "fireAction": 1
+                    "timeOffset": 3932,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4197,
-                    "fireAction": 1
+                    "timeOffset": 4197,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5909,
-                    "fireAction": 0
+                    "timeOffset": 5909,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7543,
-                    "fireAction": 1
+                    "timeOffset": 7543,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10972,
-                    "fireAction": 0
+                    "timeOffset": 10972,
+                    "action": 0
                 },
                 {
-                    "daySecond": 11504,
-                    "fireAction": 0
+                    "timeOffset": 11504,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12123,
-                    "fireAction": 0
+                    "timeOffset": 12123,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12224,
-                    "fireAction": 1
+                    "timeOffset": 12224,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 226,
-                    "fireAction": 0
+                    "timeOffset": 226,
+                    "action": 0
                 },
                 {
-                    "daySecond": 1307,
-                    "fireAction": 1
+                    "timeOffset": 1307,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2406,
-                    "fireAction": 1
+                    "timeOffset": 2406,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4961,
-                    "fireAction": 0
+                    "timeOffset": 4961,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6780,
-                    "fireAction": 1
+                    "timeOffset": 6780,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7204,
-                    "fireAction": 1
+                    "timeOffset": 7204,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7739,
-                    "fireAction": 0
+                    "timeOffset": 7739,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 384,
-                    "fireAction": 0
+                    "timeOffset": 384,
+                    "action": 0
                 },
                 {
-                    "daySecond": 1814,
-                    "fireAction": 1
+                    "timeOffset": 1814,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4813,
-                    "fireAction": 0
+                    "timeOffset": 4813,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8117,
-                    "fireAction": 1
+                    "timeOffset": 8117,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10485,
-                    "fireAction": 0
+                    "timeOffset": 10485,
+                    "action": 0
                 },
                 {
-                    "daySecond": 11303,
-                    "fireAction": 0
+                    "timeOffset": 11303,
+                    "action": 0
                 },
                 {
-                    "daySecond": 13644,
-                    "fireAction": 0
+                    "timeOffset": 13644,
+                    "action": 0
                 },
                 {
-                    "daySecond": 16711,
-                    "fireAction": 1
+                    "timeOffset": 16711,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1041,
-                    "fireAction": 1
+                    "timeOffset": 1041,
+                    "action": 1
                 },
                 {
-                    "daySecond": 1517,
-                    "fireAction": 1
+                    "timeOffset": 1517,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3295,
-                    "fireAction": 0
+                    "timeOffset": 3295,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5750,
-                    "fireAction": 0
+                    "timeOffset": 5750,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7546,
-                    "fireAction": 1
+                    "timeOffset": 7546,
+                    "action": 1
                 },
                 {
-                    "daySecond": 11036,
-                    "fireAction": 1
+                    "timeOffset": 11036,
+                    "action": 1
                 },
                 {
-                    "daySecond": 12406,
-                    "fireAction": 0
+                    "timeOffset": 12406,
+                    "action": 0
                 },
                 {
-                    "daySecond": 15571,
-                    "fireAction": 1
+                    "timeOffset": 15571,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 2558,
-                    "fireAction": 1
+                    "timeOffset": 2558,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5481,
-                    "fireAction": 1
+                    "timeOffset": 5481,
+                    "action": 1
                 },
                 {
-                    "daySecond": 9064,
-                    "fireAction": 0
+                    "timeOffset": 9064,
+                    "action": 0
                 },
                 {
-                    "daySecond": 11978,
-                    "fireAction": 0
+                    "timeOffset": 11978,
+                    "action": 0
                 },
                 {
-                    "daySecond": 15010,
-                    "fireAction": 1
+                    "timeOffset": 15010,
+                    "action": 1
                 },
                 {
-                    "daySecond": 15925,
-                    "fireAction": 0
+                    "timeOffset": 15925,
+                    "action": 0
                 },
                 {
-                    "daySecond": 19022,
-                    "fireAction": 1
+                    "timeOffset": 19022,
+                    "action": 1
                 },
                 {
-                    "daySecond": 19826,
-                    "fireAction": 1
+                    "timeOffset": 19826,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 394,
-                    "fireAction": 1
+                    "timeOffset": 394,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2484,
-                    "fireAction": 0
+                    "timeOffset": 2484,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4037,
-                    "fireAction": 1
+                    "timeOffset": 4037,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5078,
-                    "fireAction": 0
+                    "timeOffset": 5078,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5796,
-                    "fireAction": 1
+                    "timeOffset": 5796,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7120,
-                    "fireAction": 0
+                    "timeOffset": 7120,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9385,
-                    "fireAction": 1
+                    "timeOffset": 9385,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 3517,
-                    "fireAction": 0
+                    "timeOffset": 3517,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4858,
-                    "fireAction": 0
+                    "timeOffset": 4858,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7909,
-                    "fireAction": 0
+                    "timeOffset": 7909,
+                    "action": 0
                 },
                 {
-                    "daySecond": 8328,
-                    "fireAction": 1
+                    "timeOffset": 8328,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10397,
-                    "fireAction": 1
+                    "timeOffset": 10397,
+                    "action": 1
                 },
                 {
-                    "daySecond": 11853,
-                    "fireAction": 0
+                    "timeOffset": 11853,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14587,
-                    "fireAction": 0
+                    "timeOffset": 14587,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14896,
-                    "fireAction": 0
+                    "timeOffset": 14896,
+                    "action": 0
                 },
                 {
-                    "daySecond": 15619,
-                    "fireAction": 0
+                    "timeOffset": 15619,
+                    "action": 0
                 },
                 {
-                    "daySecond": 15827,
-                    "fireAction": 1
+                    "timeOffset": 15827,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1244,
-                    "fireAction": 1
+                    "timeOffset": 1244,
+                    "action": 1
                 },
                 {
-                    "daySecond": 2136,
-                    "fireAction": 1
+                    "timeOffset": 2136,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3859,
-                    "fireAction": 1
+                    "timeOffset": 3859,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5635,
-                    "fireAction": 0
+                    "timeOffset": 5635,
+                    "action": 0
                 },
                 {
-                    "daySecond": 5762,
-                    "fireAction": 0
+                    "timeOffset": 5762,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2665,
-                    "fireAction": 1
+                    "timeOffset": 2665,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5923,
-                    "fireAction": 0
+                    "timeOffset": 5923,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6988,
-                    "fireAction": 0
+                    "timeOffset": 6988,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7197,
-                    "fireAction": 1
+                    "timeOffset": 7197,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7645,
-                    "fireAction": 1
+                    "timeOffset": 7645,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10727,
-                    "fireAction": 1
+                    "timeOffset": 10727,
+                    "action": 1
                 },
                 {
-                    "daySecond": 11852,
-                    "fireAction": 0
+                    "timeOffset": 11852,
+                    "action": 0
                 },
                 {
-                    "daySecond": 14003,
-                    "fireAction": 1
+                    "timeOffset": 14003,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1966,
-                    "fireAction": 0
+                    "timeOffset": 1966,
+                    "action": 0
                 },
                 {
-                    "daySecond": 2301,
-                    "fireAction": 0
+                    "timeOffset": 2301,
+                    "action": 0
                 },
                 {
-                    "daySecond": 2997,
-                    "fireAction": 1
+                    "timeOffset": 2997,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3637,
-                    "fireAction": 1
+                    "timeOffset": 3637,
+                    "action": 1
                 },
                 {
-                    "daySecond": 5031,
-                    "fireAction": 0
+                    "timeOffset": 5031,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2850,
-                    "fireAction": 0
+                    "timeOffset": 2850,
+                    "action": 0
                 },
                 {
-                    "daySecond": 3941,
-                    "fireAction": 0
+                    "timeOffset": 3941,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4281,
-                    "fireAction": 0
+                    "timeOffset": 4281,
+                    "action": 0
                 },
                 {
-                    "daySecond": 7065,
-                    "fireAction": 1
+                    "timeOffset": 7065,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8588,
-                    "fireAction": 0
+                    "timeOffset": 8588,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2191,
-                    "fireAction": 0
+                    "timeOffset": 2191,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4190,
-                    "fireAction": 0
+                    "timeOffset": 4190,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6896,
-                    "fireAction": 0
+                    "timeOffset": 6896,
+                    "action": 0
                 },
                 {
-                    "daySecond": 10376,
-                    "fireAction": 0
+                    "timeOffset": 10376,
+                    "action": 0
                 },
                 {
-                    "daySecond": 12294,
-                    "fireAction": 1
+                    "timeOffset": 12294,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13098,
-                    "fireAction": 0
+                    "timeOffset": 13098,
+                    "action": 0
                 },
                 {
-                    "daySecond": 16105,
-                    "fireAction": 0
+                    "timeOffset": 16105,
+                    "action": 0
                 },
                 {
-                    "daySecond": 18978,
-                    "fireAction": 1
+                    "timeOffset": 18978,
+                    "action": 1
                 },
                 {
-                    "daySecond": 21961,
-                    "fireAction": 0
+                    "timeOffset": 21961,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 2212,
-                    "fireAction": 1
+                    "timeOffset": 2212,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4439,
-                    "fireAction": 1
+                    "timeOffset": 4439,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6718,
-                    "fireAction": 1
+                    "timeOffset": 6718,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8317,
-                    "fireAction": 0
+                    "timeOffset": 8317,
+                    "action": 0
                 },
                 {
-                    "daySecond": 10970,
-                    "fireAction": 1
+                    "timeOffset": 10970,
+                    "action": 1
                 },
                 {
-                    "daySecond": 14333,
-                    "fireAction": 0
+                    "timeOffset": 14333,
+                    "action": 0
                 },
                 {
-                    "daySecond": 17362,
-                    "fireAction": 1
+                    "timeOffset": 17362,
+                    "action": 1
                 },
                 {
-                    "daySecond": 19572,
-                    "fireAction": 1
+                    "timeOffset": 19572,
+                    "action": 1
                 },
                 {
-                    "daySecond": 20915,
-                    "fireAction": 0
+                    "timeOffset": 20915,
+                    "action": 0
                 },
                 {
-                    "daySecond": 21015,
-                    "fireAction": 0
+                    "timeOffset": 21015,
+                    "action": 0
                 }
             ],
             [
                 {
-                    "daySecond": 1001,
-                    "fireAction": 1
+                    "timeOffset": 1001,
+                    "action": 1
                 },
                 {
-                    "daySecond": 1763,
-                    "fireAction": 0
+                    "timeOffset": 1763,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4162,
-                    "fireAction": 0
+                    "timeOffset": 4162,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6015,
-                    "fireAction": 0
+                    "timeOffset": 6015,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6196,
-                    "fireAction": 1
+                    "timeOffset": 6196,
+                    "action": 1
                 },
                 {
-                    "daySecond": 7417,
-                    "fireAction": 1
+                    "timeOffset": 7417,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 3160,
-                    "fireAction": 0
+                    "timeOffset": 3160,
+                    "action": 0
                 },
                 {
-                    "daySecond": 4956,
-                    "fireAction": 1
+                    "timeOffset": 4956,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6874,
-                    "fireAction": 1
+                    "timeOffset": 6874,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8315,
-                    "fireAction": 0
+                    "timeOffset": 8315,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9724,
-                    "fireAction": 1
+                    "timeOffset": 9724,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 3380,
-                    "fireAction": 1
+                    "timeOffset": 3380,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4975,
-                    "fireAction": 0
+                    "timeOffset": 4975,
+                    "action": 0
                 },
                 {
-                    "daySecond": 6309,
-                    "fireAction": 1
+                    "timeOffset": 6309,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8021,
-                    "fireAction": 0
+                    "timeOffset": 8021,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9734,
-                    "fireAction": 1
+                    "timeOffset": 9734,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13223,
-                    "fireAction": 1
+                    "timeOffset": 13223,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13371,
-                    "fireAction": 1
+                    "timeOffset": 13371,
+                    "action": 1
                 },
                 {
-                    "daySecond": 13476,
-                    "fireAction": 0
+                    "timeOffset": 13476,
+                    "action": 0
                 },
                 {
-                    "daySecond": 17017,
-                    "fireAction": 1
+                    "timeOffset": 17017,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 1567,
-                    "fireAction": 1
+                    "timeOffset": 1567,
+                    "action": 1
                 },
                 {
-                    "daySecond": 3240,
-                    "fireAction": 1
+                    "timeOffset": 3240,
+                    "action": 1
                 },
                 {
-                    "daySecond": 4273,
-                    "fireAction": 1
+                    "timeOffset": 4273,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6604,
-                    "fireAction": 1
+                    "timeOffset": 6604,
+                    "action": 1
                 },
                 {
-                    "daySecond": 8785,
-                    "fireAction": 1
+                    "timeOffset": 8785,
+                    "action": 1
                 },
                 {
-                    "daySecond": 10111,
-                    "fireAction": 1
+                    "timeOffset": 10111,
+                    "action": 1
                 }
             ],
             [
                 {
-                    "daySecond": 3487,
-                    "fireAction": 1
+                    "timeOffset": 3487,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6777,
-                    "fireAction": 1
+                    "timeOffset": 6777,
+                    "action": 1
                 },
                 {
-                    "daySecond": 6868,
-                    "fireAction": 0
+                    "timeOffset": 6868,
+                    "action": 0
                 },
                 {
-                    "daySecond": 9240,
-                    "fireAction": 1
+                    "timeOffset": 9240,
+                    "action": 1
                 },
                 {
-                    "daySecond": 12402,
-                    "fireAction": 0
+                    "timeOffset": 12402,
+                    "action": 0
                 }
             ]
         ]
@@ -2088,27 +2689,19 @@ function getSchedulePlacholder() {
   </script>
   <script>
    const POPUP_WINDOW_ID = "d-day-schedule-popup";
+const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 
 const schedule = new Schedule();
 
 
-function showTab(tabId) {
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-
-    document.querySelector(`.tab[onclick*="${tabId}"]`).classList.add('active');
-    document.getElementById(tabId).classList.add('active');
-}
-
-function scheduleTypeSelectChanged() {
-    const newType = document.getElementById("schedule-loop-type").value;
+/**
+ * Should be called when the schedule type selector is changed by the user
+ */
+function onScheduleTypeSelectChanged() {
+    const newType = getScheduleTypeSelection();
     const targetClass = `d-${newType}-view`;
-    console.log(targetClass);
+    // console.log(targetClass);
 
     const viewsHolder = document.getElementById("d-schedule-views");
     // console.log(viewsHolder.children);
@@ -2126,6 +2719,11 @@ function scheduleTypeSelectChanged() {
     schedule.setScheduleType(newType);
 }
 
+/**
+ * Is passed to the calendar constructor as a callback when user clicks on a day in the yearly schedule. 
+ * @param { Number } month [0; 11]
+ * @param { Number } day [0; 30]
+ */
 function onYearlyDayClick(month, day) {
     if (schedule.scheduleType != "yearly") {
         throw TypeError("onDayClick event fired for the yearly schedule when current schedule type is not yearly.");
@@ -2134,6 +2732,11 @@ function onYearlyDayClick(month, day) {
     showPopup({ monthIndex: month, dayIndex: day });
 }
 
+/**
+ * Is passed to the calendar constructor as a callback when user clicks on a day in the monthly schedule. 
+ * @param { undefined } _ Unused
+ * @param { Number } day [0; 30]
+ */
 function onMonthlyDayClick(_, day) {
     if (schedule.scheduleType != "monthly") {
         throw TypeError("onDayClick event fired for the monthly schedule when current schedule type is not monthly.");
@@ -2142,17 +2745,126 @@ function onMonthlyDayClick(_, day) {
     showPopup({ dayIndex: day });
 }
 
+/**
+ * @returns { String } Currently selected option in the schedule type selector
+ */
+function getScheduleTypeSelection() {
+    return document.getElementById("schedule-loop-type").value;
+}
+
+/**
+ * Extracts the schedule from the day-like schedule containers: day, custom & week day schedules.
+ * Also, sorts the schedule by time in ascending order
+ * @param { String } rowsSelector 
+ * @returns { [SchedulePoint] }
+ */
+function getScheduleFromBaseRows(rowsSelector) {
+    let scheduleData = [];
+
+    document.querySelectorAll(rowsSelector).forEach(scheduleRow => {
+        scheduleData.push(new SchedulePoint(
+            timeToSeconds(scheduleRow.children[0].value),
+            Number(scheduleRow.children[1].value),
+            Number(scheduleRow.children[2].children[0].value)
+        ));
+    });
+
+    scheduleData.sort((a, b) => a.timeOffset - b.timeOffset);
+
+    return scheduleData;
+}
+
+/**
+ * Hides all divs within the divs with class `tabGroup`,
+ * and leaves only one div with `tabId` id shown
+ * @param { String } tabGroup Tab group to work in
+ * @param { String } tabId Id of the tab to leave shown
+ */
+function showTab(tabGroup, tabId) {
+    document.querySelectorAll(`.${tabGroup} .tab`).forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    document.querySelectorAll(`.${tabGroup}.tab-content`).forEach(content => {
+        content.classList.remove('active');
+    });
+
+    document.querySelector(`.${tabGroup} .tab[onclick*="${tabId}"]`).classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+
+/**
+ * Generates the weekly schedule tab
+ */
+function generateWeeklyView() {
+    const weekViewTabGroup = "weekly-schedule";
+
+    const tabButtonsContainer = document.querySelector(".tab-group-weekly-schedule.tabs");
+    WEEK_DAYS.forEach(weekDay => {
+        weekDayButton = document.createElement("button");
+        weekDayButton.innerHTML = weekDay;
+        weekDayButton.classList = "tab";
+        weekDayButton.type = "button";
+
+        // `setAttribute()` adds the onclick attribute inside the html itself,
+        // which the `showTab()` then uses to find the button when user clicks it
+        weekDayButton.setAttribute("onclick", `showTab('tab-group-${weekViewTabGroup}', '${weekViewTabGroup}-${weekDay.toLowerCase()}')`);
+
+        tabButtonsContainer.appendChild(weekDayButton);
+    });
+
+    const weekDaysContainer = document.querySelector(".d-weekly-view .d-schedule-wrapper");
+
+    WEEK_DAYS.forEach(weekDay => {
+        // create a container for the week day
+        const weekDayContainer = document.createElement("div");
+        weekDayContainer.classList.add(`tab-group-${weekViewTabGroup}`, "tab-content");
+        const containerId = `${weekViewTabGroup}-${weekDay.toLowerCase()}`
+        weekDayContainer.id = containerId;
+
+        const scheduleContainer = document.createElement("div");
+        scheduleContainer.classList.add("d-schedule-rows-container");
+        weekDayContainer.appendChild(scheduleContainer);
+
+        // add it to the document before calling the generator function
+        weekDaysContainer.appendChild(weekDayContainer);
+
+        // generate the first row 
+        generateDailyScheduleRows(document.querySelector(`#${containerId} .d-schedule-rows-container`));
+
+        // create the '+' button beneath the rows
+        const addRowButtonContainer = document.createElement("div");
+        addRowButtonContainer.classList.add("d-row", "d-justify-end", "d-margin-top-10");
+
+        const addRowButton = document.createElement("button");
+        addRowButton.classList.add("d-button", "d-add-schedule-point");
+        addRowButton.type = "button";
+        addRowButton.onclick = () => createDailyScheduleRow(document.querySelector(`#${containerId} .d-schedule-rows-container`));
+        addRowButton.innerHTML = '+';
+
+        addRowButtonContainer.appendChild(addRowButton);
+        weekDayContainer.appendChild(addRowButtonContainer);
+    });
+
+    // show only the Monday tab
+    showTab(`tab-group-${weekViewTabGroup}`, `${weekViewTabGroup}-mon`)
+}
+
+/**
+ * Displays the popup to show the day schedule for a given month & day index
+ * @param { {monthIndex: Number, dayIndex: Number} }  
+ */
 function showPopup({ monthIndex = -1, dayIndex = 0 }) {
     document.getElementById(POPUP_WINDOW_ID).classList.remove("d-hidden");
     const rowsContainer = document.querySelector(`#${POPUP_WINDOW_ID} .d-schedule-rows-container`);
     const storedSchedule = schedule.getDaySchedule({ monthIndex: monthIndex, dayIndex: dayIndex });
-    generateDailyScheduleRows(rowsContainer, (storedSchedule != undefined && storedSchedule.length != 0) ? storedSchedule : [{ daySecond: 0, fireAction: 0 }]);
+    generateDailyScheduleRows(rowsContainer, (storedSchedule && storedSchedule.length > 0) ? storedSchedule : undefined);
 
     let headerText;
-    if (monthIndex >= 0)
-        headerText = `${monthIndexToName(monthIndex)} ${dayIndex}`;
+    if (monthIndex == -1)
+        headerText = `Day: ${dayIndex + 1}`;
     else
-        headerText = `Day: ${dayIndex}`
+        headerText = `${monthIndexToName(monthIndex)} ${dayIndex}`;
 
     const editorHeader = document.querySelector(`#${POPUP_WINDOW_ID} #popup-header`);
     editorHeader.innerHTML = headerText;
@@ -2161,71 +2873,246 @@ function showPopup({ monthIndex = -1, dayIndex = 0 }) {
     document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-dayIndex`).value = dayIndex;
 }
 
+/**
+ * Closes the popup
+ * @param { Boolean } promptConfirm Whether to ask the user for confirmation for closing
+ * @returns 
+ */
 function closePopup(promptConfirm = true) {
-    // check if the confirmation should be asked, then, if confirmation declined, skip the closing process
-    if (promptConfirm && !confirm("Close the editor without saving?")) {
+    // check if the confirmation should be asked, then, if user cancels the closing, skip the closing process
+    if (promptConfirm && !confirm("Close the editor without saving?"))
         return;
-    }
 
     document.getElementById(POPUP_WINDOW_ID).classList.add("d-hidden");
 }
 
+/**
+ * Extracts the schedule from the popup, and closes it
+ */
 function savePopupSchedule() {
-    const scheduleRows = document.querySelectorAll(`#${POPUP_WINDOW_ID} .d-schedule-row`);
-    console.log(scheduleRows);
-
-    const newDayschedule = [];
-    scheduleRows.forEach(scheduleRow => {
-        const time = scheduleRow.children[0].value;
-        const action = scheduleRow.children[1].value;
-
-        newDayschedule.push({
-            daySecond: timeToSeconds(time),
-            fireAction: action
-        });
-    });
-
-    newDayschedule.sort((lhs, rhs) => {
-        if (rhs.daySecond > lhs.daySecond)
-            return -1
-        else if (rhs.daySecond < lhs.daySecond)
-            return 1
-
-        return 0;
-    });
-
     const monthIndex = document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-monthIndex`).value;
     const dayIndex = document.querySelector(`#${POPUP_WINDOW_ID} #d-popup-dayIndex`).value;
 
-    // console.log(`Day index: ${dayIndex}, Month index: ${monthIndex}`);
-
-    schedule.setDaySchedule({
-        schedule: newDayschedule,
-        monthIndex: Number(monthIndex),
-        dayIndex: Number(dayIndex)
-    });
-
-    closePopup(promptConfirm = false);
+    if (saveDailySchedule(`#${POPUP_WINDOW_ID}`, monthIndex, dayIndex))
+        closePopup(promptConfirm = false);
 }
 
+/**
+ * Fetches the schedule from the host, saves it the `schedule` global variable, and updates the document
+ */
 function loadSchedule() {
     const deviceSchedule = fetchSchedule();
+
+    if (deviceSchedule.scheduleType === 'custom') {
+        document.getElementById('startTime').value = new Date(deviceSchedule.startTime * 1_000).toISOString().slice(0, 19);
+        document.getElementById('loopTime').value = deviceSchedule.loopTime;
+        schedule.setCustomScheduleParams(deviceSchedule.startTime, deviceSchedule.loopTime);
+    }
+
     schedule.setScheduleType(deviceSchedule.scheduleType);
     schedule.setSchedule(deviceSchedule.schedule);
 
     generateDailyScheduleRows(
         document.querySelector(`.d-daily-view .d-schedule-rows-container`),
-        (deviceSchedule.scheduleType === "daily") ? storedSchedule : [{ daySecond: 0, fireAction: 0 }]
+        (deviceSchedule.scheduleType === "daily") ? deviceSchedule.schedule : undefined
     );
+
+    generateDailyScheduleRows(
+        document.querySelector(`.d-custom-view .d-schedule-rows-container`),
+        (deviceSchedule.scheduleType === "custom") ? deviceSchedule.schedule : undefined
+    );
+
+    if (deviceSchedule.scheduleType === 'weekly') {
+        if (WEEK_DAYS.length != deviceSchedule.schedule.length) {
+            throw new RangeError(`Device schedule does not have the correct amount of days for a weekly schedule type. Device days: ${deviceSchedule.schedule.length}; Required days: ${WEEK_DAYS.length}`);
+        }
+
+        WEEK_DAYS.forEach((weekDay, index) => {
+            const location = document.querySelector(
+                `#${weekViewTabGroup}-${weekDay.toLowerCase()} .d-schedule-rows-container`
+            );
+            const data = deviceSchedule.schedule[index];
+
+            generateDailyScheduleRows(location, data);
+        });
+    }
 
     document.getElementById("schedule-loop-type").value = deviceSchedule.scheduleType;
 
-    scheduleTypeSelectChanged();
+    onScheduleTypeSelectChanged();
+}
+
+/**
+ * Extracts a base schedule from the div with class `scheduleContainer`,
+ * and stores it in the `schedule` via `setDaySchedule()`.
+ * If store fails, updates the document to highlight the rows with incorrect values,
+ * and alerts the user
+ * 
+ * @param { String } scheduleContainer 
+ * A HTML element inside of which the desired schedule is located.
+ * Should include both the rows & the rows' container.
+ * Identifier should include the prefix: '.', '#' or nothing.
+ * 
+ * @returns { Boolean } Whether the saving was successful or not: true in case of success, false otherwise.
+ */
+function saveDailySchedule(scheduleContainer, monthIndex, dayIndex) {
+    try {
+        const userSchedule = getScheduleFromBaseRows(`${scheduleContainer} .d-schedule-row`);
+
+        // re-generate the rows with the sorted schedule
+        generateDailyScheduleRows(document.querySelector(`${scheduleContainer} .d-schedule-rows-container`), userSchedule);
+
+        schedule.setDaySchedule({ schedule: userSchedule, monthIndex: monthIndex, dayIndex: dayIndex });
+
+        return true;
+    }
+    catch (error) {
+        if (!(error instanceof InvalidScheduleException))
+            throw error;
+
+        /** @type { [{ index: Number, reason: InvalidReason }] } */
+        const invalidPoints = error.params.invalidPoints;
+        const invalidReasons = new Set();
+        const invalidIndexes = new Set();
+        invalidPoints.forEach(invalidPoint => {
+            invalidIndexes.add(invalidPoint.index);
+            invalidReasons.add(invalidPoint.reason);
+        });
+
+        const scheduleRows = document.querySelectorAll(`${scheduleContainer} .d-schedule-row`);
+        invalidIndexes.forEach((_, invalidIndex) => scheduleRows[invalidIndex].classList.add('d-border-wrong'));
+
+        const invalidReasonsString =
+            Array.from(
+                invalidReasons,
+                reason => `  - ${InvalidReason.toString(reason)};`
+            ).join("\n");
+
+        alert(
+            'Some issues have been found with the schedule:\n' +
+            `${invalidReasonsString}\n\n` +
+            'Invalid items have been marked with red.'
+        );
+
+        return false;
+    }
+}
+
+/**
+ * Same as `saveDailySchedule()` but only for the weekly view
+ */
+function saveWeeklySchedule() {
+    try {
+        /** @type { [[SchedulePoint]] } */
+        const userSchedule = [];
+        WEEK_DAYS.forEach((weekDay) => {
+            userSchedule.push(
+                getScheduleFromBaseRows(`#weekly-schedule-${weekDay.toLowerCase()} .d-schedule-row`)
+            );
+        });
+
+        // re-generate the rows with the sorted schedule
+        WEEK_DAYS.forEach((weekDay, index) => {
+            const location = document.querySelector(
+                `#weekly-schedule-${weekDay.toLowerCase()} .d-schedule-rows-container`
+            );
+            const data = userSchedule[index];
+
+            generateDailyScheduleRows(location, data);
+        });
+
+        // try to save the schedule, even if it is invalid
+        schedule.setSchedule(userSchedule);
+
+        return true;
+    }
+    catch (error) {
+        if (!(error instanceof InvalidScheduleException))
+            throw error;
+
+        /** @type { [{dayIndex: Number, invalidPoints: [{ index: Number, reason: InvalidReason }]}] } */
+        const invalidDays = error.params.invalidDays;
+        const invalidReasons = new Set();
+        const invalidIndexes = Array.from({ length: 7 }, () => new Set());
+        invalidDays.forEach(invalidDay => {
+            invalidDay.invalidPoints.forEach((invalidPoint) => {
+                invalidIndexes[invalidDay.dayIndex].add(invalidPoint.index);
+                invalidReasons.add(invalidPoint.reason);
+            });
+        });
+
+        WEEK_DAYS.forEach((weekDay, weekDayIndex) => {
+            const weekRows = document.querySelectorAll(`#weekly-schedule-${weekDay.toLowerCase()} .d-schedule-row`);
+            invalidIndexes[weekDayIndex].forEach(pointIndex => {
+                weekRows[pointIndex].classList.add('d-border-wrong');
+            });
+        });
+
+        const weekDayTabButtons = document.querySelectorAll('.tab-group-weekly-schedule.tabs button');
+        invalidIndexes.forEach((dayInvalidPoints, index) => {
+            if (dayInvalidPoints.size !== 0)
+                weekDayTabButtons[index].classList.add('d-border-wrong-tab');
+            else
+                weekDayTabButtons[index].classList.remove('d-border-wrong-tab');
+
+        })
+
+        const invalidReasonsString =
+            Array.from(
+                invalidReasons,
+                reason => `  - ${InvalidReason.toString(reason)};`
+            ).join("\n");
+
+        alert(
+            'Some issues have been found with the schedule:\n' +
+            `${invalidReasonsString}\n\n` +
+            'Invalid items have been marked with red.'
+        );
+
+        return false;
+    }
+}
+
+/**
+ * Extracts the schedule from the currently selected schedule, and stores it in the `schedule`.
+ * If store fails, updates the document to highlight the rows with incorrect values, and alerts the user.
+ */
+function saveScheduleData() {
+    const selectedType = getScheduleTypeSelection();
+    if (schedule.scheduleType != selectedType)
+        throw new EvalError(`Selected schedule and internal schedule types don't match. Selected: ${selectedType}; internal: ${schedule.scheduleType}`);
+
+    switch (selectedType) {
+        case "daily":
+            return saveDailySchedule('.d-daily-view');
+
+        case "weekly":
+            return saveWeeklySchedule();
+
+        case "custom":
+            schedule.setCustomScheduleParams(
+                Date.parse(`${document.getElementById('startTime').value}Z`) / 1_000,
+                Number(document.getElementById('loopTime').value),
+            );
+            return saveDailySchedule('.d-custom-view');
+
+        default:
+            throw new TypeError(`Unsupported opperation for schedule type: ${selectedType}`);
+    }
+}
+
+function uploadScheduleClick() {
+    if (!saveScheduleData())
+        return;
+
+    console.log("Uploading schedule to the host...");
+    console.log(schedule.serialize());
 }
   </script>
   <script>
    createMonthCalendar("d-monthly-view .c-schedule-container", -1, onMonthlyDayClick)
         createYearCalendar("d-yearly-view .c-schedule-container", onYearlyDayClick);
+        generateWeeklyView();
 
         loadSchedule();
   </script>

@@ -274,22 +274,17 @@ class CustomSchedule {
         /** @type { [{timeOffset: Number, action: Number}] } */
         const transformedItems = [];
         this.items.forEach(item => {
-            const item1 = {
+            transformedItems.push({
                 timeOffset: item.timeOffset,
                 action: item.action
-            };
+            });
 
-            const item2 = {
-                timeOffset: item.timeOffset + item.duration,
-                action: item.getInverseAction()
+            if (item.duration != 0) {
+                transformedItems.push({
+                    timeOffset: item.timeOffset + item.duration,
+                    action: item.action.getInverse()
+                });
             }
-
-            transformedItems.push(
-                item1,
-                // if duration is 0, this action should be left unchanged; 
-                // i.e. runs forever if no actions are after it
-                duration != 0 ? item2 : undefined
-            );
         });
 
         transformedItems.sort((a, b) => a.timeOffset - b.timeOffset);
@@ -302,19 +297,22 @@ class CustomSchedule {
 
         const header = new ArrayBuffer(20);
         const headerView = new DataView(header)
-        headerView.setBigUint64(0, schedule.startTime, true);
-        headerView.setBigUint64(8, schedule.loopTime, true);
+        headerView.setBigUint64(0, BigInt(schedule.startTime), true);
+        headerView.setBigUint64(8, BigInt(schedule.loopTime), true);
         headerView.setUint32(16, schedule.items.length, true);
 
-        const itemBuffers = schedule.items.map(item => {
-            const buffer = new ArrayBuffer(5);
-            const view = new DataView(buffer);
-            view.setUint32(0, item.daySecond, true); // little-endian
-            view.setUint8(4, item.action.type);
-            return new Uint8Array(buffer);
+        const itemsByteLength = schedule.items.length * 5;
+        const itemsBuffer = new ArrayBuffer(itemsByteLength);
+        const itemsView = new DataView(itemsBuffer);
+        let bufferOffset = 0;        
+
+        schedule.items.forEach(item => {
+            itemsView.setUint32(bufferOffset + 0, item.timeOffset, true); // little-endian
+            itemsView.setUint8(bufferOffset + 4, item.action.type);
+            bufferOffset += 5;
         });
 
-        return new Uint8Array([...new Uint8Array(header), ...itemBuffers.flat()]);
+        return new Uint8Array([...new Uint8Array(header), ...new Uint8Array(itemsBuffer)]);
     }
 }
 

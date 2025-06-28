@@ -13,6 +13,7 @@ namespace config {
 constexpr std::size_t MS_COUNT_BEFORE_RESET = 10'000;
 
 constexpr std::string_view SPIFFS_BASE_PATH = "/spiffs";
+constexpr std::string_view SCHEDULE_FILEPATH = "/spiffs/schedule.bin";
 
 } // namespace config
 

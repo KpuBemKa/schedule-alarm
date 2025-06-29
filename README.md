@@ -17,7 +17,8 @@ Developed using ESP-IDF version `5.4.1`.
 - Schedule loops daily, for now.
 
 # Website
-Website source code can be found in `components/website/source`. `site_builder.py` in the `website` directory is a helper script to embed all `.css` & `.js` files included by `index.html` into a single `index.html` file, and then place it into `components/data_image` directory, which will be flashed onto the ESP32.
+Website source code can be found in `components/website/source`.
+`site_builder.py` in the `website` directory is a helper script to embed all `.css` & `.js` files included by `index.html` into a single `index.html` file, and then place it into `components/data_image` directory, which will be flashed onto the ESP32.
 
 CMake is configured to run the `site_builder.py` script automatically before the build starts if any source files have been changed.
 
